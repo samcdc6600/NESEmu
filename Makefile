@@ -28,6 +28,7 @@ OBJ	= $(patsubst %,$(ODIR)/%,$(OBJ_FILES))
 $(BIN_NAME): $(OBJ)
 	$(CXX) -o $@ $^ $(LIBS)
 
+
 # $(ODIR)/%.o depends on $(SRC)/%.cpp $(DEPS).
 $(ODIR)/%.o: $(SRC)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXXFLAGS) $(DEBUG)

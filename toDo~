@@ -1,0 +1,9 @@
+# Priority of list is from top to bottom, with the top being the highest.
+
+* CPU
+	- ...
+* PPU
+	- Mapper for Kirby's Adventure ()
+	- ...
+* APU
+	- ...
