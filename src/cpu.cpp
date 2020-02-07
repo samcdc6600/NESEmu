@@ -47,7 +47,7 @@ namespace architecturalState
 
 bool foo()
 {
-  switch(memory::mem[PC])
+  switch(memory::mem[architecturalState::PC])
     {				// There are 151 official 6502 opcodes organized
 				// into 56 instructions (note that the NES does
       				// not support decimal mode and also that there
@@ -56,15 +56,25 @@ bool foo()
     case 0x0000:	// BRK
       break;
     case 0x0001:	// ORA
+      break;
     case 0x0002:	// STP	(d,x)
+      break;
     case 0x0003:	// SLO
+      break;
     case 0x0004:	// NOP	(d,x)
+      break;
     case 0x0005:	// ORA	d
+      break;
     case 0x0006:	// ASL	d
+      break;
     case 0x0007:	// SLO	d
+      break;
     case 0x0008:	// PHP	d (God personal home page terrible!)
+      break;
     case 0x0009:	// ORA
+      break;
     case 0x000A:	// ASL	#i
+      break;
 // 	ANC
 // #i 	NOP
 // a 	ORA
