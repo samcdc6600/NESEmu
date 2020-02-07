@@ -1,4 +1,6 @@
 #include <iostream>
+#include "include/cpu.hpp"
+//#include "include/mem.hpp"
 
 
 int main()
