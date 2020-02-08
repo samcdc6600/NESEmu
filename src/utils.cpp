@@ -1,18 +1,18 @@
 #include "include/utils.hpp"
 
 
-bool loadFileProper(const std::string & path, char buff [],
+bool loadFileProper(const std::string & path, unsigned char buff [],
 		    const size_t s);
 
 
-bool loadFile(const std::string & path, char buff [], const size_t s)
+bool loadFile(const std::string & path, unsigned char buff [], const size_t s)
 {
   return loadFileProper(path, buff, s);
 }
 
 
-void loadFile(const std::string & path, const std::string & errorContext,
-	      char buff [], const size_t s)
+void loadFile(const std::string & path, unsigned char buff [], const size_t s,
+	      const std::string & errorContext)
 {
   try
     {
@@ -31,7 +31,7 @@ void loadFile(const std::string & path, const std::string & errorContext,
 }
 
 
-bool loadFileProper(const std::string & path, char buff [],
+bool loadFileProper(const std::string & path, unsigned char buff [],
 		    const size_t s)
 {
   std::ifstream f {path};
@@ -53,10 +53,14 @@ bool loadFileProper(const std::string & path, char buff [],
 }
 
 
-void printBufferAsMemory(const char buff [], const size_t s)
+void printBufferAsMemory(const unsigned char buff [], const size_t s)
 {
-  for(size_t i {}; i < s; ++i)
+  for(size_t i {}; i < s; i += 2)
     {
-      std::cerr<<std::hex<<i<<":"<<"\t\t"<<unsigned(buff[i])<<'\n';
+      unsigned opcode {buff[i]};
+      opcode <<= 8;
+      opcode += buff[i + 1];
+      std::cerr<<std::hex<<i<<":"<<"\t\t"
+	       <<opcode<<'\n';
     }
 }

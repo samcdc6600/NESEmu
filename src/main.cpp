@@ -47,6 +47,6 @@ void checkArgs(const int argc, const char * argv[])
 
 void initialise(const int argc, const char * argv[])
 {
-  loadFile(std::string{argv[cmd::romPath]}, "loading rom file", memory::mem,
-	   memory::memSize);
+  loadFile(std::string{argv[cmd::romPath]}, memory::mem, memory::memSize,
+	   "loading rom file");
 }

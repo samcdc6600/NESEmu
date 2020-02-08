@@ -3,5 +3,5 @@
 
 namespace memory
 {
-  char mem [memSize] {};
+  unsigned char mem [memSize] {};
 }
