@@ -68,8 +68,9 @@ void cpu()
     {
       if(!dispatchInstruction())
 	{
-	  std::stringstream e {"Error: opcode("};
-	  e<<std::hex<<int(memory::mem[architecturalState::PC])<<") at pc("
+	  std::stringstream e {};
+	  e<<std::hex<<"Error (fatal): opcode("
+	   <<int(memory::mem[architecturalState::PC])<<") at pc("
 	   <<architecturalState::PC<<") is invalid!\n";
 	  throw std::invalid_argument(e.str().c_str());
 	}

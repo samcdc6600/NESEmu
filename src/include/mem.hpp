@@ -8,5 +8,5 @@ namespace memory
 				   is a good idea. Latter we will change it to
 				   2K (or whatever the right amount is :) .) */
   constexpr size_t memSize {65536};
-  extern unsigned char mem [memSize];
+  extern char mem [memSize];
 }

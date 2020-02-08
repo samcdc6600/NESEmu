@@ -1,15 +1,51 @@
 #include <iostream>
+#include "include/utils.hpp"
 #include "include/cpu.hpp"
-//#include "include/mem.hpp"
+#include "include/mem.hpp"
 
 
-int main()
+namespace cmd
+{
+  constexpr size_t binName {0};
+  constexpr size_t romPath {1};
+}
+
+
+void checkArgs(const int argc, const char * argv[]);
+void initialise(const int argc, const char * argv[]);
+
+
+int main(const int argc, const char * argv[])
 {
 #ifdef DEBUG
 
   std::cout<<"============================= Running debug build ==============="
     "===============\n";
 #endif
-  
+
+  checkArgs(argc, argv);
+  initialise(argc, argv);
   cpu();
+}
+
+
+void checkArgs(const int argc, const char * argv[])
+{
+  constexpr size_t minArgs {2}, maxArgs {2};
+  if(size_t(argc) < minArgs)
+    genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed to"
+	     " ", argv[cmd::binName], " but at least ", minArgs, " required!"
+	     "\n");
+  else
+    if(size_t(argc) > maxArgs)
+      genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed "
+	       "to ", argv[cmd::binName], " but no more than ", maxArgs,
+	       " allowed!\n");
+}
+
+
+void initialise(const int argc, const char * argv[])
+{
+  loadFile(std::string{argv[cmd::romPath]}, "loading rom file", memory::mem,
+	   memory::memSize);
 }
