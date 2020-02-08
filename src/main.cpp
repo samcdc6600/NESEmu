@@ -5,8 +5,7 @@
 
 int main()
 {
-  std::cout<<"Hello world\n";
-
+  cpu();
   #ifdef DEBUG
   std::cout<<"In Debug mode\n";
   #endif
