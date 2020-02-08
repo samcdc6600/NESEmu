@@ -1,7 +1,8 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * CPU ==========================================================================
-	- ...
+	- Fix up comments in switch statment in "dispatchInstruction()" and
+	  double check case statement values.
 
 
 * .NES ROM loading =============================================================
