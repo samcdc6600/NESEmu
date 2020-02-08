@@ -38,6 +38,9 @@ bool loadFile(const std::string & path, char buff [], const size_t s);
 // Where s is the size of buff in bytes.
 void loadFile(const std::string & path, const std::string & errorContext,
 	      char buff [], const size_t s);
+// Used to print values in buff in hex with address indexes starting at 0.
+// Where s is the size of the buffer in bytes.
+void printBufferAsMemory(const char buff [], const size_t s);
 
 
 #endif

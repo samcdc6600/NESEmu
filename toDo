@@ -3,6 +3,7 @@
 * CPU ==========================================================================
 	- Fix up comments in switch statment in "dispatchInstruction()" and
 	  double check case statement values.
+	- Fix problem with decode.
 
 
 * .NES ROM loading =============================================================

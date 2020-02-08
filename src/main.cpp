@@ -25,6 +25,7 @@ int main(const int argc, const char * argv[])
 
   checkArgs(argc, argv);
   initialise(argc, argv);
+  printBufferAsMemory(memory::mem, memory::memSize);
   cpu();
 }
 

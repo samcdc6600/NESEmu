@@ -51,3 +51,12 @@ bool loadFileProper(const std::string & path, char buff [],
   
   return false;
 }
+
+
+void printBufferAsMemory(const char buff [], const size_t s)
+{
+  for(size_t i {}; i < s; ++i)
+    {
+      std::cerr<<std::hex<<i<<":"<<"\t\t"<<unsigned(buff[i])<<'\n';
+    }
+}

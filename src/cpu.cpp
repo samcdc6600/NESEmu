@@ -70,7 +70,7 @@ void cpu()
 	{
 	  std::stringstream e {};
 	  e<<std::hex<<"Error (fatal): opcode("
-	   <<int(memory::mem[architecturalState::PC])<<") at pc("
+	   <<unsigned(memory::mem[architecturalState::PC])<<") at pc("
 	   <<architecturalState::PC<<") is invalid!\n";
 	  throw std::invalid_argument(e.str().c_str());
 	}
@@ -1386,7 +1386,7 @@ bool dispatchInstruction()
 void debugDispatchInstruction()
 {
   std::cout<<std::hex<<"\tin cycle "<<architecturalState::cycles
-	   <<", read opcode "<<int(memory::mem[architecturalState::PC])
+	   <<", read opcode "<<unsigned(memory::mem[architecturalState::PC])
 	   <<", at PC "<<architecturalState::PC<<'\n';
 }
 #endif
