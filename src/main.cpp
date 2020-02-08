@@ -5,8 +5,11 @@
 
 int main()
 {
+#ifdef DEBUG
+
+  std::cout<<"============================= Running debug build ==============="
+    "===============\n";
+#endif
+  
   cpu();
-  #ifdef DEBUG
-  std::cout<<"In Debug mode\n";
-  #endif
 }
