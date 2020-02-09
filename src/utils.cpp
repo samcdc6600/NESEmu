@@ -37,14 +37,16 @@ bool loadFileProper(const std::string & path, unsigned char buff [],
   std::ifstream f {path};
   if(f.is_open())
     {
-      char c {};
       for(size_t i {} ; i < s; ++i)
 	{
-	  c = f.get();
-	  if(c != std::char_traits<char>::eof())
-	    buff[i] = c;
-	  else
-	    break;
+	  std::cout<<"i = "<<i<<'\n';
+	  buff[i] = f.get();
+	  std::cout<<"i = ("<<i<<"), buff[i] = ("<<buff[i]<<")\n";
+	  if(f.eof())
+	    {
+	      buff[i] = 0x0;	// We don't want the EOF value!
+	      break;
+	    }
 	}
       return true;
     }
@@ -55,12 +57,9 @@ bool loadFileProper(const std::string & path, unsigned char buff [],
 
 void printBufferAsMemory(const unsigned char buff [], const size_t s)
 {
-  for(size_t i {}; i < s; i += 2)
+  for(size_t i {}; i < s; ++i)
     {
-      unsigned opcode {buff[i]};
-      opcode <<= 8;
-      opcode += buff[i + 1];
       std::cerr<<std::hex<<i<<":"<<"\t\t"
-	       <<opcode<<'\n';
+	       <<unsigned(buff[i])<<'\n';
     }
 }
