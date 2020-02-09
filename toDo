@@ -1,13 +1,9 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * CPU ==========================================================================
-	- Fix up comments in switch statment in "dispatchInstruction()" and
-	  double check case statement values.
-	- Fix problem with decode.
-	- Opcodes are definitly only one byte long. This must be fixed. The + on
-	  nesdev.com obviously has an arithmetic meaning as opposed to
-	  concatination >:(. I guess we should have know that you don't need 16
-	  bit's for it but we are very very tired.
+	- Fix up tabbing of first few comments in switch statment in
+	  "dispatchInstruction()".
+	- Implement instructions.
 
 
 * .NES ROM loading =============================================================
