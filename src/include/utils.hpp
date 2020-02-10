@@ -31,6 +31,19 @@ namespace error
 }
 
 
+namespace masks
+{
+  constexpr unsigned char bit0 {0b00000001};
+  constexpr unsigned char bit1 {0b00000010};
+  constexpr unsigned char bit2 {0b00000100};
+  constexpr unsigned char bit3 {0b00001000};
+  constexpr unsigned char bit4 {0b00010000};
+  constexpr unsigned char bit5 {0b00100000};
+  constexpr unsigned char bit6 {0b01000000};
+  constexpr unsigned char bit7 {0b10000000};
+}
+
+
 // Used when we want to decide what to do if we cannot open path.
 // Where s is the size of buff in bytes.
 bool loadFile(const std::string & path, unsigned char buff [], const size_t s);

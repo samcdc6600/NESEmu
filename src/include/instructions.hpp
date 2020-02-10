@@ -10,40 +10,91 @@
    accessing the "architecturalState" namespace and our functions are inline,
    both of these factors necessitate that our function definitions be in this
    translation unit. */
+// We have a separet function for each opcode for performance reasons.
 
 
+template <typename T> inline void setZeroFlagOn(const T var);
+inline void setDecimalFlagOn(const bool d);
+template <typename T> inline void setNegativeFlagOn(const T var);
+/* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X index 
+   to the stack pointer."
+   - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
+inline void txs_9a();
+inline void ldx_a2();
+inline void lda_a9();
 /* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
    Register by setting the 3rd bit 0." "Even though the NES doesn't use decimal
    mode, the opcodes to clear and set the flag do work, so if you need to store
    a bit, this acts as a free space."
    - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=CLD */
-void cdl();
-void ldx();
+inline void cdl_d8();
 
 
-void cdl()
+// =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
+// ============ (The below functions are used for operations that do ===========
+// ================ not in them selves constitute instructions.) ===============
+
+
+inline void setDecimalFlagOn(const bool d)
 {
-  architecturalState::status.u.D = 1;
+  architecturalState::status.u.D = d;
+}
+
+
+template <typename T> inline void setZeroFlagOn(const T var)
+{
+  architecturalState::status.u.Z = !var ? 1 : 0;
+}
+
+
+template <typename T> inline void setNegativeFlagOn(const T var)
+{
+  architecturalState::status.u.N =
+    (var & masks::bit7) ? 1 : 0;
+}
+
+
+// ======================== INSTRUCTION SPECIALIZATIONS  =======================
+// ============== (The below functions comprise full instructions. =============
+// =========== Functions that belong to the same class of instruction ==========
+// ============ (indicated by their prefixs) are grouped together.) ============
+
+
+inline void txs_9a()
+{
+  setNegativeFlagOn(architecturalState::X);
+  setZeroFlagOn(architecturalState::X);
+  architecturalState::S = architecturalState::X;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
 
-void ldx()
+inline void ldx_a2()
 {
-  switch(unsigned(memory::mem[architecturalState::PC]))
-    {
-    case:
-      break;
-    case:
-      break;
-    case:
-      break;
-    case:
-      break;
-    case:
-      break;
-    }
+  architecturalState::X = memory::mem[architecturalState::PC + 1];
+  setNegativeFlagOn(architecturalState::X);
+  setZeroFlagOn(architecturalState::X);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+inline void lda_a9()
+{
+  architecturalState::A = memory::mem[architecturalState::PC + 1];
+  setNegativeFlagOn(architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+inline void cdl_d8()
+{
+  setDecimalFlagOn(false);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
 }
 
 

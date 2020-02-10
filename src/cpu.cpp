@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <sstream>
+#include <bitset>
 #include "include/cpu.hpp"
 #include "include/mem.hpp"
 #include "include/utils.hpp"
@@ -35,8 +36,8 @@ namespace architecturalState
   unsigned char S {};		// Stack Pointer
   
 
-  typedef union			// Status (look at link below for how to acces members (remove this and the next comment latter.))
-  {				// https://stackoverflow.com/questions/3497345/is-there-a-way-to-access-individual-bits-with-a-union
+  typedef union
+  {
     struct
     {
       unsigned char C : 1;	// Carry
@@ -50,10 +51,50 @@ namespace architecturalState
     }u;
     unsigned char flags;
   }Status;
+  constexpr size_t statusSize {8};
 
   Status status {};
   size_t cycles {};
 }
+
+
+#ifdef DEBUG
+/*constexpr char * instructionMnemonicsOrganizedByOpcode []
+{
+  "BRK", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO",
+    "PHP", "ORA", "ASL", "ANC", "NOP", "ORA", "ASL", "SLO",
+    "BPL", "ORA", "STP", "SLO", "NOP", "ORA", "ASL", "SLO",
+    "CLC", "ORA", "NOP", "SLO", "NOP", "ORA", "ASL", "SLO",
+    "JSR", "AND", "STP", "RLA", "BIT", "AND", "ROL", "RLA",
+    "PLP", "AND", "ROL", "ANC", "BIT", "AND", "ROL", "RLA",
+    "BMI", "AND", "STP", "RLA", "NOP", "AND", "ROL", "RLA",
+    "SEC", "AND", "NOP", "RLA", "NOP", "AND", "ROL", "RLA",
+    "RTI", "EOR", "STP", "SRE", "NOP", "EOR", "LSR", "SRE",
+    "PHA", "EOR", "LSR", "ALR", "JMP", "EOR", "LSR", "SRE",
+    "BVC", "EOR", "STP", "SRE", "NOP", "EOR", "LSR", "SRE",
+    "CLI", "EOR", "NOP", "SRE", "NOP", "EOR", "LSR", "SRE",
+    "RTS", "ADC", "STP", "RRA", "NOP", "ADC", "ROR", "RRA",
+    "PLA", "ADC", "ROR", "ARR", "JMP", "ADC", "ROR", "RRA",
+    "BVS", "ADC", "STP", "RRA", "NOP", "ADC", "ROR", "RRA",
+    "SEI", "ADC", "NOP", "RRA", "NOP", "ADC", "ROR", "RRA",
+    "NOP", "STA", "NOP", "SAX", "STY", "STA", "STX", "SAX",
+    "DEY", "NOP", "TXA", "XAA", "STY", "STA", "STX", "SAX",
+    "BCC", "STA", "STP", "AHX", "STY", "STA", "STX", "SAX",
+    "TYA", "STA", "TXS", "TAS", "SHY", "STA", "SHX", "AHX",
+    "LDY", "LDA", "LDX", "LAX", "LDY", "LDA", "LDX", "LAX",
+    "TAY", "LDA", "TAX", "LAX", "LDY", "LDA", "LDX", "LAX",
+    "BCS", "LDA", "STP", "LAX", "LDY", "LDA", "LDX", "LAX",
+    "CLV", "LDA", "TSX", "LAS", "LDY", "LDA", "LDX", "LAX",
+    "CPY", "CMP", "NOP", "DCP", "CPY", "CMP", "DEC", "DCP",
+    "INY", "CMP", "DEX", "AXS", "CPY", "CMP", "DEC", "DCP",
+    "BNE", "CMP", "STP", "DCP", "NOP", "CMP", "DEC", "DCP",
+    "CLD", "CMP", "NOP", "DCP", "NOP", "CMP", "DEC", "DCP",
+    "CPX", "SBC", "NOP", "ISC", "CPX", "SBC", "INC", "ISC",
+    "INX", "SBC", "NOP", "SBC", "CPX", "SBC", "INC", "ISC",
+    "BEQ", "SBC", "STP", "ISC", "NOP", "SBC", "INC", "ISC",
+    "SED", "SBC", "NOP", "ISC", "NOP", "SBC", "INC", "ISC"
+    };*/
+#endif
 
 
 /* We think it is a little ugly to have to put this include here, however we
@@ -67,6 +108,7 @@ namespace architecturalState
 
 bool dispatchInstruction();
 #ifdef DEBUG
+void debugPrintArchitecturalState();
 void debugDispatchInstruction();
 #endif
 
@@ -95,6 +137,7 @@ bool dispatchInstruction()
 {
 #ifdef DEBUG
   std::cout<<"In dispatchInstruction():\n";
+  debugPrintArchitecturalState();
 #endif
 
   switch(unsigned(memory::mem[architecturalState::PC]))
@@ -103,127 +146,127 @@ bool dispatchInstruction()
       // not support decimal mode and also that there
       // are a number of unofficial opcodes.)
 
-    case 0x00:	// BRK
+    case 0x00:			// BRK
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x01:	// ORA	(d,x)
+    case 0x01:			// ORA	(d,x)
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x02:	// STP
+    case 0x02:			// STP
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x03:	// SLO	(d,x)
+    case 0x03:			// SLO	(d,x)
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x04:	// NOP	d
+    case 0x04:			// NOP	d
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x05:	// ORA	d
+    case 0x05:			// ORA	d
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x06:	// ASL	d
+    case 0x06:			// ASL	d
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x07:	// SLO	d
+    case 0x07:			// SLO	d
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x08:	// PHP	(God personal home page is terrible!)
+    case 0x08:	       		// PHP	(God personal home page is terrible!)
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x09:	// ORA	#i
+    case 0x09:			// ORA	#i
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0a:	// ASL
+    case 0x0a:			// ASL
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0b:	// ANC	#i
+    case 0x0b:			// ANC	#i
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0c:	// NOP	a
+    case 0x0c:			// NOP	a
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0d:	// ORA	a
+    case 0x0d:			// ORA	a
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0e:	// ASL	a
+    case 0x0e:			// ASL	a
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x0f:	// SLO	a
+    case 0x0f:			// SLO	a
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x10:	// BPL	*+d
+    case 0x10:			// BPL	*+d
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x11:	// ORA	(d),y
+    case 0x11:			// ORA	(d),y
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x12:	// STP
+    case 0x12:			// STP
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x13:	// SLO	(d),y
+    case 0x13:			// SLO	(d),y
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x14:	// NOP	d,x
+    case 0x14:			// NOP	d,x
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x15:	// ORA	d,x
+    case 0x15:			// ORA	d,x
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x16:	// ASL	d,x
+    case 0x16:			// ASL	d,x
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x17:	// SLO	d,x
+    case 0x17:			// SLO	d,x
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
       break;
-    case 0x18:	// CLC
+    case 0x18:			// CLC
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
@@ -877,6 +920,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      txs_9a();
       break;
     case 0x9b:			// TAS	a,y
 #ifdef DEBUG
@@ -917,6 +961,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      ldx_a2();
       break;
     case 0xa3:			// LAX	(d,x)
 #ifdef DEBUG
@@ -1186,8 +1231,8 @@ bool dispatchInstruction()
     case 0xd8:			// CLD
 #ifdef DEBUG
       debugDispatchInstruction();
-      cdl();
 #endif
+      cdl_d8();
       break;
     case 0xd9:			// CMP	a,y
 #ifdef DEBUG
@@ -1393,6 +1438,24 @@ bool dispatchInstruction()
 
 
 #ifdef DEBUG
+void debugPrintArchitecturalState()
+{
+  std::bitset<architecturalState::statusSize>
+    psw {unsigned(architecturalState::status.flags)};
+  std::cout<<std::hex<<"------------------------------------- A "
+	   <<" S -------------------------------------\n\tA = ("
+	   <<unsigned(architecturalState::A)<<"),\tX     = ("
+	   <<unsigned(architecturalState::X)<<"),\tY      = ("
+	   <<unsigned(architecturalState::Y)<<"),\tPC = ("
+	   <<architecturalState::PC<<"),\n\tS = ("
+	   <<unsigned(architecturalState::S)<<"),\tflags = ("
+	   <<psw<<"),\tcycles = ("
+	   <<std::dec<<architecturalState::cycles<<")\n"
+	   <<"-----------------------------------------------------------------"
+	   <<"---------------\n";
+}
+
+
 void debugDispatchInstruction()
 {
   std::cout<<std::hex<<"\tin cycle "<<architecturalState::cycles

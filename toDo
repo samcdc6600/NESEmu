@@ -1,8 +1,6 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * CPU ==========================================================================
-	- Fix up tabbing of first few comments in switch statment in
-	  "dispatchInstruction()".
 	- Implement instructions.
 
 

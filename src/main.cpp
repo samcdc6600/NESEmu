@@ -25,13 +25,13 @@ int main(const int argc, const char * argv[])
 
   checkArgs(argc, argv);
   initialise(argc, argv);
-  printBufferAsMemory(memory::mem, memory::memSize);
+  //  printBufferAsMemory(memory::mem, memory::memSize);
 
   char dummy {};
   do
     {
       cpu();
-      std::cout<<"Hello\n";
+      std::cout<<'\n';
       std::cin>>dummy;
     }
   while(dummy != 'q' && dummy != 'Q');
