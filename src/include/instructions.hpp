@@ -12,10 +12,21 @@
    translation unit. */
 // We have a separet function for each opcode for performance reasons.
 
-
+// =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
+// =========== (The below functions prototypes are used for operations =========
+// ============ that do not in them selves constitute instructions.) ===========
 template <typename T> inline void setZeroFlagOn(const T var);
 inline void setDecimalFlagOn(const bool d);
 template <typename T> inline void setNegativeFlagOn(const T var);
+template <typename T> inline void storeAbsoluteThis(const T var);
+
+// ======================== INSTRUCTION SPECIALIZATIONS  =======================
+// ============== (The below functions prototypes comprise full  ===============
+// ==== instructions. Functions that belong to the same class of instruction ===
+// ============ (indicated by their prefixs) are grouped together.) ============
+/* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
+   OPERATIONS", as these functions assume it has not been altered yet! */
+inline void sta_8d();
 /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X index 
    to the stack pointer."
    - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
@@ -54,10 +65,30 @@ template <typename T> inline void setNegativeFlagOn(const T var)
 }
 
 
+template <typename T> inline void storeAbsoluteThis(const T var)
+{
+  memory::address a = memory::mem[architecturalState::PC + 2];
+  a <<= memory::minimumAddressableUnit;
+  std::cout<<"a = "<<a<<'\n';
+  a += memory::mem[architecturalState::PC + 1];
+  std::cout<<"a = "<<a<<'\n';
+  memory::mem[a] = var;
+}
+
+
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions comprise full instructions. =============
 // =========== Functions that belong to the same class of instruction ==========
 // ============ (indicated by their prefixs) are grouped together.) ============
+
+
+inline void sta_8d()
+{
+  //    STORE(Operand, ACCUMLATOR);   // Stores the Accumulator Register into the memory address specified in the operand.
+  storeAbsoluteThis(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
 
 
 inline void txs_9a()

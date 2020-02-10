@@ -2,6 +2,10 @@
 
 * CPU ==========================================================================
 	- Implement instructions.
+	- Think about whether some of the functions in "SUB INSTRUCTION
+	  GRANULARITY OPERATIONS" really need to be template functions and
+	  change them to non template functions if we can't come up with a good
+	  reason for them to be templates.
 
 
 * .NES ROM loading =============================================================
