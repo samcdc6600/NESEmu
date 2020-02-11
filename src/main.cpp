@@ -13,6 +13,9 @@ namespace cmd
 
 void checkArgs(const int argc, const char * argv[]);
 void initialise(const int argc, const char * argv[]);
+#ifdef DEBUG
+void handleDebugCommand(const char c);
+#endif
 
 
 int main(const int argc, const char * argv[])
@@ -27,14 +30,18 @@ int main(const int argc, const char * argv[])
   initialise(argc, argv);
   //  printBufferAsMemory(memory::mem, memory::memSize);
 
-  char dummy {};
+  char c {};
   do
     {
       cpu();
+      
       std::cout<<'\n';
-      std::cin>>dummy;
+      std::cin>>c;
+      #ifdef DEBUG
+      handleDebugCommand(c);
+      #endif
     }
-  while(dummy != 'q' && dummy != 'Q');
+  while(c != 'q' && c != 'Q');
 }
 
 
@@ -58,3 +65,18 @@ void initialise(const int argc, const char * argv[])
   loadFile(std::string{argv[cmd::romPath]}, memory::mem, memory::memSize,
 	   "loading rom file");
 }
+
+
+#ifdef DEBUG
+void handleDebugCommand(const char c)
+{
+  std::string arg {};
+  switch(c)
+    {
+    case 'p':
+      std::cin>>arg;
+      printMemeory(arg);
+      break;
+    }
+}
+#endif

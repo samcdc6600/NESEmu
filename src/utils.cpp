@@ -39,9 +39,7 @@ bool loadFileProper(const std::string & path, unsigned char buff [],
     {
       for(size_t i {} ; i < s; ++i)
 	{
-	  std::cout<<"i = "<<i<<'\n';
 	  buff[i] = f.get();
-	  std::cout<<"i = ("<<i<<"), buff[i] = ("<<buff[i]<<")\n";
 	  if(f.eof())
 	    {
 	      buff[i] = 0x0;	// We don't want the EOF value!

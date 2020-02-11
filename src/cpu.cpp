@@ -533,6 +533,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      jmp_4c();
       break;
     case 0x4d:			// EOR	a
 #ifdef DEBUG
