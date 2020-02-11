@@ -67,10 +67,10 @@ template <typename T> inline void setNegativeFlagOn(const T var)
 
 template <typename T> inline void storeAbsoluteThis(const T var)
 {
-  memory::address a = memory::mem[architecturalState::PC + 2];
+  memory::address a = memory::mem[architecturalState::PC + 1];
   a <<= memory::minimumAddressableUnit;
   std::cout<<"a = "<<a<<'\n';
-  a += memory::mem[architecturalState::PC + 1];
+  a += memory::mem[architecturalState::PC + 2];
   std::cout<<"a = "<<a<<'\n';
   memory::mem[a] = var;
 }

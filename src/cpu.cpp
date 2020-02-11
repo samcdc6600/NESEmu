@@ -856,9 +856,9 @@ bool dispatchInstruction()
       break;
     case 0x8d:			// STA	a
 #ifdef DEBUG
-      sta_8d();
       debugDispatchInstruction();
 #endif
+      sta_8d();
       break;
     case 0x8e:			// STX	a
 #ifdef DEBUG
