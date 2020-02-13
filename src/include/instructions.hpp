@@ -96,10 +96,7 @@ inline void loadPCFromImmediate()
 
 inline void jmp_4c()
 {
-  std::cout<<"PC = "<<architecturalState::PC<<'\n';
   loadPCFromImmediate();
-  std::cout<<"PC = "<<architecturalState::PC<<'\n';
-  architecturalState::PC += 3;
   architecturalState::cycles += 3;
 }
 
