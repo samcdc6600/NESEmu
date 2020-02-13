@@ -15,6 +15,9 @@ void checkArgs(const int argc, const char * argv[]);
 void initialise(const int argc, const char * argv[]);
 #ifdef DEBUG
 bool handleDebugCommand(const char * argv[], bool & next);
+void handlePrintCommand(const std::string command);
+// Command.size() should be > 0
+void handlePrintHelp(const char * argv[], const std::string command);
 #endif
 
 
@@ -87,27 +90,7 @@ bool handleDebugCommand(const char * argv[], bool & next)
 	{
 	case 'p':
 	case 'P':
-	  {
-	    constexpr size_t prefixLen {2};
-	    constexpr char commandArgDelim {' '};
-	    size_t pos {};
-	    if(command.size() > prefixLen && command[1] == commandArgDelim)
-	      {
-		if(command[0] == 'p')
-		  pos = command.find("p ") + prefixLen;
-		else
-		  pos = command.find("P ") + prefixLen;
-		printMemeory(command.substr(pos));
-	      }
-	    else
-	      {
-		if(command[1] != ' ')
-		  std::cerr<<"Error: malformed print command (\""<<command
-			   <<"\") encountered.\n";
-		else
-		  std::cerr<<"Error: address missing from print command.\n";
-	      }
-	  }
+	  handlePrintCommand(command);
 	  break;
 	case 'n':
 	case 'N':
@@ -120,17 +103,7 @@ bool handleDebugCommand(const char * argv[], bool & next)
 	case 'h':
 	case 'H':
 	default:
-	  std::cerr<<"Invalid command (\""<<command<<"\") entered, please enter"
-	    " one of the following:\n\th\t: where \"h\" stands for \"help\" and"
-	    " will print this message. Note\n\t\t  that \"H\" is also accepted."
-	    "\n\tp X\t: where \"p\" stands for \"print\" and \"X\" is an "
-	    "address in hex in\n\t\t  the range ["<<0<<", "<<memory::memSize
-		   <<"). Note that \"P\" is  also accepted.\n\tn\t: where \"n\""
-	    " stands for \"next\". This will cause the next\n\t\t  instruction "
-	    "to be executed. Note that \"N\" and \"\\n\" are also\n\t\t  "
-	    "accepted.\n\tq\t: where \"q\" stands for \"quit\" and cause "
-		   <<argv[0]<<" to hault\n\t\t  instruction execution and exit."
-	    " Note that \"Q\" is also\n\t\t  accepted.\n";
+	  handlePrintHelp(argv, command);
 	}
     }
   else
@@ -139,4 +112,49 @@ bool handleDebugCommand(const char * argv[], bool & next)
     }
   return ret;
 }
+
+
+void handlePrintCommand(const std::string command)
+{
+  {
+    constexpr size_t prefixLen {2};
+    constexpr char commandArgDelim {' '};
+    size_t pos {};
+    if(command.size() > prefixLen && command[1] == commandArgDelim)
+      {
+	if(command[0] == 'p')
+	  pos = command.find("p ") + prefixLen;
+	else
+	  pos = command.find("P ") + prefixLen;
+	printMemeory(command.substr(pos));
+      }
+    else
+      {
+	if(command[1] != ' ')
+	  std::cerr<<"Error: malformed print command (\""<<command
+		   <<"\") encountered.\n";
+	else
+	  std::cerr<<"Error: address missing from print command.\n";
+      }
+  }
+}
+
+
+void handlePrintHelp(const char * argv[], const std::string command)
+{
+  size_t helpIndex {};
+  if(command[helpIndex] != 'h' && command[helpIndex] != 'H')
+    std::cerr<<"Invalid command (\""<<command<<"\") entered: ";
+  std::cerr<<"Please enter one of the following:\n\th\t: where \"h\" stands for"
+    " \"help\" and will print this message. Note\n\t\t  that \"H\" is also "
+    "accepted.\n\tp X\t: where \"p\" stands for \"print\" and \"X\" is an "
+    "address in hex in\n\t\t  the range ["<<0<<", "<<memory::memSize<<"). Note "
+    "that \"P\" is  also accepted.\n\tn\t: where \"n\" stands for \"next\". "
+    "This will cause the next\n\t\t  instruction to be executed. Note that \"N"
+    "\" and \"\\n\" are also\n\t\t  accepted.\n\tq\t: where \"q\" stands for \""
+    "quit\" and cause "<<argv[0]<<" to hault\n\t\t  instruction execution and "
+    "exit. Note that \"Q\" is also\n\t\t  accepted.\n";
+}
+
+
 #endif
