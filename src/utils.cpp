@@ -53,11 +53,13 @@ bool loadFileProper(const std::string & path, unsigned char buff [],
 }
 
 
-void printBufferAsMemory(const unsigned char buff [], const size_t s)
+#ifdef DEBUG
+void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s)
 {
   for(size_t i {}; i < s; ++i)
     {
       std::cerr<<std::hex<<i<<":"<<"\t\t"
-	       <<unsigned(buff[i])<<'\n';
+	       <<memory::address(buff[i])<<'\n';
     }
 }
+#endif

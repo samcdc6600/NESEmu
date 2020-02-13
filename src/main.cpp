@@ -14,7 +14,7 @@ namespace cmd
 void checkArgs(const int argc, const char * argv[]);
 void initialise(const int argc, const char * argv[]);
 #ifdef DEBUG
-void handleDebugCommand(const char c);
+bool handleDebugCommand(const char * argv[], bool & next);
 #endif
 
 
@@ -30,18 +30,26 @@ int main(const int argc, const char * argv[])
   initialise(argc, argv);
   //  printBufferAsMemory(memory::mem, memory::memSize);
 
-  char c {};
+#ifndef DEBUG
   do
     {
       cpu();
-      
-      std::cout<<'\n';
-      std::cin>>c;
-      #ifdef DEBUG
-      handleDebugCommand(c);
-      #endif
     }
-  while(c != 'q' && c != 'Q');
+  while(true);
+#endif
+
+#ifdef DEBUG
+  bool next {true};		// Always execute the first instruction
+  do
+    {
+      if(next)
+	cpu();
+      next = false;
+    }
+  while(handleDebugCommand(argv, next));
+  std::cout<<"================================== Goodbye :) =================="
+    "================\n";
+#endif
 }
 
 
@@ -68,15 +76,67 @@ void initialise(const int argc, const char * argv[])
 
 
 #ifdef DEBUG
-void handleDebugCommand(const char c)
+bool handleDebugCommand(const char * argv[], bool & next)
 {
-  std::string arg {};
-  switch(c)
+  bool ret {true};
+  std::string command {};
+  std::getline(std::cin, command);
+  if(command.size() != 0)	// We treat no input the same as "n" or "N".
     {
-    case 'p':
-      std::cin>>arg;
-      printMemeory(arg);
-      break;
+      switch(command[0])
+	{
+	case 'p':
+	case 'P':
+	  {
+	    constexpr size_t prefixLen {2};
+	    constexpr char commandArgDelim {' '};
+	    size_t pos {};
+	    if(command.size() > prefixLen && command[1] == commandArgDelim)
+	      {
+		if(command[0] == 'p')
+		  pos = command.find("p ") + prefixLen;
+		else
+		  pos = command.find("P ") + prefixLen;
+		printMemeory(command.substr(pos));
+	      }
+	    else
+	      {
+		if(command[1] != ' ')
+		  std::cerr<<"Error: malformed print command (\""<<command
+			   <<"\") encountered.\n";
+		else
+		  std::cerr<<"Error: address missing from print command.\n";
+	      }
+	  }
+	  break;
+	case 'n':
+	case 'N':
+	  next = true;
+	  break;
+	case 'q':
+	case 'Q':
+	  ret = false;
+	  break;
+	case 'h':
+	case 'H':
+	default:
+	  std::cerr<<"Invalid command (\""<<command<<"\") entered, please enter"
+	    " one of the following:\n\th\t: where \"h\" stands for \"help\" and"
+	    " will print this message. Note\n\t\t  that \"H\" is also accepted."
+	    "\n\tp X\t: where \"p\" stands for \"print\" and \"X\" is an "
+	    "address in hex in\n\t\t  the range ["<<0<<", "<<memory::memSize
+		   <<"). Note that \"P\" is  also accepted.\n\tn\t: where \"n\""
+	    " stands for \"next\". This will cause the next\n\t\t  instruction "
+	    "to be executed. Note that \"N\" and \"\\n\" are also\n\t\t  "
+	    "accepted.\n\tq\t: where \"q\" stands for \"quit\" and cause "
+		   <<argv[0]<<" to hault\n\t\t  instruction execution and exit."
+	    " Note that \"Q\" is also\n\t\t  accepted.\n";
+	}
     }
+  else
+    {				// Remeber '\n' is equivalent to 'n'.
+      next = true;
+    }
+  return ret;
 }
 #endif

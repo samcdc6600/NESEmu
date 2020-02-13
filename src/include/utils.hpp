@@ -1,10 +1,13 @@
 #ifndef ERROR_HPP_
 #define ERROR_HPP_
+
+
 #include <climits>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
+#include "mem.hpp"
 
 
 namespace error
@@ -51,9 +54,11 @@ bool loadFile(const std::string & path, unsigned char buff [], const size_t s);
 // Where s is the size of buff in bytes.
 void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 	      const std::string & errorContext);
+#ifdef DEBUG
 // Used to print values in buff in hex with address indexes starting at 0.
 // Where s is the size of the buffer in bytes.
-void printBufferAsMemory(const unsigned char buff [], const size_t s);
+void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);
+#endif
 
 
 #endif

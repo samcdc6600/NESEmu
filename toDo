@@ -1,13 +1,11 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
+* GENERAL ======================================================================
+	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
+	  can take advantge of pretty colours to help distinguish things.
+
+
 * CPU ==========================================================================
-	- Think about whether some of the functions in "SUB INSTRUCTION
-	  GRANULARITY OPERATIONS" really need to be template functions and
-	  change them to non template functions if we can't come up with a good
-	  reason for them to be templates.
-	- Fix issue with "sta_8d()" instruction, specificaly
-	  "storeAbsoluteThis()" sub instruction. It is outputting 4 as our
-	  address, but it should be 2!
 	- Implement instructions.
 
 

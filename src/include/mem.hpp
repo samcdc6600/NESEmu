@@ -1,3 +1,7 @@
+#ifndef MEM_HPP_
+#define MEM_HPP_
+
+
 #include <cstddef>
 #include <string>
 
@@ -19,5 +23,8 @@ namespace memory
 
 
 #ifdef DEBUG
-void printMemeory(std::string address);
+void printMemeory(std::string addressStr);
+#endif
+
+
 #endif
