@@ -6,6 +6,9 @@
 
 
 * CPU ==========================================================================
+	- Fix implementation of "bne_d0()", We think there are errors in
+	  "loadPCLowAndCheckPageBoundryTransition()", specifically in our
+	  reading in of and maksing of the immediate and pc values.
 	- Implement instructions.
 
 

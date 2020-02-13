@@ -18,9 +18,12 @@
 inline void setZeroFlagOn(const memory::minimumAddressableUnit var);
 inline void setDecimalFlagOn(const bool d);
 inline void setNegativeFlagOn(const memory::minimumAddressableUnit var);
-inline memory::address getImmediateAddress();
+inline memory::minimumAddressableUnit get8BitImmediate();
+inline memory::address get16BitImmediate();
 inline void storeAbsoluteThis(const memory::minimumAddressableUnit var);
-inline void loadPCFromImmediate();
+inline void loadPCFrom16BitImmediate();
+// Return true if we have crossed a page boundry
+inline bool loadPCLowAndCheckPageBoundryTransition();
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
@@ -36,6 +39,7 @@ inline void sta_8d();
 inline void txs_9a();
 inline void ldx_a2();
 inline void lda_a9();
+inline void bne_d0();
 /* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
    Register by setting the 3rd bit 0." "Even though the NES doesn't use decimal
    mode, the opcodes to clear and set the flag do work, so if you need to store
@@ -68,7 +72,13 @@ void setNegativeFlagOn(const memory::minimumAddressableUnit var)
 }
 
 
-inline memory::address getImmediateAddress()
+inline memory::minimumAddressableUnit get8BitImmediate()
+{
+  return memory::mem[architecturalState::PC + 1];
+}
+
+
+inline memory::address get16BitImmediate()
 {
   return memory::address(memory::mem[architecturalState::PC + 1]) +
 	      memory::address((memory::mem[architecturalState::PC + 2])
@@ -78,13 +88,32 @@ inline memory::address getImmediateAddress()
 
 inline void storeAbsoluteThis(const memory::minimumAddressableUnit var)
 {
-  memory::mem[getImmediateAddress()] = var;
+  memory::mem[get16BitImmediate()] = var;
 }
 
 
-inline void loadPCFromImmediate()
+inline void loadPCFrom16BitImmediate()
 {
-  architecturalState::PC = getImmediateAddress();
+  architecturalState::PC = get16BitImmediate();
+}
+
+
+inline bool loadPCLowAndCheckPageBoundryTransition()
+{
+  bool ret {false};
+  const memory::address pageNum {memory::address(architecturalState::PC %
+						 memory::pageSize)};
+  memory::address newPC = architecturalState::PC & memory::maskAddressHigh;
+  architecturalState::PC = newPC |
+    (get8BitImmediate() & memory::maskAddressLow);
+
+  std::cout<<std::hex<<"architecturalState::PC & memory::maskAddressHigh = "
+	   <<(architecturalState::PC & memory::maskAddressHigh)<<'\n';
+  std::cout<<std::hex<<"(get8BitImmediate() & memory::maskAddressLow) = "
+	   <<(get8BitImmediate() & memory::maskAddressLow)<<'\n';
+  if(pageNum != (architecturalState::PC % memory::pageSize))
+    ret = true;
+  return ret;
 }
 
 
@@ -96,7 +125,7 @@ inline void loadPCFromImmediate()
 
 inline void jmp_4c()
 {
-  loadPCFromImmediate();
+  loadPCFrom16BitImmediate();
   architecturalState::cycles += 3;
 }
 
@@ -135,6 +164,21 @@ inline void lda_a9()
   setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+inline void bne_d0()
+{ /* "Branches are dependant on the status of the flag bits when the op code is
+     encountered. A branch not taken requires two machine cycles. Add one if the
+     branch is taken and add one more if the branch crosses a page boundary."
+     - http://6502.org/tutorials/6502opcodes.html#BNE */
+  if(architecturalState::status.u.Z == 0)
+    {
+      if(loadPCLowAndCheckPageBoundryTransition())
+	architecturalState::cycles += 1;
+      architecturalState::cycles += 1;
+    }
   architecturalState::cycles += 2;
 }
 

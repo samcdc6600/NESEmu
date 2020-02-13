@@ -1198,6 +1198,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      bne_d0();
       break;
     case 0xd1:			// CMP	(d),y
 #ifdef DEBUG
