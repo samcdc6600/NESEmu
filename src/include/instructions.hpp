@@ -99,18 +99,13 @@ inline void loadPCFrom16BitImmediate()
 
 
 inline bool loadPCLowAndCheckPageBoundryTransition()
-{
+{  
   bool ret {false};
   const memory::address pageNum {memory::address(architecturalState::PC %
 						 memory::pageSize)};
-  memory::address newPC = architecturalState::PC & memory::maskAddressHigh;
-  architecturalState::PC = newPC |
-    (get8BitImmediate() & memory::maskAddressLow);
-
-  std::cout<<std::hex<<"architecturalState::PC & memory::maskAddressHigh = "
-	   <<(architecturalState::PC & memory::maskAddressHigh)<<'\n';
-  std::cout<<std::hex<<"(get8BitImmediate() & memory::maskAddressLow) = "
-	   <<(get8BitImmediate() & memory::maskAddressLow)<<'\n';
+  architecturalState::PC = (architecturalState::PC & memory::maskAddressHigh) |
+    get8BitImmediate();
+  
   if(pageNum != (architecturalState::PC % memory::pageSize))
     ret = true;
   return ret;

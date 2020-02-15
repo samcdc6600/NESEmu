@@ -12,8 +12,8 @@ namespace memory
 
   typedef unsigned char minimumAddressableUnit;
   typedef unsigned short address;
-  constexpr address maskAddressLow {0b00001111};
-  constexpr address maskAddressHigh {0b11110000};
+  constexpr address maskAddressLow {0x00ff};
+  constexpr address maskAddressHigh {0xff00};
   constexpr size_t minimumAddressableUnitSize
     {sizeof(minimumAddressableUnit) * 8};
   constexpr address pageSize {256};
