@@ -6,7 +6,8 @@
 
 CXX	= clang++
 #CXX	= g++
-CXXFLAGS	= -std=c++14 -Wall -Wpedantic -Wextra -O2
+#CXXFLAGS	= -std=c++2a -fconcepts -Wall -Wpedantic -Wextra -O2
+CXXFLAGS	= -std=c++2a -Wall -Wpedantic -Wextra -O2
 LIBS	= -L/usr/local/lib/ -I/usr/local/include/ -lglut -lGLU -lGL
 BIN_NAME	= NESEmu
 SRC	= ./src

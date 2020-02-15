@@ -25,6 +25,8 @@ inline void loadPCFrom16BitImmediate();
 // Return true if we have crossed a page boundry
 inline bool loadPCLowAndCheckPageBoundryTransition();
 inline void branchTaken();
+inline memory::minimumAddressableUnit pullFromStack();
+inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
@@ -32,6 +34,8 @@ inline void branchTaken();
 // ============ (indicated by their prefixs) are grouped together.) ============
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
    OPERATIONS", as these functions assume it has not been altered yet! */
+/* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
+inline void plp_28();
 inline void jmp_4c();
 inline void sta_8d();
 /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X index 
@@ -41,6 +45,10 @@ inline void txs_9a();
 inline void ldx_a2();
 inline void lda_a9();
 inline void dex_ca();
+/* "Branches are dependant on the status of the flag bits when the op code is
+     encountered. A branch not taken requires two machine cycles. Add one if the
+     branch is taken and add one more if the branch crosses a page boundary."
+     - http://6502.org/tutorials/6502opcodes.html#BNE */
 inline void bne_d0();
 /* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
    Register by setting the 3rd bit 0." "Even though the NES doesn't use decimal
@@ -124,10 +132,36 @@ inline void branchTaken()
 }
 
 
+inline memory::minimumAddressableUnit pullFromStack()
+{
+  std::cout<<"architecturalState::stackBase | architecturalState::S = "
+	   <<(architecturalState::stackBase | architecturalState::S)<<'\n';
+  return get8BitAtAddress(architecturalState::stackBase |
+			  architecturalState::S);
+}
+
+
+inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
+{
+  std::cout<<"a = "<<a<<'\n';
+  std::cout<<"memory::mem[a] = "<<memory::mem[a]<<'\n';
+  return memory::mem[a];
+}
+
+
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions comprise full instructions. =============
 // =========== Functions that belong to the same class of instruction ==========
 // ============ (indicated by their prefixs) are grouped together.) ============
+
+
+inline void plp_28()
+{ /* With the 6502, the stack is always on page one ($100-$1FF) and works top
+     down. - http://6502.org/tutorials/6502opcodes.html#PLP */
+  std::cout<<std::hex<<"pullFromStack(); = "<<int(pullFromStack())<<std::endl;
+  architecturalState::PC += 1;
+  architecturalState::cycles += 4;
+}
 
 
 inline void jmp_4c()
@@ -188,10 +222,7 @@ inline void dex_ca()
 
 
 inline void bne_d0()
-{ /* "Branches are dependant on the status of the flag bits when the op code is
-     encountered. A branch not taken requires two machine cycles. Add one if the
-     branch is taken and add one more if the branch crosses a page boundary."
-     - http://6502.org/tutorials/6502opcodes.html#BNE */
+{
   if(architecturalState::status.u.Z == 0)
     branchTaken();
   else

@@ -16,6 +16,7 @@ void initialise(const int argc, const char * argv[]);
 #ifdef DEBUG
 bool handleDebugCommand(const char * argv[], bool & next);
 void handlePrintCommand(const std::string command);
+void handleAlterMemory(const std::string command);
 // Command.size() should be > 0
 void handlePrintHelp(const char * argv[], const std::string command);
 #endif
@@ -48,6 +49,7 @@ int main(const int argc, const char * argv[])
       if(next)
 	cpu();
       next = false;
+      std::cout<<": ";		// Print a prompt...
     }
   while(handleDebugCommand(argv, next));
   std::cout<<"================================== Goodbye :) =================="
@@ -92,6 +94,10 @@ bool handleDebugCommand(const char * argv[], bool & next)
 	case 'P':
 	  handlePrintCommand(command);
 	  break;
+	case 'a':
+	case 'A':
+	  handleAlterMemory(command);
+	  break;
 	case 'n':
 	case 'N':
 	  next = true;
@@ -117,15 +123,14 @@ bool handleDebugCommand(const char * argv[], bool & next)
 void handlePrintCommand(const std::string command)
 {
   {
-    constexpr size_t prefixLen {2};
-    constexpr char commandArgDelim {' '};
     size_t pos {};
-    if(command.size() > prefixLen && command[1] == commandArgDelim)
+    if(command.size() > command::argumentsPrefixLen &&
+       command[1] == command::argDelim)
       {
 	if(command[0] == 'p')
-	  pos = command.find("p ") + prefixLen;
+	  pos = command.find("p ") + command::argumentsPrefixLen;
 	else
-	  pos = command.find("P ") + prefixLen;
+	  pos = command.find("P ") + command::argumentsPrefixLen;
 	printMemeory(command.substr(pos));
       }
     else
@@ -140,6 +145,29 @@ void handlePrintCommand(const std::string command)
 }
 
 
+void handleAlterMemory(const std::string command)
+{
+  size_t pos {};
+  if(command.size() > command::argumentsPrefixLen &&
+     command[1] == command::argDelim)
+    {
+      if(command[0] == 'a')
+	pos = command.find("a ") + command::argumentsPrefixLen;
+      else
+	pos = command.find("A ") + command::argumentsPrefixLen;
+      alterMemory(command.substr(pos));
+    }
+  else
+    {
+      if(command[1] != ' ')
+	std::cerr<<"Error: malformed alter command (\""<<command
+		 <<"\") encountered.\n";
+      else
+	std::cerr<<"Error: arguments missing from alter command.\n";
+    }
+}
+
+
 void handlePrintHelp(const char * argv[], const std::string command)
 {
   size_t helpIndex {};
@@ -149,11 +177,16 @@ void handlePrintHelp(const char * argv[], const std::string command)
     " \"help\" and will print this message. Note\n\t\t  that \"H\" is also "
     "accepted.\n\tp X\t: where \"p\" stands for \"print\" and \"X\" is an "
     "address in hex in\n\t\t  the range ["<<0<<", "<<memory::memSize<<"). Note "
-    "that \"P\" is  also accepted.\n\tn\t: where \"n\" stands for \"next\". "
-    "This will cause the next\n\t\t  instruction to be executed. Note that \"N"
-    "\" and \"\\n\" are also\n\t\t  accepted.\n\tq\t: where \"q\" stands for \""
-    "quit\" and cause "<<argv[0]<<" to hault\n\t\t  instruction execution and "
-    "exit. Note that \"Q\" is also\n\t\t  accepted.\n";
+    "that \"P\" is  also accepted.\n\ta X Y\t: Where \"a\" stands for \"alter"
+    "\", \"X\" is an address in hex in the\n\t\t  range ["<<0<<", "
+	   <<memory::memSize<<"), \"y\" is the value in hex that the "
+    "memory at X\n\t\t  will be set to. Note that Y should be an "
+	   <<memory::minimumAddressableUnitSize<<"-bit number and A is\n\t\t  "
+    "also accepted.\n\tn\t: where \"n\" stands for \"next\". This will cause "
+    "the next\n\t\t  instruction to be executed. Note that \"N\" and \"\\n\" "
+    "are also\n\t\t  accepted.\n\tq\t: where \"q\" stands for \"quit\" and "
+    "cause "<<argv[0]<<" to hault\n\t\t  instruction execution and exit. Note "
+    "that \"Q\" is also\n\t\t  accepted.\n";
 }
 
 

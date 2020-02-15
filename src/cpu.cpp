@@ -34,6 +34,7 @@ namespace architecturalState
      implementing the CPU.) */
   memory::address PC {0x03f6};		// Program counter
   unsigned char S {};		// Stack Pointer
+  constexpr memory::address stackBase {0x100}; // Base address of stack
   
 
   typedef union
@@ -353,6 +354,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      plp_28();
       break;
     case 0x29:			// AND	#i
 #ifdef DEBUG

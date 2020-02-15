@@ -11,11 +11,13 @@ namespace memory
   // That is bits :).
 
   typedef unsigned char minimumAddressableUnit;
+    constexpr size_t minimumAddressableUnitSize
+    {sizeof(minimumAddressableUnit) * 8};
+  constexpr size_t minimumAddressableUnitMax
+    {std::numeric_limits<minimumAddressableUnit>::max()};
   typedef unsigned short address;
   constexpr address maskAddressLow {0x00ff};
   constexpr address maskAddressHigh {0xff00};
-  constexpr size_t minimumAddressableUnitSize
-    {sizeof(minimumAddressableUnit) * 8};
   constexpr address pageSize {256};
   /* Note that we are adding the maximum amount of memory only temporarily as we
      are developing the CPU emulation code first and we think it is a good idea.
@@ -25,9 +27,7 @@ namespace memory
 }
 
 
-#ifdef DEBUG
-void printMemeory(std::string addressStr);
-#endif
+
 
 
 #endif
