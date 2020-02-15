@@ -24,6 +24,7 @@ inline void storeAbsoluteThis(const memory::minimumAddressableUnit var);
 inline void loadPCFrom16BitImmediate();
 // Return true if we have crossed a page boundry
 inline bool loadPCLowAndCheckPageBoundryTransition();
+inline void branchTaken();
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
@@ -39,6 +40,7 @@ inline void sta_8d();
 inline void txs_9a();
 inline void ldx_a2();
 inline void lda_a9();
+inline void dex_ca();
 inline void bne_d0();
 /* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
    Register by setting the 3rd bit 0." "Even though the NES doesn't use decimal
@@ -46,6 +48,8 @@ inline void bne_d0();
    a bit, this acts as a free space."
    - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=CLD */
 inline void cdl_d8();
+inline void nop_ea();
+inline void beq_f0();
 
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
@@ -80,9 +84,9 @@ inline memory::minimumAddressableUnit get8BitImmediate()
 
 inline memory::address get16BitImmediate()
 {
-  return memory::address(memory::mem[architecturalState::PC + 1]) +
-	      memory::address((memory::mem[architecturalState::PC + 2])
-			      << memory::minimumAddressableUnitSize);
+   return (memory::address(memory::mem[architecturalState::PC + 1])
+			  << memory::minimumAddressableUnitSize) |
+     memory::address(memory::mem[architecturalState::PC + 2]);
 }
 
 
@@ -112,6 +116,14 @@ inline bool loadPCLowAndCheckPageBoundryTransition()
 }
 
 
+inline void branchTaken()
+{
+  if(loadPCLowAndCheckPageBoundryTransition())
+    architecturalState::cycles += 1;
+  architecturalState::cycles += 1;
+}
+
+
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions comprise full instructions. =============
 // =========== Functions that belong to the same class of instruction ==========
@@ -120,7 +132,9 @@ inline bool loadPCLowAndCheckPageBoundryTransition()
 
 inline void jmp_4c()
 {
+  std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   loadPCFrom16BitImmediate();
+    std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   architecturalState::cycles += 3;
 }
 
@@ -163,17 +177,25 @@ inline void lda_a9()
 }
 
 
+inline void dex_ca()
+{
+  architecturalState::X -= 1;
+  setNegativeFlagOn(architecturalState::X);
+  setZeroFlagOn(architecturalState::X);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
 inline void bne_d0()
 { /* "Branches are dependant on the status of the flag bits when the op code is
      encountered. A branch not taken requires two machine cycles. Add one if the
      branch is taken and add one more if the branch crosses a page boundary."
      - http://6502.org/tutorials/6502opcodes.html#BNE */
   if(architecturalState::status.u.Z == 0)
-    {
-      if(loadPCLowAndCheckPageBoundryTransition())
-	architecturalState::cycles += 1;
-      architecturalState::cycles += 1;
-    }
+    branchTaken();
+  else
+    architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
 
@@ -182,6 +204,23 @@ inline void cdl_d8()
 {
   setDecimalFlagOn(false);
   architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+inline void nop_ea()
+{
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+inline void beq_f0()
+{
+    if(architecturalState::status.u.Z == 1)
+      branchTaken();
+    else
+      architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
 

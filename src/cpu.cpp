@@ -1168,6 +1168,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      dex_ca();
       break;
     case 0xcb:			// AXS	#i
 #ifdef DEBUG
@@ -1330,6 +1331,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      nop_ea();
       break;
     case 0xeb:			// SBC	#i
 #ifdef DEBUG
@@ -1360,6 +1362,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      beq_f0();
       break;
     case 0xf1:			// SBC	(d),y
 #ifdef DEBUG
