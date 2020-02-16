@@ -76,7 +76,7 @@ void alterMemory(const std::string argsStr);
 /* Return true if addressStr is valid. Print error message and return false
    otherwise. */
 template <typename T1, typename T2, typename T3>
-bool checkStrNumber(const std::string numStr, T1 & number, const T2 min,
+void checkStrNumber(const std::string numStr, T1 & number, const T2 min,
  			    const T3 max, size_t * pPos);
 // template <typename T1, typename T2, typename T3>
 // bool checkStrUnsignedNumber(const std::string numStr, T1 & number, const T2 min,

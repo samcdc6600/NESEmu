@@ -1,10 +1,12 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * GENERAL ======================================================================
-	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
-	  can take advantge of pretty colours to help distinguish things.
+	 - Fix issue with ambiguous from "checkStrNumber()", this is somewhat
+	   related to the next item.
 	- Change command handling code to use tokens and allow arbitrary white
 	  space (we think it is okay right now, but it's a little ridgid.)
+	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
+	  can take advantge of pretty colours to help distinguish things.
 
 
 * CPU ==========================================================================
@@ -13,11 +15,7 @@
 	  spaces and such from the start of "cpu.cpp" to be included into the
 	  new .cpp file for the function bodies from "instructions.hpp". Think
 	  about wheather this extra complixity is worth it.
-	- Finish implementing "handleAlterMemoryCommand()"
 	- Finish "plp_28()".
-	- Add initial catch to "printMemeory()" and "alterMemory()" to catch
-	  throw that we shal add to checkStrNumber to check that maximum range
-	  of number isn't out.
 	- Update comment for "checkStrUnsignedNumber()".
 	- Implement instructions.
 

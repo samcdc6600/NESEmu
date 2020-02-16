@@ -137,14 +137,14 @@ inline memory::minimumAddressableUnit pullFromStack()
   std::cout<<"architecturalState::stackBase | architecturalState::S = "
 	   <<(architecturalState::stackBase | architecturalState::S)<<'\n';
   return get8BitAtAddress(architecturalState::stackBase |
-			  architecturalState::S);
+			  architecturalState::S--); // We are not sure if S-- is corrent here.
 }
 
 
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 {
   std::cout<<"a = "<<a<<'\n';
-  std::cout<<"memory::mem[a] = "<<memory::mem[a]<<'\n';
+  std::cout<<"memory::mem[a] = "<<unsigned(memory::mem[a])<<'\n';
   return memory::mem[a];
 }
 
@@ -159,6 +159,7 @@ inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
   std::cout<<std::hex<<"pullFromStack(); = "<<int(pullFromStack())<<std::endl;
+  architecturalState::status.flags = pullFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
 }
