@@ -2,6 +2,7 @@
 
 * GENERAL ======================================================================
 	- Fix problems when compiling with g++!
+	- Improve error messages for debug commands.
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
 	  can take advantge of pretty colours to help distinguish things.
 
