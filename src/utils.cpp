@@ -74,7 +74,7 @@ void printMemeory(const std::string addressStr)
   size_t * pPos {&pos};
   try
     {
-      checkStrNumber(addressStr, address, size_t(0), memory::memSize, pPos);
+      //      checkStrNumber(addressStr, address, size_t(0), memory::memSize, pPos);
       if(addressStr[*pPos] == '\0')
 	{
 	  std::cout<<std::hex<<memory::address(memory::mem[address])<<'\n';
@@ -95,42 +95,23 @@ void printMemeory(const std::string addressStr)
 }
 
 
-void alterMemory(const std::string argsStr)
+void alterMemory(std::stringstream argsSS)
 {
   memory::address address {};
   memory::minimumAddressableUnit value {};
-  size_t pos {};
-  size_t * pPos {&pos};
-  try{
-    checkStrNumber(argsStr, address, size_t(0), memory::memSize, pPos);
-    if(argsStr[*pPos] == ' ' && *pPos < argsStr.size() &&
-       (argsStr[*pPos +1] != ' ' && argsStr[*pPos +1] != '\0'))
-      {
-	checkStrNumber(argsStr, value, size_t(0),
-		       memory::minimumAddressableUnitMax, pPos);
 
-	if(argsStr[*pPos] == '\0')
-	  {
-	    memory::mem[address] = value;
-	  }
-	else
-	  {
-	    std::stringstream e {};
-	    e<<"more then two arguments and or trailing space detected";
-	    throw std::invalid_argument(e.str().c_str());
-	  }
-      }
-    else
-      {
-	std::stringstream e {};
-	e<<"only one argument detected";
-	throw std::invalid_argument(e.str().c_str());
-      }
-  }
+  std::stringstream e {};
+  try
+    {
+      getNumbersFromStr(argsSS, 0, address, value);
+      checkIntRanges(0, numRange(address, size_t(0), memory::memSize),
+		     numRange(value, size_t(0),
+			      memory::minimumAddressableUnitMax +1));
+    }
   catch(const std::exception & e)
     {
-      std::cerr<<"Error: processing alter command and converting the arguments "
-	"(\""<<argsStr<<"\") to integers of types (\""
+      std::cerr<<"Error: converting alter command arguments (\""
+	       <<argsSS.str()<<"\") to integers of types (\""
 	       <<typeid(memory::address).name()<<"\") and (\""
 	       <<typeid(memory::minimumAddressableUnit).name()<<"\"), recived "
 	"exception \""<<e.what()<<".\"\n";
@@ -138,30 +119,146 @@ void alterMemory(const std::string argsStr)
 }
 
 
-template <typename T1, typename T2, typename T3>
-void checkStrNumber(const std::string numStr, T1 & number, const T2 min,
-			    const T3 max, size_t * pPos)
-{
-  constexpr size_t numberBase {16};
-
-  number = std::stoul(numStr, pPos, numberBase);
-  if(numStr[*pPos] == '\0' || numStr[*pPos] == ' ')
-    {
-      std::cout<<"number = "<<number<<", max = "<<max<<'\n';
-      if(number < min || number > max)
-	{
-	  std::stringstream e {};
-	  e<<"number out of range ["<<min<<", "<<max<<")";
-	  throw std::invalid_argument(e.str().c_str());
-	}
-    }
-  else
-    {
-      std::stringstream e {};
-      e<<"unable to convert characters (\""<<numStr.substr(*pPos)<<"\") at "
-	"position ("<<*pPos<<") from (\""<<numStr<<"\") to number";
-      throw std::invalid_argument(e.str().c_str());
-    }
-}
 #endif
 
+
+
+
+
+    // argsSS>>std::hex>>address;
+    // if(argsSS.fail())
+    //   {
+    // 	if(argsSS.eof())
+    // 	  {
+    // 	    e<<"too few arguments (no arguments detected)";
+    // 	    throw std::invalid_argument(e.str().c_str());
+    // 	  }
+    // 	else
+    // 	  {
+    // 	    e<<"invalid first argument";
+    // 	    throw std::invalid_argument(e.str().c_str());
+    // 	  }
+    //   }
+    // else
+    //   {
+    // 	argsSS>>std::hex>>value;
+    // 	if(argsSS.fail())
+    // 	  {
+    // 	    if(argsSS.eof())
+    // 	      {
+    // 		e<<"too few arguments (only one argument detected)";
+    // 		throw std::invalid_argument(e.str().c_str());
+    // 	      }
+    // 	    else
+    // 	      {
+    // 		e<<"invalid second argument";
+    // 		throw std::invalid_argument(e.str().c_str());
+    // 	      }
+    // 	  }
+    // 	else
+    // 	  {
+    // 	    std::string dummy {};
+    // 	    argsSS>>dummy;
+    // 	    if(dummy.size() == 0)
+    // 	      {
+    // 		std::cout<<"read in arguments (\""<<address<<"\"), and (\""
+    // 			 <<value<<"\")\n";
+    // 	      }
+    // 	    else
+    // 	      {
+    // 				std::cout<<"read in arguments (\""<<address<<"\"), and (\""
+    // 			 <<value<<"\")\n";
+    // 		e<<"too many arguments";
+    // 		throw std::invalid_argument(e.str().c_str());
+    // 	      }
+    // 	  }
+    //   }
+
+
+
+// constexpr size_t numberBase {16};
+
+// number = std::stoul(numStr, pPos, numberBase);
+// if(numStr[*pPos] == '\0')
+//   {
+//     std::cout<<"number = "<<number<<", max = "<<max<<'\n';
+//     if(number < min || number > max)
+//       {
+// 	std::stringstream e {};
+// 	e<<"number out of range ["<<min<<", "<<max<<")";
+// 	throw std::invalid_argument(e.str().c_str());
+//       }
+//   }
+//  else
+//    {
+//      std::stringstream e {};
+//      e<<"unable to convert characters (\""<<numStr.substr(*pPos)<<"\") at "
+//        "position ("<<*pPos<<") from (\""<<numStr<<"\") to number";
+//      throw std::invalid_argument(e.str().c_str());
+//    }
+
+
+
+
+    // if(address == 0)
+    //   {
+    // 	std::cout<<"error arg 1\n";
+    //   }
+    // else
+    //   if(valueStr == 0)
+    // 	{
+    // 	  std::cout<<"error arg 2\n";
+    // 	}
+    //    argsSS>>addressStr;
+    // pos = argsStr.find(command::argDelim);
+    // if(pos == std::string::npos)
+    //   {
+    // 	e<<"character \""<<command::argDelim<<"\" not found in arguments "
+    // 	  "string";
+    // 	throw std::invalid_argument(e.str().c_str());
+    //   }
+    // else
+    //   {
+    // 	addressStr = argsStr.substr(0, pos);
+    // 	valueStr = argsStr.substr(pos + 1);
+
+    // 	if(valueStr.find(command::argDelim) != std::string::npos)
+    // 	  {
+    // 	    std::cout<<"valueStr.find(command::argDelim) = "<<valueStr.find(command::argDelim)
+    // 		     <<", valueStr = "<<valueStr<<'\n';
+    // 	    e<<"More then two arguments or trailing space detected";
+    // 	    throw std::invalid_argument(e.str().c_str());
+    // 	  }
+
+    // 	std::cout<<"addressStr = "<<addressStr<<", valueStr = "<<valueStr<<'\n';
+
+    // 	if(addressStr.size() == 0)
+    // 	  {
+    // 	    e<<"no arguments detected";
+    // 	    throw std::invalid_argument(e.str().c_str());
+    // 	  }
+    // 	else
+    // 	  {
+    // 	    if(valueStr.size() == 0)
+    // 	      {
+    // 		e<<"only one argument detected";
+    // 		throw std::invalid_argument(e.str().c_str());
+    // 	      }
+    // 	    else
+    // 	      {
+    // 		if((valueStr.size() + addressStr.size()) == argsStr.size())
+    // 		  {
+    // 		    checkStrNumber(addressStr, address, size_t(0),
+    // 				   memory::memSize, pPos);
+    // 		    checkStrNumber(valueStr, value, size_t(0),
+    // 				   memory::minimumAddressableUnitMax, pPos);
+    // 		    memory::mem[address] = value;
+    // 		  }
+    // 		else
+    // 		  {
+    // 		    e<<"more then two arguments detected";
+    // 		    throw std::invalid_argument(e.str().c_str());
+    // 		  }
+    // 	      }
+    // 	  }
+    //   }

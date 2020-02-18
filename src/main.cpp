@@ -155,7 +155,7 @@ void handleAlterMemory(const std::string command)
 	pos = command.find("a ") + command::argumentsPrefixLen;
       else
 	pos = command.find("A ") + command::argumentsPrefixLen;
-      alterMemory(command.substr(pos));
+      alterMemory(std::stringstream {command.substr(pos)});
     }
   else
     {

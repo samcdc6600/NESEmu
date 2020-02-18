@@ -1,10 +1,7 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * GENERAL ======================================================================
-	 - Fix issue with ambiguous from "checkStrNumber()", this is somewhat
-	   related to the next item.
-	- Change command handling code to use tokens and allow arbitrary white
-	  space (we think it is okay right now, but it's a little ridgid.)
+	- Fix problems when compiling with g++!
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
 	  can take advantge of pretty colours to help distinguish things.
 
@@ -16,7 +13,6 @@
 	  new .cpp file for the function bodies from "instructions.hpp". Think
 	  about wheather this extra complixity is worth it.
 	- Finish "plp_28()".
-	- Update comment for "checkStrUnsignedNumber()".
 	- Implement instructions.
 
 
