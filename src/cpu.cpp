@@ -32,7 +32,7 @@ namespace architecturalState
      requires that as the starting point and this namespaces scope is restricted
      to this file. (The initial value of PC should be changed once we finish
      implementing the CPU.) */
-  memory::address PC {0x03f6};		// Program Counter
+  memory::address PC {0x0400};		// Program Counter
   //  memory::address PC {0x400};		// Program Counter
   unsigned char S {};		// Stack Pointer
   constexpr memory::address stackBase {0x100}; // Base address of stack

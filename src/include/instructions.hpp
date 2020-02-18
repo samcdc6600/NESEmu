@@ -115,12 +115,7 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
   bool ret {false};
   const memory::address pageNum {memory::address(architecturalState::PC %
 						 memory::pageSize)};
-
-  std::cout<<"architecturalState::PC = "<<architecturalState::PC
-	   <<", signed((signed char)get8BitImmediate()) = "
-	   <<signed((signed char)get8BitImmediate())
-	   <<", architecturalState::PC += (signed char)get8BitImmediate() = "
-	   <<(architecturalState::PC + (signed char)get8BitImmediate())<<'\n';
+  
   architecturalState::PC += (signed char)get8BitImmediate();
   
   if(pageNum != (architecturalState::PC % memory::pageSize))
@@ -224,8 +219,7 @@ inline void bne_d0()
 {
   if(architecturalState::status.u.Z == 0)
     branchTaken();
-  else
-    architecturalState::PC += 2;
+  architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
 }
 
