@@ -56,6 +56,9 @@ bool loadFileProper(const std::string & path, unsigned char buff [],
 
 
 #ifdef DEBUG // ================ DEBUG FUNCTIONS ===============================
+constexpr size_t defaultCallCount {0};
+
+
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [],
 			 const size_t s)
 {
@@ -67,29 +70,21 @@ void printBufferAsMemory(const memory::minimumAddressableUnit buff [],
 }
 
 
-void printMemeory(const std::string addressStr)
+void printMemeory(std::stringstream argsSS)
 {		     // We expect addressStr to be in base addressBase
   memory::address address {};
-  size_t pos {};
-  size_t * pPos {&pos};
+  std::stringstream e {};
+
   try
     {
-      //      checkStrNumber(addressStr, address, size_t(0), memory::memSize, pPos);
-      if(addressStr[*pPos] == '\0')
-	{
-	  std::cout<<std::hex<<memory::address(memory::mem[address])<<'\n';
-	}
-      else
-	{
-	  std::stringstream e {};
-	  e<<"more then one argument and or trailing space detected";
-	  throw std::invalid_argument(e.str().c_str());
-	}
+      getNumbersFromStr(argsSS, defaultCallCount, address);
+      checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize));
+      std::cout<<std::hex<<memory::address(memory::mem[address])<<'\n';
     }
   catch(const std::exception & e)
     {
       std::cerr<<"Error: processing print command and converting address (\""
-	       <<addressStr<<"\") to type (\""<<typeid(memory::address).name()
+	       <<argsSS.str()<<"\") to type (\""<<typeid(memory::address).name()
 	       <<"\"), recived exception \""<<e.what()<<".\"\n";
     }
 }
@@ -99,14 +94,15 @@ void alterMemory(std::stringstream argsSS)
 {
   memory::address address {};
   memory::minimumAddressableUnit value {};
-
   std::stringstream e {};
+  
   try
     {
-      getNumbersFromStr(argsSS, 0, address, value);
-      checkIntRanges(0, numRange(address, size_t(0), memory::memSize),
-		     numRange(value, size_t(0),
+      getNumbersFromStr(argsSS, defaultCallCount, address, value);
+      checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize),
+		     numRange(value, 0,
 			      memory::minimumAddressableUnitMax +1));
+      memory::mem[address] = value;
     }
   catch(const std::exception & e)
     {

@@ -131,7 +131,7 @@ void handlePrintCommand(const std::string command)
 	  pos = command.find("p ") + command::argumentsPrefixLen;
 	else
 	  pos = command.find("P ") + command::argumentsPrefixLen;
-	printMemeory(command.substr(pos));
+	printMemeory(std::stringstream {command.substr(pos)});
       }
     else
       {

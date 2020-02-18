@@ -70,7 +70,7 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 // Where s is the size of the buffer in bytes.
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);
 // Print minimumAddressableUnitSize bit of memory starting at addressStr.
-void printMemeory(const std::string addressStr);
+void printMemeory(std::stringstream argsSS);
 // Set memory at addressStr equal to x.
 void alterMemory(std::stringstream argsSS);
 
@@ -128,7 +128,8 @@ inline void getNumbersFromStr(std::stringstream & str, size_t callCount)
   str>>s;
   if(!s.empty())
     {
-      e<<"too many ("<<callCount<<" or more) arguments detected";
+      e<<"too many ("<<callCount<<" or more) arguments detected, or arguments "
+	"malformed";
       throw std::invalid_argument(e.str().c_str());
     }
 }
@@ -164,7 +165,8 @@ void getNumbersFromStr(std::stringstream & str, size_t callCount, T & retNumber,
     {
       if(str.eof())
 	{
-	  e<<"too few arguments read "<<(callCount -1)<<" arguments";
+	  e<<"too few arguments read "<<(callCount -1)<<" arguments, or "
+	    "arguments too long";
 	  throw std::invalid_argument(e.str().c_str());
 	}
       else
