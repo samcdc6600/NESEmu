@@ -23,7 +23,7 @@ inline memory::address get16BitImmediate();
 inline void storeAbsoluteThis(const memory::minimumAddressableUnit var);
 inline void loadPCFrom16BitImmediate();
 // Return true if we have crossed a page boundry
-inline bool loadPCLowAndCheckPageBoundryTransition();
+inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 inline void branchTaken();
 inline memory::minimumAddressableUnit pullFromStack();
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
@@ -92,9 +92,9 @@ inline memory::minimumAddressableUnit get8BitImmediate()
 
 inline memory::address get16BitImmediate()
 {
-   return (memory::address(memory::mem[architecturalState::PC + 1])
+   return (memory::address(memory::mem[architecturalState::PC + 2])
 			  << memory::minimumAddressableUnitSize) |
-     memory::address(memory::mem[architecturalState::PC + 2]);
+     memory::address(memory::mem[architecturalState::PC + 1]);
 }
 
 
@@ -110,13 +110,18 @@ inline void loadPCFrom16BitImmediate()
 }
 
 
-inline bool loadPCLowAndCheckPageBoundryTransition()
+inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
 {  
   bool ret {false};
   const memory::address pageNum {memory::address(architecturalState::PC %
 						 memory::pageSize)};
-  architecturalState::PC = (architecturalState::PC & memory::maskAddressHigh) |
-    get8BitImmediate();
+
+  std::cout<<"architecturalState::PC = "<<architecturalState::PC
+	   <<", signed((signed char)get8BitImmediate()) = "
+	   <<signed((signed char)get8BitImmediate())
+	   <<", architecturalState::PC += (signed char)get8BitImmediate() = "
+	   <<(architecturalState::PC + (signed char)get8BitImmediate())<<'\n';
+  architecturalState::PC += (signed char)get8BitImmediate();
   
   if(pageNum != (architecturalState::PC % memory::pageSize))
     ret = true;
@@ -126,7 +131,7 @@ inline bool loadPCLowAndCheckPageBoundryTransition()
 
 inline void branchTaken()
 {
-  if(loadPCLowAndCheckPageBoundryTransition())
+  if(add8BitImmediateToPCAndCheckPageBoundryTransition())
     architecturalState::cycles += 1;
   architecturalState::cycles += 1;
 }
@@ -134,17 +139,13 @@ inline void branchTaken()
 
 inline memory::minimumAddressableUnit pullFromStack()
 {
-  std::cout<<"architecturalState::stackBase | architecturalState::S = "
-	   <<(architecturalState::stackBase | architecturalState::S)<<'\n';
   return get8BitAtAddress(architecturalState::stackBase |
-			  architecturalState::S--); // We are not sure if S-- is corrent here.
+			  architecturalState::S--);
 }
 
 
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 {
-  std::cout<<"a = "<<a<<'\n';
-  std::cout<<"memory::mem[a] = "<<unsigned(memory::mem[a])<<'\n';
   return memory::mem[a];
 }
 
@@ -158,7 +159,6 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
-  std::cout<<std::hex<<"pullFromStack(); = "<<int(pullFromStack())<<std::endl;
   architecturalState::status.flags = pullFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
@@ -167,9 +167,7 @@ inline void plp_28()
 
 inline void jmp_4c()
 {
-  std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   loadPCFrom16BitImmediate();
-    std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   architecturalState::cycles += 3;
 }
 
