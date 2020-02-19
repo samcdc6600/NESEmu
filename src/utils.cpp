@@ -77,7 +77,7 @@ void printMemeory(std::stringstream argsSS)
 
   try
     {
-      getNumbersFromStr(argsSS, defaultCallCount, address);
+      getNumbersFromStrInHex(argsSS, defaultCallCount, address);
       checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize));
       std::cout<<std::hex<<memory::address(memory::mem[address])<<'\n';
     }
@@ -98,7 +98,7 @@ void alterMemory(std::stringstream argsSS)
   
   try
     {
-      getNumbersFromStr(argsSS, defaultCallCount, address, value);
+      getNumbersFromStrInHex(argsSS, defaultCallCount, address, value);
       checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize),
 		     numRange(value, 0,
 			      memory::minimumAddressableUnitMax +1));

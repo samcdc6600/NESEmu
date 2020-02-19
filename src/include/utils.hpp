@@ -120,7 +120,7 @@ template <typename T> void checkForCharNumRange(size_t number,
 }
 
 
-inline void getNumbersFromStr(std::stringstream & str, size_t callCount)
+inline void getNumbersFromStrInHex(std::stringstream & str, size_t callCount)
 {
   callCount++;
   std::stringstream e {};
@@ -140,7 +140,7 @@ inline void getNumbersFromStr(std::stringstream & str, size_t callCount)
    the number cannot be read) or too many numbers in str. Note that the argument
    callCount should generally be 0 unless you are doing something wired. */
 template <typename T, typename ... Args>
-void getNumbersFromStr(std::stringstream & str, size_t callCount, T & retNumber,
+void getNumbersFromStrInHex(std::stringstream & str, size_t callCount, T & retNumber,
 		       Args & ... args) // requires std::is_integral<T>::value
 {
   std::stringstream e {};
@@ -177,7 +177,7 @@ void getNumbersFromStr(std::stringstream & str, size_t callCount, T & retNumber,
     }
   else
     {
-      getNumbersFromStr(str, callCount, args...);
+      getNumbersFromStrInHex(str, callCount, args...);
     }
 }
 
