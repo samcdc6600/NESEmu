@@ -20,6 +20,10 @@ void initialise(const int argc, const char * argv[]);
 bool handleDebugCommand(const char * argv[], bool & next, bool & run,
 			std::vector<memory::address> & breakpoints);
 void handlePrintCommand(const std::string command);
+/* Returns false if a command (command) of the form "C X ... ", has a malformed
+   initial command sequence (that is to say that it checks the commands 
+   delimiter position and its (the command) size.) */
+bool checkCommandWithArgsConstraint(const std::string command);
 void handleAlterMemoryCommand(const std::string command);
 void handleBreakCommand(const std::string command,
 			std::vector<memory::address> & breakpoints);
@@ -112,40 +116,40 @@ bool handleDebugCommand(const char * argv[], bool & next, bool & run,
     {
       switch(command[command::cmdIndex])
 	{
-	case 'p':
-	case 'P':
+	case command::printCmd:
+	case command::printCmdUpper:
 	  handlePrintCommand(command);
 	  break;
-	case 'a':
-	case 'A':
+	case command::alterCmd:
+	case command::alterCmdUpper:
 	  handleAlterMemoryCommand(command);
 	  break;
-	case 'n':
-	case 'N':
+	case command::nextCmd:
+	case command::nextCmdUpper:
 	  next = true;
 	  break;
-	case 'b':
-	case 'B':
+	case command::breakpointCmd:
+	case command::breakpointCmdUpper:
 	  handleBreakCommand(command, breakpoints);
 	  break;
-	case 'l':
-	case 'L':
+	case command::listCmd:
+	case command::listCmdUpper:
 	  handleListCommand(command);
 	  break;
-	case 'r':
-	case 'R':
+	case command::runCmd:
+	case command::runCmdUpper:
 	  handleListRunCommand(command, run);
 	  break;
-	case 'f':
-	case 'F':
+	case command::fiddleCmd:
+	case command::fiddleCmdUpper:
 	  handleListFiddleCommand(command);
 	  break;
-	case 'q':
-	case 'Q':
+	case command::quitCmd:
+	case command::quitCmdUpper:
 	  ret = false;
 	  break;
-	case 'h':
-	case 'H':
+	case command::helpCmd:
+	case command::helpCmdUpper:
 	default:
 	  handlePrintHelpCommand(argv, command);
 	}
@@ -162,8 +166,7 @@ void handlePrintCommand(const std::string command)
 {
   {
     size_t pos {};
-    if(command.size() > command::argumentsPrefixLen &&
-       command[command::postCmdIndex] == command::argDelim)
+    if(checkCommandWithArgsConstraint(command))
       {
 	if(command[command::cmdIndex] == 'p')
 	  pos = command.find("p ") + command::argumentsPrefixLen;
@@ -183,11 +186,19 @@ void handlePrintCommand(const std::string command)
 }
 
 
+bool checkCommandWithArgsConstraint(const std::string command)
+{
+  if(command.size() > command::argumentsPrefixLen &&
+     command[command::postCmdIndex] == command::argDelim)
+    return true;
+  return false;
+}
+
+
 void handleAlterMemoryCommand(const std::string command)
 {
   size_t pos {};
-  if(command.size() > command::argumentsPrefixLen &&
-     command[command::postCmdIndex] == command::argDelim)
+  if(checkCommandWithArgsConstraint(command))
     {
       if(command[command::cmdIndex] == 'a')
 	pos = command.find("a ") + command::argumentsPrefixLen;
@@ -197,7 +208,7 @@ void handleAlterMemoryCommand(const std::string command)
     }
   else
     {
-      if(command[command::postCmdIndex] != ' ')
+      if(command[command::postCmdIndex] != command::argDelim)
 	std::cerr<<"Error: malformed alter command (\""<<command
 		 <<"\") encountered.\n";
       else
@@ -209,6 +220,23 @@ void handleAlterMemoryCommand(const std::string command)
 void handleBreakCommand(const std::string command,
 			std::vector<memory::address> & breakpoints)
 {
+  size_t pos {};
+  if(checkCommandWithArgsConstraint(command))
+    {
+      if(command[command::cmdIndex] == 'a')
+	pos = command.find("p ") + command::argumentsPrefixLen;
+      else
+	pos = command.find("P ") + command::argumentsPrefixLen;
+      alterMemory(std::stringstream {command.substr(pos)});
+    }
+  else
+    {
+      if(command[command::postCmdIndex] != command::argDelim)
+	std::cerr<<"Error: malformed alter command (\""<<command
+		 <<"\") encountered.\n";
+      else
+	std::cerr<<"Error: arguments missing from alter command.\n";
+    }
 }
 
 
@@ -231,43 +259,69 @@ void handleListFiddleCommand(const std::string command)
 
 
 void handlePrintHelpCommand(const char * argv[], const std::string command)
-{
+{ /* We don't know how to escape '\n' when it's a char in the stream. So '\n'
+     for the "next" command will have to be changed manually if
+     "command::alterCmd" is changed. */
   /* This is definitly the sickest and best way to write out this output
      statment! */
-  if(command[command::cmdIndex] != 'h' && command[command::cmdIndex] != 'H')
+  if(command[command::cmdIndex] != command::helpCmd &&
+     command[command::cmdIndex] != command::helpCmdUpper)
     std::cerr<<"Invalid command (\""<<command<<"\") entered: ";
-  std::cerr<<"Please enter one of the following:\n\th\t\t: where \"h\" stands "
-    "for \"help\" and will print this \n\t\t\t  message. Note that \"H\" is "
-    "also accepted.\n\tp X\t\t: where \"p\" stands for \"print\" and \"X\" is "
-    "an address in\n\t\t\t  hex in the range ["<<0<<", "<<memory::memSize<<"). "
-    "Note that \"P\" is also\n\t\t\t  accepted.\n\ta X Y\t\t: Where \"a\" "
+  std::cerr<<"Please enter one of the following:\n\t"<<command::helpCmd<<"\t\t:"
+    " where \""<<command::helpCmd<<"\" stands for \"help\" and will print this "
+    "\n\t\t\t  message. Note that \""<<command::helpCmdUpper<<"\" is also "
+    "accepted.\n\t"<<command::printCmd<<" X\t\t: where \""<<command::printCmd
+	   <<"\" stands for \"print\" and \"X\" is an address in\n\t\t\t  hex "
+    "in the range ["<<0<<", "<<memory::memSize<<"). Note that \""
+	   <<command::printCmdUpper<<"\" is also\n\t\t\t  accepted.\n\t"
+	   <<command::alterCmd<<" X Y\t\t: Where \""<<command::alterCmd<<"\" "
     "stands for \"alter\", \"X\" is an address in hex\n\t\t\t  in the range ["
 	   <<0<<", "<<memory::memSize<<"), \"y\" is the value in hex that\n\t\t"
     "\t  the memory at X will be set to. Note that Y should be\n\t\t\t  an "
-	   <<memory::minimumAddressableUnitSize<<"-bit number and A is also "
-    "accepted.\n\tn\t\t: where \"n\" stands for \"next\". This will cause the "
-    "next\n\t\t\t  instruction to be executed. Note that \"N\" and \"\\n\" are"
-    "\n\t\t\t  also accepted.\n\tb X\t\t: where \"b\" stands for \"breakpoint\""
-    " and \"X\" is an\n\t\t\t  address in hex in the range ["<<0<<", "
-	   <<memory::memSize<<"). Multiple\n\t\t\t  breakpoints can be set. "
-    "Breakpoints can be unset by\n\t\t\t  issuing the very same command used to"
-    " set the\n\t\t\t  breakpoint. Note that \"B\" is also accepted.\n\tl {b | "
-    "X Z}\t: where \"l\" stands for \"list\", \"b\" stands for \n\t\t\t  \""
+	   <<memory::minimumAddressableUnitSize<<"-bit number and "
+	   <<command::alterCmdUpper<<" is also accepted.\n\t"<<command::nextCmd
+	   <<"\t\t: where \""<<command::nextCmd<<"\" stands for \"next\". This "
+    "will cause the next\n\t\t\t  instruction to be executed. Note that \""
+	   <<command::nextCmdUpper<<"\" and \"\\n\" are\n\t\t\t  also accepted."
+    "\n\t"<<command::breakpointCmd<<" X\t\t: where \""
+	   <<command::breakpointCmd<<"\" stands for \"breakpoint\" and \"X\" is"
+    " an\n\t\t\t  address in hex in the range ["<<0<<", "<<memory::memSize
+	   <<"). Multiple\n\t\t\t  breakpoints can be set. Breakpoints can be "
+    "unset by\n\t\t\t  issuing the very same command used to set the\n\t\t\t  "
+    "breakpoint. Note that \""<<command::breakpointCmdUpper<<"\" is also "
+    "accepted.\n\t"<<command::listCmd<<" {"<<command::listArgs::breakpoint<<" |"
+    " X Z}\t: where \""<<command::listCmd<<"\" stands for \"list\", \""
+	   <<command::listArgs::breakpoint<<"\" stands for \n\t\t\t  \""
     "breakpoints\" and both \"X\" and \"Z\" are addresses.\n\t\t\t  Giving the "
-    "list command the argument b will cause it\n\t\t\t  to list all breakpoints"
-    " and giving it addresses X and\n\t\t\t  Y as it's arguments will cause it "
-    "to list out the\n\t\t\t  contents of memory in the range [X, Y].\n\tr\t\t:"
-    " where \"r\" stands for \"run\". This will cause "<<argv[startCmd::binName]
-	   <<"\n\t\t\t  to execute instructions untill the PC is equal to a\n\t"
-    "\t\t  breakpoint (if there are no breakpoints set then\n\t\t\t  execution "
-    "will not stop.) Note that \"R\" is also\n\t\t\t  accepted.\n\tf X Y\t\t: "
-    "where \"f\" stands for \"fiddle with architectural\n\t\t\t  state\", \"X\""
-    " is one of {a | x | y | pc | s | f | c}\n\t\t\t  (where a stands for \""
-    "accumulator\", x stands for \"X\", y\n\t\t\t stands for \"Y\", pc stands for \"program counter\", s stands for \"stack pointer\""
-    " f stands for \"flags\" or \"status\" and c stands for \"cycles\") and Y is the value to be assigned to X. Note that \"F\" is also accepted. \n\tq\t\t: where"
-    " \"q\" stands for \"quit\" and cause "<<argv[startCmd::binName]<<" to\n\t\t\t  hault "
-    "instruction execution and exit. Note that \"Q\" is\n\t\t\t  also "
-    "accepted.\n";
+    "list command the argument "<<command::listArgs::breakpoint<<" will cause "
+    "it\n\t\t\t  to list all breakpoints and giving it addresses X and\n\t\t\t "
+    " Y as it's arguments will cause it to list out the\n\t\t\t  contents of "
+    "memory in the range [X, Y]. Note that "<<command::listCmdUpper<<"\n\t\t\t "
+    " is also accepted.\n\t"<<command::runCmd<<"\t\t: where \""
+	   <<command::runCmd<<"\" stands for \"run\". This will cause "
+	   <<argv[startCmd::binName]<<"\n\t\t\t  to execute instructions untill"
+    " the PC is equal to a\n\t\t\t  breakpoint (if there are no breakpoints set"
+    " then\n\t\t\t  execution will not stop.) Note that \""
+	   <<command::runCmdUpper<<"\" is also\n\t\t\t  accepted.\n\t"
+	   <<command::fiddleCmd<<" X Y\t\t: where \""<<command::fiddleCmd<<"\" "
+    "stands for \"fiddle with architectural\n\t\t\t  state\", \"X\" is one of {"
+	   <<command::fiddleArgs::accumulator<<" | "<<command::fiddleArgs::X
+	   <<" | "<<command::fiddleArgs::Y<<" | "<<command::fiddleArgs::PC
+	   <<" | "<<command::fiddleArgs::stack<<" | "
+	   <<command::fiddleArgs::status<<" | "<<command::fiddleArgs::cycles
+	   <<"}\n\t\t\t  (where a stands for \"accumulator\", "
+	   <<command::fiddleArgs::X<<" stands for \"X\", "
+	   <<command::fiddleArgs::Y<<"\n\t\t\t  stands for \"Y\", "
+	   <<command::fiddleArgs::PC<<" stands for \"program counter\", "
+	   <<command::fiddleArgs::stack<<"\n\t\t\t  stands for \"stack pointer"
+    "\" "<<command::fiddleArgs::status<<" stands for \"flags\" aka\n\t\t\t  \""
+    "status\" and "<<command::fiddleArgs::cycles<<" stands for \"cycles\") and "
+    "Y is the value\n\t\t\t  to be assigned to X. Note that \""
+	   <<command::fiddleCmdUpper<<"\" is also accepted.\n\t"
+	   <<command::quitCmd<<"\t\t: where \""<<command::quitCmd<<"\" stands "
+    "for \"quit\" and cause "<<argv[startCmd::binName]<<" to\n\t\t\t  hault "
+    "instruction execution and exit. Note that \""<<command::quitCmdUpper
+	   <<"\" is\n\t\t\t  also accepted.\n";
 }
 
 

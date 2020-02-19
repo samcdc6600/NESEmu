@@ -2,7 +2,6 @@
 #include <sstream>
 #include <bitset>
 #include "include/cpu.hpp"
-#include "include/mem.hpp"
 #include "include/utils.hpp"
 
 /*
@@ -113,7 +112,6 @@ namespace mnemonics
 
 bool dispatchInstruction();
 #ifdef DEBUG
-memory::address getCurrentPC();
 void printArchitecturalState();
 void debugDispatchInstruction();
 #endif

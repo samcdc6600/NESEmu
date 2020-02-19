@@ -47,6 +47,7 @@ namespace masks
 }
 
 
+#ifdef DEBUG
 namespace command
 {	     // For "command" in "handleDebugCommand()" and callee's.
   constexpr char argDelim {' '};	// Command argument delimiter
@@ -58,7 +59,41 @@ namespace command
   constexpr size_t cmdIndex {0};
   // Index of character after command code.
   constexpr size_t postCmdIndex {1};
+  constexpr char printCmd		{'p'};
+  constexpr char printCmdUpper		{'P'};
+  constexpr char alterCmd		{'a'};
+  constexpr char alterCmdUpper		{'A'};
+  constexpr char nextCmd		{'n'};
+  constexpr char nextCmdUpper		{'N'};
+  constexpr char nextAlt		{'\n'};
+  constexpr char breakpointCmd		{'b'};
+  constexpr char breakpointCmdUpper	{'B'};
+  constexpr char listCmd		{'l'};
+  constexpr char listCmdUpper		{'L'};
+  namespace listArgs
+  {
+    constexpr char breakpoint			{'b'};
+  }
+  constexpr char runCmd			{'r'};
+  constexpr char runCmdUpper		{'R'};
+  constexpr char fiddleCmd		{'f'};
+  constexpr char fiddleCmdUpper		{'F'};
+  namespace fiddleArgs
+  {
+    constexpr char accumulator			{'a'};
+    constexpr char X				{'x'};
+    constexpr char Y				{'y'};
+    constexpr char PC				{'p'};
+    constexpr char stack			{'s'};
+    constexpr char status			{'f'}; // aka flags
+    constexpr char cycles			{'c'};
+  }
+  constexpr char quitCmd		{'q'};
+  constexpr char quitCmdUpper		{'Q'};
+  constexpr char helpCmd		{'h'};
+  constexpr char helpCmdUpper		{'H'};
 }
+#endif
 
 
 // Used when we want to decide what to do if we cannot open path.
@@ -70,7 +105,6 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 	      const std::string & errorContext);
 
 #ifdef DEBUG //================= DEBUG FUNCTIONS ===============================
-memory::address getCurrentPC();
 // Used to print values in buff in hex with address indexes starting at 0.
 // Where s is the size of the buffer in bytes.
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);
