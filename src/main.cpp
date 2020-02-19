@@ -24,12 +24,19 @@ void handlePrintCommand(const std::string command);
    initial command sequence (that is to say that it checks the commands 
    delimiter position and its (the command) size.) */
 bool checkCommandWithArgsConstraint(const std::string command);
+/* Returns position after the delim which is after "cmdSearchingFor" in
+   "cmdInput" (assuming cmdSearchingFor is in cmdInput at all.) */
+inline size_t getPosAfterDelimAfterCommand(const std::string cmdInput,
+					   const char cmdSearchingFor);
+// Does what it says on the tin.
+inline std::string addDelimToArg(const SuperString str);
 void handleAlterMemoryCommand(const std::string command);
 void handleBreakCommand(const std::string command,
 			std::vector<memory::address> & breakpoints);
-void handleListCommand(const std::string command);
-void handleListRunCommand(const std::string command, bool & run);
-void handleListFiddleCommand(const std::string command);
+void handleListCommand(const std::string command,
+		       std::vector<memory::address> & breakpoints);
+void handleRunCommand(const std::string command, bool & run);
+void handleFiddleCommand(const std::string command);
 // Command.size() should be > 0
 void handlePrintHelpCommand(const char * argv[], const std::string command);
 #endif
@@ -134,15 +141,15 @@ bool handleDebugCommand(const char * argv[], bool & next, bool & run,
 	  break;
 	case command::listCmd:
 	case command::listCmdUpper:
-	  handleListCommand(command);
+	  handleListCommand(command, breakpoints);
 	  break;
 	case command::runCmd:
 	case command::runCmdUpper:
-	  handleListRunCommand(command, run);
+	  handleRunCommand(command, run);
 	  break;
 	case command::fiddleCmd:
 	case command::fiddleCmdUpper:
-	  handleListFiddleCommand(command);
+	  handleFiddleCommand(command);
 	  break;
 	case command::quitCmd:
 	case command::quitCmdUpper:
@@ -168,10 +175,10 @@ void handlePrintCommand(const std::string command)
     size_t pos {};
     if(checkCommandWithArgsConstraint(command))
       {
-	if(command[command::cmdIndex] == 'p')
-	  pos = command.find("p ") + command::argumentsPrefixLen;
+	if(command[command::cmdIndex] == command::printCmd)
+	  pos = getPosAfterDelimAfterCommand(command, command::printCmd);
 	else
-	  pos = command.find("P ") + command::argumentsPrefixLen;
+	  pos = getPosAfterDelimAfterCommand(command, command::printCmdUpper);
 	printMemeory(std::stringstream {command.substr(pos)});
       }
     else
@@ -186,7 +193,7 @@ void handlePrintCommand(const std::string command)
 }
 
 
-bool checkCommandWithArgsConstraint(const std::string command)
+inline bool checkCommandWithArgsConstraint(const std::string command)
 {
   if(command.size() > command::argumentsPrefixLen &&
      command[command::postCmdIndex] == command::argDelim)
@@ -195,15 +202,29 @@ bool checkCommandWithArgsConstraint(const std::string command)
 }
 
 
+inline size_t getPosAfterDelimAfterCommand(const std::string cmdInput,
+					   const char cmdSearchingFor)
+{
+  return cmdInput.find(addDelimToArg(cmdSearchingFor)) +
+    command::argumentsPrefixLen;
+}
+
+
+inline std::string addDelimToArg(const SuperString str)
+{
+  return str + command::argDelim;
+}
+
+
 void handleAlterMemoryCommand(const std::string command)
 {
   size_t pos {};
   if(checkCommandWithArgsConstraint(command))
     {
-      if(command[command::cmdIndex] == 'a')
-	pos = command.find("a ") + command::argumentsPrefixLen;
+      if(command[command::cmdIndex] == command::alterCmd)
+	pos = getPosAfterDelimAfterCommand(command, command::alterCmd);
       else
-	pos = command.find("A ") + command::argumentsPrefixLen;
+	pos = getPosAfterDelimAfterCommand(command, command::alterCmdUpper);
       alterMemory(std::stringstream {command.substr(pos)});
     }
   else
@@ -223,36 +244,58 @@ void handleBreakCommand(const std::string command,
   size_t pos {};
   if(checkCommandWithArgsConstraint(command))
     {
-      if(command[command::cmdIndex] == 'a')
-	pos = command.find("p ") + command::argumentsPrefixLen;
+      if(command[command::cmdIndex] == command::breakpointCmd)
+	pos = getPosAfterDelimAfterCommand(command, command::breakpointCmd);
       else
-	pos = command.find("P ") + command::argumentsPrefixLen;
-      alterMemory(std::stringstream {command.substr(pos)});
+	pos = getPosAfterDelimAfterCommand(command,
+					   command::breakpointCmdUpper);
+      setBreakpoint(std::stringstream {command.substr(pos)}, breakpoints);
     }
   else
     {
       if(command[command::postCmdIndex] != command::argDelim)
-	std::cerr<<"Error: malformed alter command (\""<<command
+	std::cerr<<"Error: malformed set breakpoint command (\""<<command
 		 <<"\") encountered.\n";
       else
-	std::cerr<<"Error: arguments missing from alter command.\n";
+	std::cerr<<"Error: arguments missing from set breakpoint command.\n";
     }
 }
 
 
-void handleListCommand(const std::string command)
+void handleListCommand(const std::string command,
+		       std::vector<memory::address> & breakpoints)
+{
+  size_t pos {};
+  if(checkCommandWithArgsConstraint(command))
+    {
+      if(command[command::cmdIndex] == command::listCmd)
+	pos = getPosAfterDelimAfterCommand(command, command::listCmd);
+      else
+	pos = getPosAfterDelimAfterCommand(command, command::listCmdUpper);
+
+      if(command[pos] == command::listArgs::breakpoint)
+	listBreakpoints(breakpoints);
+      else
+	listMemory(std::stringstream {command});
+    }
+  else
+    {
+      if(command[command::postCmdIndex] != command::argDelim)
+	std::cerr<<"Error: malformed list command (\""<<command
+		 <<"\") encountered.\n";
+      else
+	std::cerr<<"Error: arguments missing from list command.\n";
+    }
+}
+
+
+void handleRunCommand(const std::string command, bool & run)
 {
   std::cerr<<"Command not yet implemented!\n";
 }
 
 
-void handleListRunCommand(const std::string command, bool & run)
-{
-  std::cerr<<"Command not yet implemented!\n";
-}
-
-
-void handleListFiddleCommand(const std::string command)
+void handleFiddleCommand(const std::string command)
 {
   std::cerr<<"Command not yet implemented!\n";
 }
@@ -295,8 +338,8 @@ void handlePrintHelpCommand(const char * argv[], const std::string command)
     "breakpoints\" and both \"X\" and \"Z\" are addresses.\n\t\t\t  Giving the "
     "list command the argument "<<command::listArgs::breakpoint<<" will cause "
     "it\n\t\t\t  to list all breakpoints and giving it addresses X and\n\t\t\t "
-    " Y as it's arguments will cause it to list out the\n\t\t\t  contents of "
-    "memory in the range [X, Y]. Note that "<<command::listCmdUpper<<"\n\t\t\t "
+    " Z as it's arguments will cause it to list out the\n\t\t\t  contents of "
+    "memory in the range [X, Z]. Note that "<<command::listCmdUpper<<"\n\t\t\t "
     " is also accepted.\n\t"<<command::runCmd<<"\t\t: where \""
 	   <<command::runCmd<<"\" stands for \"run\". This will cause "
 	   <<argv[startCmd::binName]<<"\n\t\t\t  to execute instructions untill"

@@ -7,6 +7,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "mem.hpp"
 
 
@@ -96,6 +97,14 @@ namespace command
 #endif
 
 
+class SuperString: public std::string
+{   // String class but we can initialize the class with a single char.
+public:
+  SuperString(const char c): std::string(std::string{c})
+  {}
+};
+
+
 // Used when we want to decide what to do if we cannot open path.
 // Where s is the size of buff in bytes.
 bool loadFile(const std::string & path, unsigned char buff [], const size_t s);
@@ -108,10 +117,20 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 // Used to print values in buff in hex with address indexes starting at 0.
 // Where s is the size of the buffer in bytes.
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);
-// Print minimumAddressableUnitSize bit of memory starting at addressStr.
+/* Print minimumAddressableUnitSize bit of memory starting at addressStr. That
+   is if argsSS is well-formed, otherwise print error message.*/
 void printMemeory(std::stringstream argsSS);
-// Set memory at addressStr equal to x.
+/* Set memory at addressStr equal to x. That is if argsSS is well-formed,
+   otherwise print error message. */
 void alterMemory(std::stringstream argsSS);
+/* Add breakpoint at address in argsSS to breakpoints. That is if argsSS is
+   well-formed, otherwise print error message. */
+void setBreakpoint(std::stringstream argsSS,
+	      std::vector<memory::address> & breakpoints);
+void listBreakpoints(std::vector<memory::address> & breakpoints);
+/* List memory in the range [x, Z], where X and Z come from argsSS. That is if
+argsSS is well-formed, otherwise print error message. */
+void listMemory(std::stringstream argSS);
 
 
 //================= Functions To Extract Numbers From A String =================

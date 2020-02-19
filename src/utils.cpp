@@ -83,9 +83,10 @@ void printMemeory(std::stringstream argsSS)
     }
   catch(const std::exception & e)
     {
-      std::cerr<<"Error: processing print command and converting address (\""
-	       <<argsSS.str()<<"\") to type (\""<<typeid(memory::address).name()
-	       <<"\"), recived exception \""<<e.what()<<".\"\n";
+      std::cerr<<"Error: converting print command argument (\""
+	       <<argsSS.str()<<"\") to integer of type (\""
+	       <<typeid(memory::address).name()<<"\"), recived exception \""
+	       <<e.what()<<".\"\n";
     }
 }
 
@@ -112,6 +113,56 @@ void alterMemory(std::stringstream argsSS)
 	       <<typeid(memory::minimumAddressableUnit).name()<<"\"), recived "
 	"exception \""<<e.what()<<".\"\n";
     }
+}
+
+
+void setBreakpoint(std::stringstream argsSS,
+	      std::vector<memory::address> & breakpoints)
+{
+  memory::address address {};
+  std::stringstream e {};
+
+  try
+    {
+      getNumbersFromStrInHex(argsSS, defaultCallCount, address);
+      checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize));
+
+      bool removed {false};
+      for(auto iter {breakpoints.begin()}; iter != breakpoints.cend(); ++iter)
+	{
+	  if(*iter == address)
+	    {
+	      breakpoints.erase(iter);
+	      removed = true;
+	      break;
+	    }
+	}
+      if(!removed)
+	breakpoints.push_back(address);
+    }
+  catch(const std::exception & e)
+    {
+      std::cerr<<"Error: converting set breakpoint command argument (\""
+	       <<argsSS.str()<<"\") to integer of type (\""
+	       <<typeid(memory::address).name()<<"\"), recived exception \""
+	       <<e.what()<<".\"\n";
+    }
+}
+
+
+void listBreakpoints(std::vector<memory::address> & breakpoints)
+{
+  std::cout<<"The following breakpoints are set:\n";
+  for(auto bp: breakpoints)
+    {
+      std::cout<<'\t'<<bp<<'\n';
+    }
+}
+
+
+void listMemory(std::stringstream argSS)
+{
+  std::cout<<"please implement me!\n";
 }
 
 
