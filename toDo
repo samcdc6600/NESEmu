@@ -8,12 +8,6 @@
 
 
 * CPU ==========================================================================
-	- Think about whether to put the function bodies in "instructions.hpp"
-	  into their own .cpp file and make an extra hader file with the name
-	  spaces and such from the start of "cpu.cpp" to be included into the
-	  new .cpp file for the function bodies from "instructions.hpp". Think
-	  about wheather this extra complixity is worth it.
-	- Finish "plp_28()".
 	- Implement instructions.
 
 

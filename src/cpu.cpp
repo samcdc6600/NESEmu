@@ -959,6 +959,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      ldy_a0();
       break;
     case 0xa1:			// LDA	(d,x)
 #ifdef DEBUG

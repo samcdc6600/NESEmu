@@ -42,6 +42,7 @@ inline void sta_8d();
    to the stack pointer."
    - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
 inline void txs_9a();
+inline void ldy_a0();
 inline void ldx_a2();
 inline void lda_a9();
 inline void dex_ca();
@@ -126,6 +127,11 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
 
 inline void branchTaken()
 {
+  std::cout<<"(signed char)get8BitImmediate() = "
+	   <<(signed )get8BitImmediate()
+	   <<", architecturalState::PC + (signed char)get8BitImmediate() = "
+	   <<architecturalState::PC + (signed char)get8BitImmediate()<<'\n';
+
   if(add8BitImmediateToPCAndCheckPageBoundryTransition())
     architecturalState::cycles += 1;
   architecturalState::cycles += 1;
@@ -181,6 +187,15 @@ inline void txs_9a()
   setZeroFlagOn(architecturalState::X);
   architecturalState::S = architecturalState::X;
   architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+inline void ldy_a0()
+{
+  architecturalState::Y = memory::mem[architecturalState::PC + 1];
+  setNegativeFlagOn(architecturalState::Y);
+  setZeroFlagOn(architecturalState::Y);
+  architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
 
@@ -241,10 +256,9 @@ inline void nop_ea()
 
 inline void beq_f0()
 {
-    if(architecturalState::status.u.Z == 1)
-      branchTaken();
-    else
-      architecturalState::PC += 2;
+  if(architecturalState::status.u.Z == 1)
+    branchTaken();
+  architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
 
