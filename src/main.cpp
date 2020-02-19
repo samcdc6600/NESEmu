@@ -2,10 +2,13 @@
 #include "include/utils.hpp"
 #include "include/cpu.hpp"
 #include "include/mem.hpp"
+#ifdef DEBUG
+#include <vector>
+#endif
 
 
-namespace cmd
-{
+namespace startCmd
+{				// For argv[]
   constexpr size_t binName {0};
   constexpr size_t romPath {1};
 }
@@ -14,11 +17,17 @@ namespace cmd
 void checkArgs(const int argc, const char * argv[]);
 void initialise(const int argc, const char * argv[]);
 #ifdef DEBUG
-bool handleDebugCommand(const char * argv[], bool & next);
+bool handleDebugCommand(const char * argv[], bool & next, bool & run,
+			std::vector<memory::address> & breakpoints);
 void handlePrintCommand(const std::string command);
-void handleAlterMemory(const std::string command);
+void handleAlterMemoryCommand(const std::string command);
+void handleBreakCommand(const std::string command,
+			std::vector<memory::address> & breakpoints);
+void handleListCommand(const std::string command);
+void handleListRunCommand(const std::string command, bool & run);
+void handleListFiddleCommand(const std::string command);
 // Command.size() should be > 0
-void handlePrintHelp(const char * argv[], const std::string command);
+void handlePrintHelpCommand(const char * argv[], const std::string command);
 #endif
 
 
@@ -43,15 +52,27 @@ int main(const int argc, const char * argv[])
 #endif
 
 #ifdef DEBUG
-  bool next {true};		// Always execute the first instruction
+  bool next {false};	       // Don't execute the first instruction.
+  bool run {false};	       // Don't execute the first instruction.
+  memory::address currentPC {};
+  std::vector<memory::address> breakpoints {};
   do
     {
-      if(next)
-	cpu();
+      currentPC = getCurrentPC();
+      if(std::find(breakpoints.begin(), breakpoints.end(), currentPC) ==
+	 breakpoints.end())
+	{			// We haven't reached a breakpoint
+	  if(next || run)
+	    cpu();
+	}
+      else
+	{
+	  run = false;
+	}
       next = false;
       std::cout<<": ";		// Print a prompt...
     }
-  while(handleDebugCommand(argv, next));
+  while(handleDebugCommand(argv, next, run, breakpoints));
   std::cout<<"================================== Goodbye :) =================="
     "================\n";
 #endif
@@ -63,32 +84,33 @@ void checkArgs(const int argc, const char * argv[])
   constexpr size_t minArgs {2}, maxArgs {2};
   if(size_t(argc) < minArgs)
     genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed to"
-	     " ", argv[cmd::binName], " but at least ", minArgs, " required!"
-	     "\n");
+	     " ", argv[startCmd::binName], " but at least ", minArgs,
+	     " required!\n");
   else
     if(size_t(argc) > maxArgs)
       genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed "
-	       "to ", argv[cmd::binName], " but no more than ", maxArgs,
+	       "to ", argv[startCmd::binName], " but no more than ", maxArgs,
 	       " allowed!\n");
 }
 
 
 void initialise(const int argc, const char * argv[])
 {
-  loadFile(std::string{argv[cmd::romPath]}, memory::mem, memory::memSize,
+  loadFile(std::string{argv[startCmd::romPath]}, memory::mem, memory::memSize,
 	   "loading rom file");
 }
 
 
 #ifdef DEBUG
-bool handleDebugCommand(const char * argv[], bool & next)
+bool handleDebugCommand(const char * argv[], bool & next, bool & run,
+			std::vector<memory::address> & breakpoints)
 {
   bool ret {true};
   std::string command {};
   std::getline(std::cin, command);
   if(command.size() != 0)	// We treat no input the same as "n" or "N".
     {
-      switch(command[0])
+      switch(command[command::cmdIndex])
 	{
 	case 'p':
 	case 'P':
@@ -96,11 +118,27 @@ bool handleDebugCommand(const char * argv[], bool & next)
 	  break;
 	case 'a':
 	case 'A':
-	  handleAlterMemory(command);
+	  handleAlterMemoryCommand(command);
 	  break;
 	case 'n':
 	case 'N':
 	  next = true;
+	  break;
+	case 'b':
+	case 'B':
+	  handleBreakCommand(command, breakpoints);
+	  break;
+	case 'l':
+	case 'L':
+	  handleListCommand(command);
+	  break;
+	case 'r':
+	case 'R':
+	  handleListRunCommand(command, run);
+	  break;
+	case 'f':
+	case 'F':
+	  handleListFiddleCommand(command);
 	  break;
 	case 'q':
 	case 'Q':
@@ -109,7 +147,7 @@ bool handleDebugCommand(const char * argv[], bool & next)
 	case 'h':
 	case 'H':
 	default:
-	  handlePrintHelp(argv, command);
+	  handlePrintHelpCommand(argv, command);
 	}
     }
   else
@@ -125,9 +163,9 @@ void handlePrintCommand(const std::string command)
   {
     size_t pos {};
     if(command.size() > command::argumentsPrefixLen &&
-       command[1] == command::argDelim)
+       command[command::postCmdIndex] == command::argDelim)
       {
-	if(command[0] == 'p')
+	if(command[command::cmdIndex] == 'p')
 	  pos = command.find("p ") + command::argumentsPrefixLen;
 	else
 	  pos = command.find("P ") + command::argumentsPrefixLen;
@@ -135,7 +173,7 @@ void handlePrintCommand(const std::string command)
       }
     else
       {
-	if(command[1] != ' ')
+	if(command[command::postCmdIndex] != command::argDelim)
 	  std::cerr<<"Error: malformed print command (\""<<command
 		   <<"\") encountered.\n";
 	else
@@ -145,13 +183,13 @@ void handlePrintCommand(const std::string command)
 }
 
 
-void handleAlterMemory(const std::string command)
+void handleAlterMemoryCommand(const std::string command)
 {
   size_t pos {};
   if(command.size() > command::argumentsPrefixLen &&
-     command[1] == command::argDelim)
+     command[command::postCmdIndex] == command::argDelim)
     {
-      if(command[0] == 'a')
+      if(command[command::cmdIndex] == 'a')
 	pos = command.find("a ") + command::argumentsPrefixLen;
       else
 	pos = command.find("A ") + command::argumentsPrefixLen;
@@ -159,7 +197,7 @@ void handleAlterMemory(const std::string command)
     }
   else
     {
-      if(command[1] != ' ')
+      if(command[command::postCmdIndex] != ' ')
 	std::cerr<<"Error: malformed alter command (\""<<command
 		 <<"\") encountered.\n";
       else
@@ -168,12 +206,35 @@ void handleAlterMemory(const std::string command)
 }
 
 
-void handlePrintHelp(const char * argv[], const std::string command)
+void handleBreakCommand(const std::string command,
+			std::vector<memory::address> & breakpoints)
 {
-  size_t helpIndex {};
+}
+
+
+void handleListCommand(const std::string command)
+{
+  std::cerr<<"Command not yet implemented!\n";
+}
+
+
+void handleListRunCommand(const std::string command, bool & run)
+{
+  std::cerr<<"Command not yet implemented!\n";
+}
+
+
+void handleListFiddleCommand(const std::string command)
+{
+  std::cerr<<"Command not yet implemented!\n";
+}
+
+
+void handlePrintHelpCommand(const char * argv[], const std::string command)
+{
   /* This is definitly the sickest and best way to write out this output
      statment! */
-  if(command[helpIndex] != 'h' && command[helpIndex] != 'H')
+  if(command[command::cmdIndex] != 'h' && command[command::cmdIndex] != 'H')
     std::cerr<<"Invalid command (\""<<command<<"\") entered: ";
   std::cerr<<"Please enter one of the following:\n\th\t\t: where \"h\" stands "
     "for \"help\" and will print this \n\t\t\t  message. Note that \"H\" is "
@@ -196,11 +257,15 @@ void handlePrintHelp(const char * argv[], const std::string command)
     "list command the argument b will cause it\n\t\t\t  to list all breakpoints"
     " and giving it addresses X and\n\t\t\t  Y as it's arguments will cause it "
     "to list out the\n\t\t\t  contents of memory in the range [X, Y].\n\tr\t\t:"
-    " where \"r\" stands for \"run\". This will cause "<<argv[cmd::binName]
+    " where \"r\" stands for \"run\". This will cause "<<argv[startCmd::binName]
 	   <<"\n\t\t\t  to execute instructions untill the PC is equal to a\n\t"
     "\t\t  breakpoint (if there are no breakpoints set then\n\t\t\t  execution "
-    "will not stop.) Note that \"R\" is also\n\t\t\t  accepted.\n\tq\t\t: where"
-    " \"q\" stands for \"quit\" and cause "<<argv[0]<<" to\n\t\t\t  hault "
+    "will not stop.) Note that \"R\" is also\n\t\t\t  accepted.\n\tf X Y\t\t: "
+    "where \"f\" stands for \"fiddle with architectural\n\t\t\t  state\", \"X\""
+    " is one of {a | x | y | pc | s | f | c}\n\t\t\t  (where a stands for \""
+    "accumulator\", x stands for \"X\", y\n\t\t\t stands for \"Y\", pc stands for \"program counter\", s stands for \"stack pointer\""
+    " f stands for \"flags\" or \"status\" and c stands for \"cycles\") and Y is the value to be assigned to X. Note that \"F\" is also accepted. \n\tq\t\t: where"
+    " \"q\" stands for \"quit\" and cause "<<argv[startCmd::binName]<<" to\n\t\t\t  hault "
     "instruction execution and exit. Note that \"Q\" is\n\t\t\t  also "
     "accepted.\n";
 }

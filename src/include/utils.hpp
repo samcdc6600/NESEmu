@@ -48,12 +48,16 @@ namespace masks
 
 
 namespace command
-{
+{	     // For "command" in "handleDebugCommand()" and callee's.
   constexpr char argDelim {' '};	// Command argument delimiter
   // This is assuming we are using "std::getline()"
   constexpr char endDelim {'\0'};
   // We expect to see 2 and only 2 characters before command arguments.
   constexpr char argumentsPrefixLen {2};
+  // Index of command code.
+  constexpr size_t cmdIndex {0};
+  // Index of character after command code.
+  constexpr size_t postCmdIndex {1};
 }
 
 
@@ -66,6 +70,7 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 	      const std::string & errorContext);
 
 #ifdef DEBUG //================= DEBUG FUNCTIONS ===============================
+memory::address getCurrentPC();
 // Used to print values in buff in hex with address indexes starting at 0.
 // Where s is the size of the buffer in bytes.
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);

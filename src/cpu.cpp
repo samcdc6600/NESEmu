@@ -113,7 +113,8 @@ namespace mnemonics
 
 bool dispatchInstruction();
 #ifdef DEBUG
-void debugPrintArchitecturalState();
+memory::address getCurrentPC();
+void printArchitecturalState();
 void debugDispatchInstruction();
 #endif
 
@@ -142,7 +143,7 @@ bool dispatchInstruction()
 {
 #ifdef DEBUG
   std::cout<<"In dispatchInstruction():\n";
-  debugPrintArchitecturalState();
+  printArchitecturalState();
 #endif
 
   switch(unsigned(memory::mem[architecturalState::PC]))
@@ -1452,7 +1453,13 @@ bool dispatchInstruction()
 
 
 #ifdef DEBUG
-void debugPrintArchitecturalState()
+memory::address getCurrentPC()
+{
+  return architecturalState::PC;
+}
+
+
+void printArchitecturalState()
 {
   std::bitset<architecturalState::statusSize>
     psw {unsigned(architecturalState::status.flags)};
