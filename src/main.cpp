@@ -82,12 +82,14 @@ int main(const int argc, const char * argv[])
 	    {
 	      cpu();
 	      if(run)
-		goto AFTER_TEST;
+		  goto AFTER_TEST;
 	    }
 	}
       else
 	{
 	  run = false;
+	  breakpoints.erase(std::remove(breakpoints.begin(), breakpoints.end(),
+					currentPC), breakpoints.end());
 	}
       next = false;
       std::cout<<": ";		// Print a prompt...
