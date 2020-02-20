@@ -1,10 +1,17 @@
 #include <cassert>
 #include <limits>
 #include "include/utils.hpp"
+#ifdef DEBUG
+#include "include/mnemonics.hpp"
+#endif
 
 
 bool loadFileProper(const std::string & path, unsigned char buff [],
 		    const size_t s);
+#ifdef DEBUG // ================ DEBUG FUNCTIONS ===============================
+void listMemoryProper(const memory::address addressX,
+		 const memory::address addressZ);
+#endif
 
 
 bool loadFile(const std::string & path, unsigned char buff [], const size_t s)
@@ -64,7 +71,7 @@ void printBufferAsMemory(const memory::minimumAddressableUnit buff [],
 {
   for(size_t i {}; i < s; ++i)
     {
-      std::cerr<<std::hex<<i<<":"<<"\t\t"
+      std::cout<<std::hex<<i<<":"<<"\t\t"
 	       <<memory::address(buff[i])<<'\n';
     }
 }
@@ -155,14 +162,47 @@ void listBreakpoints(std::vector<memory::address> & breakpoints)
   std::cout<<"The following breakpoints are set:\n";
   for(auto bp: breakpoints)
     {
-      std::cout<<'\t'<<bp<<'\n';
+      std::cout<<std::hex<<'\t'<<bp<<'\n';
     }
 }
 
 
-void listMemory(std::stringstream argSS)
+void listMemory(std::stringstream argsSS)
 {
-  std::cout<<"please implement me!\n";
+  memory::address addressX {}, addressZ {};
+  std::stringstream e {};
+
+  try
+    {
+      getNumbersFromStrInHex(argsSS, defaultCallCount, addressX, addressZ);
+      checkIntRanges(defaultCallCount, numRange(addressX, 0, memory::memSize),
+		     numRange(addressZ, 0, memory::memSize));
+      enforce1stLessThenOrEqTo2nd(defaultCallCount, addressX, addressZ);
+      listMemoryProper(addressX, addressZ);
+    }
+  catch(const std::exception & e)
+    {
+      std::cerr<<"Error: converting list (memory) command arguments (\""
+	       <<argsSS.str()<<"\") to integers of types (\""
+	       <<typeid(memory::address).name()<<"\") and (\""
+	       <<typeid(memory::address).name()<<"\"), recived exception \""
+	       <<e.what()<<".\"\n";
+    }
+}
+
+
+void listMemoryProper(const memory::address addressX,
+		 const memory::address addressZ)
+{
+  std::cout<<"-----------------------------------------------------------------"
+    "---------------\n\taddress\t|\tmnemonic\t|\traw value\n---------------------"
+    "-----------------------------------------------------------\n";
+  for(size_t index {addressX}; index < (addressZ +1); ++index)
+    {
+      std::cout<<std::hex<<'\t'<<index<<"\t|\t"
+	       <<mnemonics::instructionMnemonicsOrganizedByOpcode[memory::mem[index]]
+	       <<"\t|\t"<<unsigned(memory::mem[index])<<'\n';
+    }
 }
 
 

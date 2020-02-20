@@ -128,9 +128,9 @@ void alterMemory(std::stringstream argsSS);
 void setBreakpoint(std::stringstream argsSS,
 	      std::vector<memory::address> & breakpoints);
 void listBreakpoints(std::vector<memory::address> & breakpoints);
-/* List memory in the range [x, Z], where X and Z come from argsSS. That is if
+/* List memory in the range [X, Z], where X and Z come from argsSS. That is if
 argsSS is well-formed, otherwise print error message. */
-void listMemory(std::stringstream argSS);
+void listMemory(std::stringstream argsSS);
 
 
 //================= Functions To Extract Numbers From A String =================
@@ -201,8 +201,6 @@ template <typename T, typename ... Args>
 void getNumbersFromStrInHex(std::stringstream & str, size_t callCount, T & retNumber,
 		       Args & ... args) // requires std::is_integral<T>::value
 {
-  std::stringstream e {};
-
   callCount++;
   /* We have to make sure that number isn't of type "char" or "unsigned char"
      beacuse it will only read in one character from the stream instead of the
@@ -221,6 +219,7 @@ void getNumbersFromStrInHex(std::stringstream & str, size_t callCount, T & retNu
   
   if(str.fail())
     {
+      std::stringstream e {};
       if(str.eof())
 	{
 	  e<<"too few arguments read "<<(callCount -1)<<" arguments, or "
@@ -241,8 +240,6 @@ void getNumbersFromStrInHex(std::stringstream & str, size_t callCount, T & retNu
 
 
 //====================== Functions to check integer ranges =====================
-
-
 template <typename T> struct numRange
 {
   numRange(const T number, const size_t minimum, const size_t maximum) :
@@ -255,11 +252,11 @@ template <typename T> struct numRange
 
 // For the range check the number must be in the range [min, max).
 template <typename T>
-void checkIntRangesProper(size_t callCount, numRange<T> range)
+inline void checkIntRangesProper(size_t callCount, numRange<T> range)
 {
-  std::stringstream e {};
   if(!(range.min <= range.num && range.num < range.max))
     {
+      std::stringstream e {};
       e<<"argument (\""<<size_t(range.num)<<"\") #"<<callCount<<" out of range";
       throw std::invalid_argument(e.str().c_str());
     }
@@ -281,8 +278,38 @@ void checkIntRanges(size_t callCount, numRange<T> range, Args ... args)
   checkIntRanges(callCount, args ...);
 }
 
-  
-#endif
 
-  
+//========== Functions to check pairs of integers against one another  =========
+// Throw exception if first argument is not less then or equal to second.
+template <typename T1, typename T2>
+inline void enforce1stLessThenOrEqTo2ndProper(size_t & callCount,
+					      const T1 first, const T2 second)
+{
+  callCount += 2;
+    if(!(first <= second))
+      {
+	std::stringstream e {};
+	e<<std::hex<<"argument (\""<<first<<"\") #"<<(callCount -1)<<" greater "
+	  "then argument (\""<<second<<"\") #"<<callCount;
+	throw std::invalid_argument(e.str().c_str());
+      }
+}
+
+template <typename T1, typename T2>
+inline void enforce1stLessThenOrEqTo2nd(size_t callCount, const T1 first,
+				 const T2 second)
+{
+  enforce1stLessThenOrEqTo2ndProper(callCount, first, second);
+}
+
+template <typename T1, typename T2, typename ... Args>
+void enforce1stLessThenOrEqTo2nd(size_t callCount, const T1 first,
+				 const T2 second, Args ... args)
+{
+  enforce1stLessThenOrEqTo2ndProper(callCount, first, second);
+  enforce1stLessThenOrEqTo2nd(callCount, args ...);
+}
+
+
+#endif
 #endif

@@ -276,7 +276,7 @@ void handleListCommand(const std::string command,
       if(command[pos] == command::listArgs::breakpoint)
 	listBreakpoints(breakpoints);
       else
-	listMemory(std::stringstream {command});
+	listMemory(std::stringstream {command.substr(pos)});
     }
   else
     {
