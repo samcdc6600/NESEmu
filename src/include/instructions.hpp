@@ -36,6 +36,7 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
 inline void plp_28();
 inline void jmp_4c();
+inline void dey_88();
 inline void sta_8d();
 /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X index 
    to the stack pointer."
@@ -44,6 +45,7 @@ inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
 inline void lda_a9();
+inline void lda_ad();
 inline void dex_ca();
 /* "Branches are dependant on the status of the flag bits when the op code is
      encountered. A branch not taken requires two machine cycles. Add one if the
@@ -126,11 +128,6 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
 
 inline void branchTaken()
 {
-  std::cout<<"(signed char)get8BitImmediate() = "
-	   <<(signed )get8BitImmediate()
-	   <<", architecturalState::PC + (signed char)get8BitImmediate() = "
-	   <<architecturalState::PC + (signed char)get8BitImmediate()<<'\n';
-
   if(add8BitImmediateToPCAndCheckPageBoundryTransition())
     architecturalState::cycles += 1;
   architecturalState::cycles += 1;
@@ -172,6 +169,16 @@ inline void jmp_4c()
 }
 
 
+inline void dey_88()
+{
+  architecturalState::Y -= 1;
+  setNegativeFlagOn(architecturalState::Y);
+  setZeroFlagOn(architecturalState::Y);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
 inline void sta_8d()
 {
   storeAbsoluteThis(architecturalState::A);
@@ -191,7 +198,7 @@ inline void txs_9a()
 
 inline void ldy_a0()
 {
-  architecturalState::Y = memory::mem[architecturalState::PC + 1];
+  architecturalState::Y = get8BitImmediate();
   setNegativeFlagOn(architecturalState::Y);
   setZeroFlagOn(architecturalState::Y);
   architecturalState::PC += 2;
@@ -201,7 +208,7 @@ inline void ldy_a0()
 
 inline void ldx_a2()
 {
-  architecturalState::X = memory::mem[architecturalState::PC + 1];
+  architecturalState::X = get8BitImmediate();
   setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
   architecturalState::PC += 2;
@@ -211,11 +218,21 @@ inline void ldx_a2()
 
 inline void lda_a9()
 {
-  architecturalState::A = memory::mem[architecturalState::PC + 1];
+  architecturalState::A = get8BitImmediate();
   setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+inline void lda_ad()
+{
+  architecturalState::A = memory::mem[get16BitImmediate()];
+  setNegativeFlagOn(architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 

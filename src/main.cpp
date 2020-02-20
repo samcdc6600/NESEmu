@@ -72,8 +72,6 @@ int main(const int argc, const char * argv[])
   do
     {
     AFTER_TEST:
-      if(run)
-	std::cout<<"hello\n";
       currentPC = getCurrentPC();
       if(std::find(breakpoints.begin(), breakpoints.end(), currentPC) ==
 	 breakpoints.end())
@@ -374,8 +372,9 @@ void handlePrintHelpCommand(const char * argv[], const std::string command)
     "\n\t"<<command::breakpointCmd<<" X\t\t: where \""
 	   <<command::breakpointCmd<<"\" stands for \"breakpoint\" and \"X\" is"
     " an\n\t\t\t  address in hex in the range ["<<0<<", "<<memory::memSize
-	   <<"). Multiple\n\t\t\t  breakpoints can be set. Breakpoints can be "
-    "unset by\n\t\t\t  issuing the very same command used to set the\n\t\t\t  "
+	   <<"). Execution\n\t\t\t  stops at the instruction before the "
+    "breakpoint!\n\t\t\t  Multiple breakpoints can be set. Breakpoints can be\n"
+    "\t\t\t  unset by issuing the very same command used to set the\n\t\t\t  "
     "breakpoint. Note that \""<<command::breakpointCmdUpper<<"\" is also "
     "accepted.\n\t"<<command::listCmd<<" {"<<command::listArgs::breakpoint<<" |"
     " X Z}\t: where \""<<command::listCmd<<"\" stands for \"list\", \""

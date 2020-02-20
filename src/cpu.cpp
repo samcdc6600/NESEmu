@@ -762,6 +762,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      dey_88();
       break;
     case 0x89:			// NOP	#i
 #ifdef DEBUG
