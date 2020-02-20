@@ -36,6 +36,8 @@ void handleBreakCommand(const std::string command,
 void handleListCommand(const std::string command,
 		       std::vector<memory::address> & breakpoints);
 void handleRunCommand(const std::string command, bool & run);
+inline bool checkCommandWithNoArgsConstraint(const std::string command,
+					     const char cmd, const char altCmd);
 void handleFiddleCommand(const std::string command);
 // Command.size() should be > 0
 void handlePrintHelpCommand(const char * argv[], const std::string command);
@@ -69,12 +71,19 @@ int main(const int argc, const char * argv[])
   std::vector<memory::address> breakpoints {};
   do
     {
+    AFTER_TEST:
+      if(run)
+	std::cout<<"hello\n";
       currentPC = getCurrentPC();
       if(std::find(breakpoints.begin(), breakpoints.end(), currentPC) ==
 	 breakpoints.end())
 	{			// We haven't reached a breakpoint
 	  if(next || run)
-	    cpu();
+	    {
+	      cpu();
+	      if(run)
+		goto AFTER_TEST;
+	    }
 	}
       else
 	{
@@ -291,7 +300,26 @@ void handleListCommand(const std::string command,
 
 void handleRunCommand(const std::string command, bool & run)
 {
-  std::cerr<<"Command not yet implemented!\n";
+  size_t pos {};
+  if(checkCommandWithNoArgsConstraint(command, command::runCmd,
+				      command::runCmdUpper))
+      run = true;
+  else
+      std::cerr<<"Error: malformed run command (\""<<command
+	       <<"\") encountered.\n";
+}
+
+
+/* This would be more flexible as a recursive template function (however we dont
+need anything other then two argument right now.) */
+inline bool checkCommandWithNoArgsConstraint(const std::string command,
+					     const char cmd, const char altCmd)
+{
+  if(command.size() == command::cmdSizeNoArgs &&
+     (command[command::cmdIndex] == cmd ||
+      command[command::cmdIndex] == altCmd))
+    return true;
+  return false;
 }
 
 

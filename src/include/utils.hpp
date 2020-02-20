@@ -55,7 +55,8 @@ namespace command
   // This is assuming we are using "std::getline()"
   constexpr char endDelim {'\0'};
   // We expect to see 2 and only 2 characters before command arguments.
-  constexpr char argumentsPrefixLen {2};
+  constexpr size_t argumentsPrefixLen {2};
+  constexpr size_t cmdSizeNoArgs {1};
   // Index of command code.
   constexpr size_t cmdIndex {0};
   // Index of character after command code.

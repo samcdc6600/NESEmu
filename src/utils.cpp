@@ -201,7 +201,7 @@ void listMemoryProper(const memory::address addressX,
     {
       std::cout<<std::hex<<'\t'<<index<<"\t|\t"
 	       <<mnemonics::instructionMnemonicsOrganizedByOpcode[memory::mem[index]]
-	       <<"\t|\t"<<unsigned(memory::mem[index])<<'\n';
+	       <<"\t\t|\t"<<unsigned(memory::mem[index])<<'\n';
     }
 }
 
