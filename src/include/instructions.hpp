@@ -1,15 +1,14 @@
+/* This file is only intended for use with "cpu.cpp". It exists only to break up
+   "cpu.cpp". This is beneficial because it allows a logical splitting of the
+   logic that handles the CPU instructions from the rest of the code for the CPU
+   in cpu.cpp and more importantly it allows us to reduce the length of the
+   cpu.cpp file as well as allowing us to have both file open in two different
+   editor windows simultaneously. We put both function declarations and
+   definitions here becase we are accessing the "architecturalState" namespace
+   and our functions are inline, both of these factors necessitate that our
+   function definitions be in this file. */
 #ifndef INSTRUCTIONS_HPP_
 #define INSTRUCTIONS_HPP_
-/* This translation unit is only intended for use with "cpu.cpp". It exists only
-   to break up "cpu.cpp". This is beneficial because it allows a logical
-   splitting of the logic that handles the CPU instructions from the rest of the
-   code for the CPU in cpu.cpp and more importantly it allows us to reduce the
-   length of the cpu.cpp translation unit as well as allowing us to have both
-   translation units open in two different editor windows simultaneously.
-   We put both function declarations and definitions here becase we are
-   accessing the "architecturalState" namespace and our functions are inline,
-   both of these factors necessitate that our function definitions be in this
-   translation unit. */
 // We have a separet function for each opcode for performance reasons.
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================

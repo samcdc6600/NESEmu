@@ -30,7 +30,7 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 	  std::stringstream e {};
 	  e<<std::hex<<"Error (fatal): ("<<errorContext<<") couldn't load file "
 	    "\""<<path<<"\"\n";
-	  throw std::invalid_argument(e.str().c_str());
+	  throw std::invalid_argument(e.str());
 	}
     }
   catch(const std::exception & e)
@@ -80,7 +80,6 @@ void printBufferAsMemory(const memory::minimumAddressableUnit buff [],
 void printMemeory(std::stringstream argsSS)
 {		     // We expect addressStr to be in base addressBase
   memory::address address {};
-  std::stringstream e {};
 
   try
     {
@@ -102,7 +101,6 @@ void alterMemory(std::stringstream argsSS)
 {
   memory::address address {};
   memory::minimumAddressableUnit value {};
-  std::stringstream e {};
   
   try
     {
@@ -127,7 +125,6 @@ void setBreakpoint(std::stringstream argsSS,
 	      std::vector<memory::address> & breakpoints)
 {
   memory::address address {};
-  std::stringstream e {};
 
   try
     {
@@ -170,7 +167,6 @@ void listBreakpoints(std::vector<memory::address> & breakpoints)
 void listMemory(std::stringstream argsSS)
 {
   memory::address addressX {}, addressZ {};
-  std::stringstream e {};
 
   try
     {
@@ -195,13 +191,98 @@ void listMemoryProper(const memory::address addressX,
 		 const memory::address addressZ)
 {
   std::cout<<"-----------------------------------------------------------------"
-    "---------------\n\taddress\t|\tmnemonic\t|\traw value\n---------------------"
-    "-----------------------------------------------------------\n";
+    "---------------\n\taddress\t|\tmnemonic\t|\traw value\n-------------------"
+    "-------------------------------------------------------------\n";
   for(size_t index {addressX}; index < (addressZ +1); ++index)
     {
       std::cout<<std::hex<<'\t'<<index<<"\t|\t"
 	       <<mnemonics::instructionMnemonicsOrganizedByOpcode[memory::mem[index]]
 	       <<"\t\t|\t"<<unsigned(memory::mem[index])<<'\n';
+    }
+}
+
+
+/* =================== The Following function/s should be the ==================
+  =================== last in this file to limit the visibility ================
+  ======================== of the follow include statment! =================== */
+#include "include/architecturalState.hpp"
+
+void fiddleWithArchitecturalState(std::stringstream argsSS)
+{  
+  try
+    {
+      std::stringstream e {};
+      
+      unsigned char A {};		// Accumulator
+      unsigned char X {}, Y {};		// Index's
+      memory::address PC {};		// Program Counter
+      unsigned char S {};		// Stack Pointer
+      unsigned char status {};		// Status (flags, PSW etc...)
+      size_t cycles {};			// Current clock cycle
+
+      char toFiddle {};
+      argsSS>>toFiddle;
+
+      switch(toFiddle)
+	{
+	case command::fiddleArgs::accumulator:
+	  
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, A);
+	  checkIntRanges(defaultCallCount, numRange(A, std::numeric_limits<unsigned char>::lowest(),
+						    std::numeric_limits<unsigned char>::max() +1));
+	  architecturalState::A = A;
+	  break;
+	case command::fiddleArgs::X:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, X);
+	  checkIntRanges(defaultCallCount, numRange(X, std::numeric_limits<unsigned char>::lowest(),
+						    std::numeric_limits<unsigned char>::max() +1));
+	  architecturalState::X = X;
+	  break;
+	case command::fiddleArgs::Y:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, Y);
+	  checkIntRanges(defaultCallCount, numRange(Y, std::numeric_limits<unsigned char>::lowest(),
+						    std::numeric_limits<unsigned char>::max() +1));
+	  architecturalState::Y = Y;
+	  break;
+	case command::fiddleArgs::PC:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, PC);
+	  checkIntRanges(defaultCallCount, numRange(PC, 0, size_t(memory::memSize)));
+	  architecturalState::PC = PC;
+	  break;
+	case command::fiddleArgs::stack:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, S);
+	  /* Stack Starts at offset 0x0100 and covers the range [0x0100, 0x01ff]
+	     it wraps around (basically just let the numbers do their thing :)
+	     .) */
+	  checkIntRanges(defaultCallCount, numRange(S, std::numeric_limits<unsigned char>::lowest(),
+						    std::numeric_limits<unsigned char>::max() +1));
+	  architecturalState::S = S;
+	  break;
+	case command::fiddleArgs::status:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, status);
+	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<unsigned char>::lowest(),
+						    std::numeric_limits<unsigned char>::max() +1));
+	  architecturalState::status.flags = status;
+	  break;
+	case command::fiddleArgs::cycles:
+	  getNumbersFromStrInHex(argsSS, defaultCallCount, cycles);
+	  /* Can't do +1 here because we will wrap around. Probably don't need
+	     that last cycle anyway ;) */
+	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<size_t>::lowest(),
+						    std::numeric_limits<size_t>::max()));
+	  architecturalState::cycles = cycles;
+	  break;
+	default:
+	  e<<"unknown argument (\""
+	   <<argsSS.str()[command::argsStrippedOfCmdIndex]<<"\")";
+	  throw std::invalid_argument(e.str());
+	}
+    }
+  catch(const std::exception & e)
+    {
+      std::cerr<<"Error: processing fiddle command arguments (\""
+	       <<argsSS.str()<<"\"), recived exception \""
+	       <<e.what()<<".\"\n";
     }
 }
 

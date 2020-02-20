@@ -300,7 +300,6 @@ void handleListCommand(const std::string command,
 
 void handleRunCommand(const std::string command, bool & run)
 {
-  size_t pos {};
   if(checkCommandWithNoArgsConstraint(command, command::runCmd,
 				      command::runCmdUpper))
       run = true;
@@ -325,7 +324,23 @@ inline bool checkCommandWithNoArgsConstraint(const std::string command,
 
 void handleFiddleCommand(const std::string command)
 {
-  std::cerr<<"Command not yet implemented!\n";
+  size_t pos {};
+  if(checkCommandWithArgsConstraint(command))
+    {
+      if(command[command::cmdIndex] == command::fiddleCmd)
+	pos = getPosAfterDelimAfterCommand(command, command::fiddleCmd);
+      else
+	pos = getPosAfterDelimAfterCommand(command, command::fiddleCmdUpper);
+      fiddleWithArchitecturalState(std::stringstream {command.substr(pos)});
+    }
+  else
+    {
+      if(command[command::postCmdIndex] != command::argDelim)
+	std::cerr<<"Error: malformed fiddle command (\""<<command
+		 <<"\") encountered.\n";
+      else
+	std::cerr<<"Error: arguments missing from fiddle command.\n";      
+    }
 }
 
 

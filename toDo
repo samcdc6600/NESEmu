@@ -6,9 +6,11 @@
 	- Improve code for "handlePrintHelp()"
 	- Make variables for parts of duplicated debug commands exception out
 	  put's in utils.cpp?
+	- Fix error where not char type numbers read in with
+	  "getNumbersFromStrInHex()" that are less then 0 are read even if the
+	  type is not signed.
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
 	  can take advantge of pretty colours to help distinguish things.
-
 
 * CPU ==========================================================================
 	- Implement instructions.

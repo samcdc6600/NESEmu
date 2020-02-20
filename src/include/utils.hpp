@@ -59,6 +59,9 @@ namespace command
   constexpr size_t cmdSizeNoArgs {1};
   // Index of command code.
   constexpr size_t cmdIndex {0};
+  /* Index of first argument after the command has been stripped on the command
+     code and it's deliminator */
+  constexpr size_t argsStrippedOfCmdIndex {0};
   // Index of character after command code.
   constexpr size_t postCmdIndex {1};
   constexpr char printCmd		{'p'};
@@ -132,6 +135,7 @@ void listBreakpoints(std::vector<memory::address> & breakpoints);
 /* List memory in the range [X, Z], where X and Z come from argsSS. That is if
 argsSS is well-formed, otherwise print error message. */
 void listMemory(std::stringstream argsSS);
+void fiddleWithArchitecturalState(std::stringstream argsSS);
 
 
 //================= Functions To Extract Numbers From A String =================
@@ -162,7 +166,7 @@ template <typename T> void checkForCharNumRange(size_t number,
       if(number > std::numeric_limits<unsigned char>::max())
 	{
 	  e<<"argument #"<<callCount<<" invalid";
-	  throw std::invalid_argument(e.str().c_str());
+	  throw std::invalid_argument(e.str());
 	}
     }
   else
@@ -172,7 +176,7 @@ template <typename T> void checkForCharNumRange(size_t number,
 	  if(number > std::numeric_limits<char>::max())
 	    {
 	      e<<"argument #"<<callCount<<" invalid";
-	      throw std::invalid_argument(e.str().c_str());
+	      throw std::invalid_argument(e.str());
 	    }
 	}
     }
@@ -189,7 +193,7 @@ inline void getNumbersFromStrInHex(std::stringstream & str, size_t callCount)
     {
       e<<"too many ("<<callCount<<" or more) arguments detected, or arguments "
 	"malformed";
-      throw std::invalid_argument(e.str().c_str());
+      throw std::invalid_argument(e.str());
     }
 }
 
@@ -225,12 +229,12 @@ void getNumbersFromStrInHex(std::stringstream & str, size_t callCount, T & retNu
 	{
 	  e<<"too few arguments read "<<(callCount -1)<<" arguments, or "
 	    "arguments too long";
-	  throw std::invalid_argument(e.str().c_str());
+	  throw std::invalid_argument(e.str());
 	}
       else
 	{
 	  e<<"argument #"<<callCount<<" invalid";
-	  throw std::invalid_argument(e.str().c_str());
+	  throw std::invalid_argument(e.str());
 	}
     }
   else
@@ -259,7 +263,7 @@ inline void checkIntRangesProper(size_t callCount, numRange<T> range)
     {
       std::stringstream e {};
       e<<"argument (\""<<size_t(range.num)<<"\") #"<<callCount<<" out of range";
-      throw std::invalid_argument(e.str().c_str());
+      throw std::invalid_argument(e.str());
     }
 }
 
@@ -292,7 +296,7 @@ inline void enforce1stLessThenOrEqTo2ndProper(size_t & callCount,
 	std::stringstream e {};
 	e<<std::hex<<"argument (\""<<first<<"\") #"<<(callCount -1)<<" greater "
 	  "then argument (\""<<second<<"\") #"<<callCount;
-	throw std::invalid_argument(e.str().c_str());
+	throw std::invalid_argument(e.str());
       }
 }
 

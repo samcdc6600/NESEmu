@@ -2,26 +2,11 @@
 #include <sstream>
 #include <bitset>
 #include "include/cpu.hpp"
+#include "include/architecturalState.hpp"
 #include "include/utils.hpp"
 #ifdef DEBUG
 #include "include/mnemonics.hpp"
 #endif
-
-/*
-  From: http://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
-  "While there are only six flags in the processor status register within the
-  CPU, when transferred to the stack, there are two additional bits. These do
-  not represent a register that can hold a value but can be used to distinguish
-  how the flags were pushed.
-
-  Some 6502 references call this the "B flag", though it does not represent an
-  actual CPU register. Two interrupts (/IRQ and /NMI) and two instructions (PHP
-  and BRK) push the flags to the stack. In the byte pushed, bit 5 is always set
-  to 1, and bit 4 is 1 if from an instruction (PHP or BRK) or 0 if from an
-  interrupt line being pulled low (/IRQ or /NMI). This is the only time and
-  place where the B flag actually exists: not in the status register itself, but
-  in bit 4 of the copy that is written to the stack."
-*/
 
 
 namespace architecturalState
@@ -35,28 +20,7 @@ namespace architecturalState
      to this file. (The initial value of PC should be changed once we finish
      implementing the CPU.) */
   memory::address PC {0x0400};		// Program Counter
-  //  memory::address PC {0x400};		// Program Counter
   unsigned char S {};		// Stack Pointer
-  constexpr memory::address stackBase {0x100}; // Base address of stack
-  
-
-  typedef union
-  {
-    struct
-    {
-      unsigned char C : 1;	// Carry
-      unsigned char Z : 1;	// Zero
-      unsigned char I : 1;	// Interrupt Disable
-      unsigned char D : 1;	// Decimal
-      unsigned char s0 : 1;	// No CPU effect. (refere to the comment at the
-      unsigned char s1 : 1;	// top of the file.)
-      unsigned char V : 1;	// Overflow
-      unsigned char N : 1;	// Negative
-    }u;
-    unsigned char flags;
-  }Status;
-  constexpr size_t statusSize {8};
-
   Status status {};
   size_t cycles {};
 }
@@ -67,7 +31,8 @@ namespace architecturalState
    "instructions.hpp". The include must be here because "instructions.hpp" must
    be able to see the "architecturalState" namespace. We do not put
    "architecturalState" in "cpu.hpp because we only want it to be accessible
-   from this translation unit. */
+   from this translation unit and the translation unit containing the contents
+   of utils.cpp (if builing with the debug flag.) */
 #include "include/instructions.hpp"
 
 
@@ -88,7 +53,7 @@ void cpu()
 	  e<<std::hex<<"Error (fatal): opcode("
 	   <<unsigned(memory::mem[architecturalState::PC])<<") at pc("
 	   <<architecturalState::PC<<") is invalid!\n";
-	  throw std::invalid_argument(e.str().c_str());
+	  throw std::invalid_argument(e.str());
 	}
     }
   catch(const std::exception & e)
