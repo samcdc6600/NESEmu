@@ -844,6 +844,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      tya_98();
       break;
     case 0x99:			// STA	a,y
 #ifdef DEBUG
@@ -1094,6 +1095,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      cmp_c9();
       break;
     case 0xca:			// DEX
 #ifdef DEBUG

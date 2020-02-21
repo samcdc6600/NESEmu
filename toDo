@@ -6,7 +6,7 @@
 	- Improve code for "handlePrintHelp()"
 	- Make variables for parts of duplicated debug commands exception out
 	  put's in utils.cpp?
-	- Fix error where not char type numbers read in with
+	- Fix error where non char type numbers read in with
 	  "getNumbersFromStrInHex()" that are less then 0 are read even if the
 	  type is not signed.
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
@@ -14,9 +14,6 @@
 
 * CPU ==========================================================================
 	- Implement instructions.
-	- Finish implementing new debug commands. Remember that commands that
-	  don't have any arguments should have a slightly different pattern to
-	  their "handleXCommand()" functions.
 
 * .NES ROM loading =============================================================
         - ...

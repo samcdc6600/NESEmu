@@ -38,25 +38,15 @@ inline void plp_28();
 inline void jmp_4c();
 inline void dey_88();
 inline void sta_8d();
-/* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X index 
-   to the stack pointer."
-   - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
+inline void tya_98();
 inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
 inline void lda_a9();
 inline void lda_ad();
+inline void cmp_c9();
 inline void dex_ca();
-/* "Branches are dependant on the status of the flag bits when the op code is
-     encountered. A branch not taken requires two machine cycles. Add one if the
-     branch is taken and add one more if the branch crosses a page boundary."
-     - http://6502.org/tutorials/6502opcodes.html#BNE */
 inline void bne_d0();
-/* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
-   Register by setting the 3rd bit 0." "Even though the NES doesn't use decimal
-   mode, the opcodes to clear and set the flag do work, so if you need to store
-   a bit, this acts as a free space."
-   - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=CLD */
 inline void cdl_d8();
 inline void nop_ea();
 inline void beq_f0();
@@ -81,8 +71,7 @@ inline void setZeroFlagOn(const memory::minimumAddressableUnit var)
 
 void setNegativeFlagOn(const memory::minimumAddressableUnit var)
 {
-  architecturalState::status.u.N =
-    (var & masks::bit7) ? 1 : 0;
+  architecturalState::status.u.N = (var & masks::bit7) ? 1 : 0;
 }
 
 
@@ -187,8 +176,20 @@ inline void sta_8d()
 }
 
 
-inline void txs_9a()
+inline void tya_98()
 {
+  architecturalState::A = architecturalState::Y;
+  setNegativeFlagOn(architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+inline void txs_9a()
+{ /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X
+     index to the stack pointer."
+     - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
   setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
   architecturalState::S = architecturalState::X;
@@ -236,6 +237,22 @@ inline void lda_ad()
 }
 
 
+inline void cmp_c9()
+{ /* Compare sets flags as if a subtraction had been carried out. If the value
+     in the accumulator is equal or greater than the compared value, the Carry
+     will be set. The equal (Z) and negative (N) flags will be set based on
+     equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
+     - http://6502.org/tutorials/6502opcodes.html#CMP */
+  architecturalState::status.u.C = ((architecturalState::A == get8BitImmediate())
+				    || (architecturalState::A >
+					get8BitImmediate())) ? 1 : 0;
+  setZeroFlagOn(architecturalState::A - get8BitImmediate());
+  setNegativeFlagOn(architecturalState::A - get8BitImmediate());
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
 inline void dex_ca()
 {
   architecturalState::X -= 1;
@@ -247,7 +264,10 @@ inline void dex_ca()
 
 
 inline void bne_d0()
-{
+{ /* "Branches are dependant on the status of the flag bits when the op code is
+     encountered. A branch not taken requires two machine cycles. Add one if the
+     branch is taken and add one more if the branch crosses a page boundary."
+     - http://6502.org/tutorials/6502opcodes.html#BNE */
   if(architecturalState::status.u.Z == 0)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
@@ -256,7 +276,11 @@ inline void bne_d0()
 
 
 inline void cdl_d8()
-{
+{ /* "CLD (Clear Decimal Flag) clears the Decimal Flag in the Processor Status
+     Register by setting the 3rd bit 0." "Even though the NES doesn't use
+     decimal mode, the opcodes to clear and set the flag do work, so if you need
+     to store a bit, this acts as a free space."
+     - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=CLD */
   setDecimalFlagOn(false);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
