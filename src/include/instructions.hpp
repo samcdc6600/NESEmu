@@ -34,22 +34,24 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
    OPERATIONS", as these functions assume it has not been altered yet! */
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
-inline void plp_28();
-inline void jmp_4c();
-inline void dey_88();
-inline void sta_8d();
-inline void tya_98();
-inline void txs_9a();
-inline void ldy_a0();
-inline void ldx_a2();
-inline void lda_a9();
-inline void lda_ad();
-inline void cmp_c9();
-inline void dex_ca();
-inline void bne_d0();
-inline void cdl_d8();
-inline void nop_ea();
-inline void beq_f0();
+inline void bpl_10();	// BPL	*+d
+inline void plp_28();	// PLP
+inline void jmp_4c();	// JMP	a
+inline void dey_88();	// DEY
+inline void sta_8d();	// STA	a
+inline void tya_98();	// TYA
+inline void txs_9a();	// TXS
+inline void ldy_a0();	// LDY	#i
+inline void ldx_a2();	// LDX	#i
+inline void lda_a9();	// TAX
+inline void tax_aa();	// TAX
+inline void lda_ad();	// LDA	a
+inline void cmp_c9();	// CMP	#i
+inline void dex_ca();	// DEX
+inline void bne_d0();	// BNE	*+d
+inline void cdl_d8();	// CLD
+inline void nop_ea();	// NOP
+inline void beq_f0();	// BEQ	*+d
 
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
@@ -142,6 +144,17 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 // ============ (indicated by their prefixs) are grouped together.) ============
 
 
+inline void bpl_10()
+{ /* Branches are dependant on the status of the flag bits when the op code is
+     encountered. A branch not taken requires two machine cycles. Add one if the
+     branch is taken and add one more if the branch crosses a page boundary. */
+  if(architecturalState::status.u.N == 0)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
 inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
@@ -223,6 +236,16 @@ inline void lda_a9()
   setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+inline void tax_aa()
+{
+  architecturalState::X = architecturalState::A;
+  setNegativeFlagOn(architecturalState::X);
+  setZeroFlagOn(architecturalState::X);
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 

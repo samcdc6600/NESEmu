@@ -160,6 +160,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      bpl_10();
       break;
     case 0x11:			// ORA	(d),y
 #ifdef DEBUG
@@ -939,6 +940,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      tax_aa();
       break;
     case 0xab:			// LAX	#i
 #ifdef DEBUG
