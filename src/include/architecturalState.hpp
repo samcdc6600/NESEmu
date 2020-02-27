@@ -23,10 +23,12 @@
 
 namespace architecturalState
 {
-  extern unsigned char A;		// Accumulator
-  extern unsigned char X, Y;	// Index's
+  typedef unsigned largerThenAXY;
+  typedef unsigned char isaReg;
+  extern isaReg A;		// Accumulator
+  extern isaReg X, Y;	// Index's
   extern memory::address PC;		// Program Counter
-  extern unsigned char S;		// Stack Pointer
+  extern isaReg S;		// Stack Pointer
   constexpr memory::address stackBase {0x100}; // Base address of stack
   
 
@@ -43,7 +45,7 @@ namespace architecturalState
       unsigned char V : 1;	// Overflow
       unsigned char N : 1;	// Negative
     }u;
-    unsigned char flags;
+    isaReg flags;
   }Status;
   constexpr size_t statusSize {8};
 

@@ -37,14 +37,22 @@ namespace error
 
 namespace masks
 {
-  constexpr unsigned char bit0 {0b00000001};
-  constexpr unsigned char bit1 {0b00000010};
-  constexpr unsigned char bit2 {0b00000100};
-  constexpr unsigned char bit3 {0b00001000};
-  constexpr unsigned char bit4 {0b00010000};
-  constexpr unsigned char bit5 {0b00100000};
-  constexpr unsigned char bit6 {0b01000000};
-  constexpr unsigned char bit7 {0b10000000};
+  constexpr unsigned char bit0	{0b00000001};
+  constexpr unsigned char bit1	{0b00000010};
+  constexpr unsigned char bit2	{0b00000100};
+  constexpr unsigned char bit3	{0b00001000};
+  constexpr unsigned char bit4	{0b00010000};
+  constexpr unsigned char bit5	{0b00100000};
+  constexpr unsigned char bit6	{0b01000000};
+  constexpr unsigned char bit7	{0b10000000};
+  constexpr unsigned bit8	{0b0000000100000000};
+  constexpr unsigned bit9	{0b0000001000000000};
+  constexpr unsigned bit10	{0b0000010000000000};
+  constexpr unsigned bit11	{0b0000100000000000};
+  constexpr unsigned bit12	{0b0001000000000000};
+  constexpr unsigned bit13	{0b0010000000000000};
+  constexpr unsigned bit14	{0b0100000000000000};
+  constexpr unsigned bit15	{0b1000000000000000};
 }
 
 

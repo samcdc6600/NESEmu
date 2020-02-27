@@ -14,6 +14,9 @@
 
 * CPU ==========================================================================
 	- Implement instructions.
+	- See if code to set carry in "cmp_c9()" can be replaced with
+	  "setCarryFlagOnAdditionOn()" or why we would need both if that is the
+	  case.
 
 * .NES ROM loading =============================================================
         - ...

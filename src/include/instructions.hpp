@@ -14,12 +14,22 @@
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
 // =========== (The below functions prototypes are used for operations =========
 // ============ that do not in them selves constitute instructions.) ===========
-inline void setZeroFlagOn(const memory::minimumAddressableUnit var);
+/* Here if the function has more then one argument (in general) the first should
+   be the register and the second the immediate or datum from memory (that is if
+   the function is used as such.) Also note that "minimumAddressableUnit" and
+   "isaReg" are both of type unsigned char (so they can be used interchangeably,
+   however we try not to do so for reasons of consistency.)  */
+inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
+				     const architecturalState::isaReg b);
+inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
+				    const architecturalState::isaReg b,
+				    const architecturalState::isaReg c);
+inline void setZeroFlagOn(const architecturalState::isaReg var);
 inline void setDecimalFlagOn(const bool d);
-inline void setNegativeFlagOn(const memory::minimumAddressableUnit var);
+inline void setNegativeFlagOn(const architecturalState::isaReg var);
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
-inline void storeAbsoluteThis(const memory::minimumAddressableUnit var);
+inline void storeAbsoluteThis(const architecturalState::isaReg var);
 inline void loadPCFrom16BitImmediate();
 // Return true if we have crossed a page boundry
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
@@ -35,8 +45,10 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
    OPERATIONS", as these functions assume it has not been altered yet! */
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
 inline void bpl_10();	// BPL	*+d
+inline void clc_18();	// CLC
 inline void plp_28();	// PLP
 inline void jmp_4c();	// JMP	a
+inline void adc_69();	// ADC	#i
 inline void dey_88();	// DEY
 inline void sta_8d();	// STA	a
 inline void tya_98();	// TYA
@@ -59,19 +71,37 @@ inline void beq_f0();	// BEQ	*+d
 // ================ not in them selves constitute instructions.) ===============
 
 
+inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
+				     const architecturalState::isaReg b)
+{
+  architecturalState::status.u.C =
+    (masks::bit8 & (architecturalState::largerThenAXY(a) + b)) ? 1 : 0;
+}
+
+
+inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
+				    const architecturalState::isaReg b,
+				    const architecturalState::isaReg c)
+{
+  /* An explination of the following:
+     https://stackoverflow.com/questions/16845912/determining-carry-and-overflow-flag-in-6502-emulation-in-java  */
+  architecturalState::status.u.V = (~(a ^ b)) & (a ^ c) & masks::bit7;
+}
+
+
+inline void setZeroFlagOn(const architecturalState::isaReg var)
+{
+  architecturalState::status.u.Z = !var ? 1 : 0;
+}
+
+
 inline void setDecimalFlagOn(const bool d)
 {
   architecturalState::status.u.D = d;
 }
 
 
-inline void setZeroFlagOn(const memory::minimumAddressableUnit var)
-{
-  architecturalState::status.u.Z = !var ? 1 : 0;
-}
-
-
-void setNegativeFlagOn(const memory::minimumAddressableUnit var)
+void setNegativeFlagOn(const architecturalState::isaReg var)
 {
   architecturalState::status.u.N = (var & masks::bit7) ? 1 : 0;
 }
@@ -91,7 +121,7 @@ inline memory::address get16BitImmediate()
 }
 
 
-inline void storeAbsoluteThis(const memory::minimumAddressableUnit var)
+inline void storeAbsoluteThis(const architecturalState::isaReg var)
 {
   memory::mem[get16BitImmediate()] = var;
 }
@@ -155,6 +185,14 @@ inline void bpl_10()
 }
 
 
+inline void clc_18()
+{				// Clear Carry Flag
+  architecturalState::status.u.C = 0;
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
 inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
@@ -168,6 +206,20 @@ inline void jmp_4c()
 {
   loadPCFrom16BitImmediate();
   architecturalState::cycles += 3;
+}
+
+
+inline void adc_69()
+{
+  architecturalState::isaReg aR {architecturalState::isaReg(architecturalState::A
+							    + get8BitImmediate())};
+  setCarryFlagOnAdditionOn(architecturalState::A, get8BitImmediate());
+  setOverFlowOnAdditionOn(architecturalState::A, get8BitImmediate(), aR);
+  architecturalState::A = aR;
+  setNegativeFlagOn(architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
 }
 
 

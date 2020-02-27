@@ -201,6 +201,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      clc_18();
       break;
     case 0x19:			// ORA	a,y
 #ifdef DEBUG
@@ -608,6 +609,7 @@ bool dispatchInstruction()
 #ifdef DEBUG
       debugDispatchInstruction();
 #endif
+      adc_69();
       break;
     case 0x6a:			// ROR
 #ifdef DEBUG
