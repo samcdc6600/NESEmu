@@ -1,6 +1,7 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * GENERAL ======================================================================
+  	- Consider using Doxygen for documentation!
 	- Fix problems when compiling with g++!
 	- Improve error messages for debug commands.
 	- Improve code for "handlePrintHelp()"
