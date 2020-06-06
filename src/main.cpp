@@ -112,7 +112,6 @@ void checkArgs(const int argc, const char * argv[])
 	       "to ", argv[startCmd::binName], " but no more than ", maxArgs -1,
 	       " allowed!\n");
 }
-}
 
 
 void initialise(const int argc, const char * argv[])
