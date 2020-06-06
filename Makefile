@@ -21,7 +21,7 @@ OBJ_FILES	= $(patsubst %.cpp,%.o,$(CPP_FILES)) # Replace .cpp with .o.
 OBJ	= $(patsubst %,$(ODIR)/%,$(OBJ_FILES))
 
 
-# Main make file patter...
+# Main make file pattern...
 # Target: Prerequisite
 #	Rule
 # 

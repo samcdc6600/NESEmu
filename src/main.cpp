@@ -104,12 +104,12 @@ void checkArgs(const int argc, const char * argv[])
   constexpr size_t minArgs {2}, maxArgs {2};
   if(size_t(argc) < minArgs)
     genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed to"
-	     " ", argv[startCmd::binName], " but at least ", minArgs,
+	     " ", argv[startCmd::binName], " but at least ", minArgs -1,
 	     " required!\n");
   else
     if(size_t(argc) > maxArgs)
       genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed "
-	       "to ", argv[startCmd::binName], " but no more than ", maxArgs,
+	       "to ", argv[startCmd::binName], " but no more than ", maxArgs -1,
 	       " allowed!\n");
 }
 

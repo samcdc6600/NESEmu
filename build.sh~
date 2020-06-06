@@ -1,0 +1,3 @@
+#!/bin/sh
+# I am the build script. Please run me and not gmake (that is if you want to
+# build the documentation as well as the binarary!)

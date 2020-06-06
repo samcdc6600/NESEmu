@@ -47,6 +47,7 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 inline void bpl_10();	// BPL	*+d
 inline void clc_18();	// CLC
 inline void plp_28();	// PLP
+inline void eor_49();	// EOR	#i
 inline void jmp_4c();	// JMP	a
 inline void adc_69();	// ADC	#i
 inline void dey_88();	// DEY
@@ -199,6 +200,11 @@ inline void plp_28()
   architecturalState::status.flags = pullFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
+}
+
+
+inline void eor_49()	// EOR	#i
+{
 }
 
 
