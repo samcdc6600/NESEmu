@@ -3,44 +3,89 @@
 # build the documentation as well as the binarary!)
 
 
-buildProper()
+handleBuildWithArgOptions()
 {
-    # Note that the -e tells echo to enable backslash escapes.
-    echo -e $GREEN"Running gmake ==================================================\
-============== :"$NO_COLOR
-    gmake $MAKE_ARG
+    CMD_ARG_OPT1="debug"		# For debug builds.
+    CMD_ARG_OPT2="DEBUG"
+    CMD_ARG_OPT3="clean"		# For make clean.
+    CMD_ARG_OPT4="doc"		# For building documentation.
+    
+    CMD_OPT1="gmake"
+    CMD_OPT2="doxygen"
+    CMD_OPT2_ARG="Doxyfile"
 
-    if [ $? -eq 0 ]			# Check exit status of gmake
-    then				# Gmake exited cleanly
-	echo -e $GREEN"Finished running gmake (without error) =====================\
-================== ."$NO_COLOR
-	if [ ${MAKE_ARG:=notDefined} != "notDefined" ]
-	then
-	    if [ $MAKE_ARG != $MAKE_CLEAN ]
-	    then			# We are building the documentation
-		echo -e $GREEN"Now building documentation with Doxygen:"$NO_COLOR
-		#	doxygen Doxyfile
-		if [ $? -eq 0 ]
-		then
-		    echo -e $GREEN"Finished running doxygen ===========================\
-===========================."$NO_COLOR
-		    echo -e $GREEN"Finished without error =============================\
-========================== ."$NO_COLOR
-		    
-		else
-		    echo -e $RED"Finished running doxygen (with error/s) ==============\
-=========================="$NO_COLOR
-		    echo -e $RED"Finished (with error/s) ==============================\
-======================== ."$NO_COLOR
-		fi
-	    fi
-	fi
-	
+    MAKE_ARG=$1
+
+    echo $1
+    
+    case $1 in
+	$CMD_ARG_OPT1)
+	    CMD=$CMD_OPT1
+	    CMD_ARG0=$CMD_ARG_OPT1
+	    
+	    printCMDInfo $CMD $CMD_ARG0
+	    gmake $CMD_ARG_OPT1
+	    CMD_RET=$?
+	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    ;;
+	$CMD_ARG_OPT2)
+	    CMD=$CMD_OPT1
+	    CMD_ARG0=$CMD_ARG_OPT1
+	    
+	    printCMDInfo $CMD $CMD_ARG0
+	    gmake $CMD_ARG_OPT1	# make file does not recognize "DEBUG"
+	    CMD_RET=$?
+	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    ;;
+	$CMD_ARG_OPT3)
+	    CMD=$CMD_OPT1
+	    CMD_ARG0=$CMD_ARG_OPT3
+	    
+	    printCMDInfo $CMD $CMD_ARG0
+	    gmake $CMD_ARG_OPT3
+	    CMD_RET=$?
+	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    ;;
+	$CMD_ARG_OPT4)
+	    CMD=$CMD_OPT2
+	    CMD_ARG0=$CMD_OPT2_ARG
+	    
+	    printCMDInfo $CMD $CMD_ARG0
+	    doxygen $CMD_OPT2_ARG
+	    CMD_RET=$?
+	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    ;;
+	*)
+	    echo -e "${RED}Error argument (${1}) is not recognised! The only \
+argument's recognised are ${GREEN}${CMD_ARG_OP1}, ${CMD_ARG_OP2}, \
+${CMD_ARG_OP3} and ${CMD_ARG_OP4}.${NO_COLOR}"
+    esac
+}
+
+
+# handleBuildWithArgOptionsExtra()
+# {
+# }
+
+
+printCMDInfo()
+{
+    echo -e "${GREEN}Now running ${CMD} with argument/s \
+(${CMD_ARG0}, ${CMD_ARG1})  =========================================\
+${NO_COLOR}"
+}
+
+
+printCMDExitStatus()
+{
+    if [ $CMD_RET -eq 0 ]
+    then
+	echo -e "${GREEN}Finished running command ${CMD} with argument\s (\
+${CMD_ARG0}, ${CMD_ARG1}) (without error) ==============${NO_COLOR}"
     else
-	echo -e $RED"Finished running gmake (with error/s)! omitting \
-documentation build step ===== :"$NO_COLOR
-	echo -e $RED"Finished with error/s ========================================\
-================ ."$NO_COLOR
+	echo -e "${RED}Finished running command ${CMD} with argument\s \
+(${GREEN}${CMD_ARG0}, ${CMD_ARG1}${RED}) (with error/s) ==============\
+${NO_COLOR}"
     fi
 }
 
@@ -51,44 +96,33 @@ NO_COLOR='\033[0m'
 RED='\033[0;31m'		# Indicates bad things :'(
 GREEN='\033[0;32m'		# Indicates all is well in the world :)
 
-CMD_ARG_DEBUG_LOWER="debug"
-CMD_ARG_DEBUG_UPPER="DEBUG"
-CMD_ARG_CLEAN="clean"
-MAKE_CLEAN=$CMD_ARG_CLEAN
+CMD_ARG_NO_OPTIONS=0
+CMD_ARG_OPTIONS=1
+CMD_ARG_OPTIONS_EXTRA=2
 
 # Check commandline argument/s ("debug" is the only command currently
 # supported.)
-if [ $# -eq 0 ]
+if [ $# -eq $CMD_ARG_NO_OPTIONS ]
 then
-    buildProper
-    
+    CMD="gmake"
+    CMD_ARG0=""
+    printCMDInfo $CMD $CMD_ARG0
+    gmake $CMD_ARG_OPT1
+    CMD_RET=$?
+    printCMDExitStatus $? $CMD $CMD_ARG0    
 else
-    if [ $# -eq 1 ]
-    then			# Note here that we use "=" and not -eq, -eq is
-	#  for numbers and = is analagous to == in c/c++ but for strings.
-	if [ \( $1 = $CMD_ARG_DEBUG_LOWER \) -o \
-		\( $1 = $CMD_ARG_DEBUG_UPPER \) ]
-	then
-	    MAKE_ARG=$CMD_ARG_DEBUG_LOWER
-	    buildProper $MAKE_ARG $MAKE_CLEAN
-	    
-	else
-	    if [ $1 = $CMD_ARG_CLEAN ]
-	    then
-		MAKE_ARG=$CMD_ARG_CLEAN
-		buildProper $MAKE_ARG $MAKE_CLEAN
-	    else
-		echo -e "${RED}Error argument ("$1") is not recognised! The \
-only argument's recognised are " $GREEN $CMD_ARG_DEBUG_LOWER $RED ", " $GREEN\
-		     $CMD_ARG_DEBUG_UPPER " and " $CMD_ARG_CLEAN $NO_COLOR
-	    fi
-	fi
-	
+    if [ $# -eq $CMD_ARG_OPTIONS ]
+    then
+	echo "Entering buildProper()"
+	handleBuildWithArgOptions $1
     else
-	echo -e "${RED}Error ("$#") argument's given but only 0 or 1 argument's\
+	if [ $# -eq $CMD_ARG_OPTIONS_EXTRA ]
+	then
+	    echo "The ${$CMD_ARG_OPTIONS_EXTRA} argument/s option is not yet\
+ implemented"
+	else
+	    echo -e "${RED}Error ("$#") argument's given but only 0 or 1 argument's\
  are allowed!${NO_COLOR}"
+	fi
     fi
 fi
-
-    
-

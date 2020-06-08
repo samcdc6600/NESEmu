@@ -110,7 +110,7 @@ void checkArgs(const int argc, const char * argv[])
     if(size_t(argc) > maxArgs)
       genError(error::CMD_ARGS, "Error (fatal): ", argc -1, " arguments passed "
 	       "to ", argv[startCmd::binName], " but no more than ", maxArgs -1,
-	       " allowed!\n");
+	       " allowed!\n");}
 }
 
 
