@@ -103,8 +103,6 @@ NULL="NULL"
 CMD_ARG_NO_OPTIONS=0
 CMD_ARG_OPTIONS_MAX=3
 
-# Check commandline argument/s ("debug" is the only command currently
-# supported.)
 if [ $# -eq $CMD_ARG_NO_OPTIONS ]
 then
     CMD="gmake -j8"

@@ -176,7 +176,7 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 
 
 inline void bpl_10()
-{ /** Branches are dependant on the status of the flag bits when the op code is
+{ /* Branches are dependant on the status of the flag bits when the op code is
      encountered. A branch not taken requires two machine cycles. Add one if the
      branch is taken and add one more if the branch crosses a page boundary. */
   if(architecturalState::status.u.N == 0)
