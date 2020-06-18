@@ -10,13 +10,14 @@ handleBuildWithArgOptions()
     CMD_ARG_OPT3="clean"		# For make clean.
     CMD_ARG_OPT4="doc"		# For building documentation.
     
-    CMD_OPT1="gmake"
+    CMD_OPT1="gmake -j8"
     CMD_OPT2="doxygen"
     CMD_OPT2_ARG="Doxyfile"
 
     MAKE_ARG=$1
 
-    echo $1
+    echo -e "${GREEN}Attempting to execute command $1 =========================\
+==================="
     
     case $1 in
 	$CMD_ARG_OPT1)
@@ -57,15 +58,16 @@ handleBuildWithArgOptions()
 	    ;;
 	*)
 	    echo -e "${RED}Error argument (${1}) is not recognised! The only \
-argument's recognised are ${GREEN}${CMD_ARG_OP1}, ${CMD_ARG_OP2}, \
-${CMD_ARG_OP3} and ${CMD_ARG_OP4}.${NO_COLOR}"
+argument's recognised are ${GREEN}${CMD_ARG_OPT1}, ${CMD_ARG_OPT2}, \
+${CMD_ARG_OPT3} and ${CMD_ARG_OPT4}.${NO_COLOR}"
     esac
+
+    shift 1			# Left shift CMD args (not equivalent to rotate)
+    if [ ${1:-NULL} != $NULL ]
+    then
+	handleBuildWithArgOptions $@
+    fi
 }
-
-
-# handleBuildWithArgOptionsExtra()
-# {
-# }
 
 
 printCMDInfo()
@@ -96,33 +98,27 @@ NO_COLOR='\033[0m'
 RED='\033[0;31m'		# Indicates bad things :'(
 GREEN='\033[0;32m'		# Indicates all is well in the world :)
 
+NULL="NULL"
+
 CMD_ARG_NO_OPTIONS=0
-CMD_ARG_OPTIONS=1
-CMD_ARG_OPTIONS_EXTRA=2
+CMD_ARG_OPTIONS_MAX=3
 
 # Check commandline argument/s ("debug" is the only command currently
 # supported.)
 if [ $# -eq $CMD_ARG_NO_OPTIONS ]
 then
-    CMD="gmake"
+    CMD="gmake -j8"
     CMD_ARG0=""
     printCMDInfo $CMD $CMD_ARG0
     gmake $CMD_ARG_OPT1
     CMD_RET=$?
     printCMDExitStatus $? $CMD $CMD_ARG0    
 else
-    if [ $# -eq $CMD_ARG_OPTIONS ]
+    if [ $# -le $CMD_ARG_OPTIONS_MAX ] # -le <- less then or equal.
     then
-	echo "Entering buildProper()"
-	handleBuildWithArgOptions $1
+	handleBuildWithArgOptions $@
     else
-	if [ $# -eq $CMD_ARG_OPTIONS_EXTRA ]
-	then
-	    echo "The ${$CMD_ARG_OPTIONS_EXTRA} argument/s option is not yet\
- implemented"
-	else
-	    echo -e "${RED}Error ("$#") argument's given but only 0 or 1 argument's\
- are allowed!${NO_COLOR}"
-	fi
+	echo -e "${RED}Error ("$#") argument's given but \
+("$CMD_ARG_OPTIONS_MAX") or less argument's are allowed!${NO_COLOR}"
     fi
 fi
