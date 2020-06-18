@@ -25,7 +25,7 @@ handleBuildWithArgOptions()
 	    CMD_ARG0=$CMD_ARG_OPT1
 	    
 	    printCMDInfo $CMD $CMD_ARG0
-	    gmake $CMD_ARG_OPT1
+	    $CMD_OPT1 $CMD_ARG_OPT1
 	    CMD_RET=$?
 	    printCMDExitStatus $? $CMD $CMD_ARG0
 	    ;;
@@ -34,7 +34,7 @@ handleBuildWithArgOptions()
 	    CMD_ARG0=$CMD_ARG_OPT1
 	    
 	    printCMDInfo $CMD $CMD_ARG0
-	    gmake $CMD_ARG_OPT1	# make file does not recognize "DEBUG"
+	    $CMD_OPT1 $CMD_ARG_OPT1	# make file does not recognize "DEBUG"
 	    CMD_RET=$?
 	    printCMDExitStatus $? $CMD $CMD_ARG0
 	    ;;
@@ -43,7 +43,7 @@ handleBuildWithArgOptions()
 	    CMD_ARG0=$CMD_ARG_OPT3
 	    
 	    printCMDInfo $CMD $CMD_ARG0
-	    gmake $CMD_ARG_OPT3
+	    $CMD_OPT1 $CMD_ARG_OPT3
 	    CMD_RET=$?
 	    printCMDExitStatus $? $CMD $CMD_ARG0
 	    ;;
@@ -52,7 +52,7 @@ handleBuildWithArgOptions()
 	    CMD_ARG0=$CMD_OPT2_ARG
 	    
 	    printCMDInfo $CMD $CMD_ARG0
-	    doxygen $CMD_OPT2_ARG
+	    $CMD_OPT2 $CMD_OPT2_ARG
 	    CMD_RET=$?
 	    printCMDExitStatus $? $CMD $CMD_ARG0
 	    ;;
@@ -110,7 +110,7 @@ then
     CMD="gmake -j8"
     CMD_ARG0=""
     printCMDInfo $CMD $CMD_ARG0
-    gmake $CMD_ARG_OPT1
+    $CMD
     CMD_RET=$?
     printCMDExitStatus $? $CMD $CMD_ARG0    
 else

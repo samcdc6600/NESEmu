@@ -13,6 +13,7 @@ BIN_NAME	= NESEmu
 SRC	= ./src
 IDIR	= $(SRC)/include
 ODIR	= ./obj
+DOCS	= ./docs
 DEPS	= $(wildcard $(IDIR)/*.hpp)
 CPP_DIRS	=  $(wildcard $(SRC)/*.cpp) # Get list of .cpp file directories.
 CPP_FILES	= $(subst $(SRC)/,,$(CPP_DIRS)) # Strip srings of paths.
@@ -47,3 +48,4 @@ debug:
 # Files with '#' and '~' seem to be left around be emacs >:'^(
 clean:
 	$(RM) $(BIN_NAME) $(ODIR)/*.o *.core *~ $(SRC)/*~ $(IDIR)/*~ \#*\# $(SRC)/\#*\# $(IDIR)/\#*\#
+	$(RM) -r $(DOCS)/*
