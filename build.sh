@@ -12,6 +12,7 @@ handleBuildWithArgOptions()
     
     CMD_OPT1="gmake -j8"
     CMD_OPT2="doxygen"
+    CMD_OPT2_ENHANCEMENT="./modifyHTMLDocsToCollapseCode.sh "
     CMD_OPT2_ARG="Doxyfile"
 
     MAKE_ARG=$1
@@ -27,7 +28,7 @@ handleBuildWithArgOptions()
 	    printCMDInfo $CMD $CMD_ARG0
 	    $CMD_OPT1 $CMD_ARG_OPT1
 	    CMD_RET=$?
-	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    printCMDExitStatus $CMD $CMD_ARG0
 	    ;;
 	$CMD_ARG_OPT2)
 	    CMD=$CMD_OPT1
@@ -36,7 +37,7 @@ handleBuildWithArgOptions()
 	    printCMDInfo $CMD $CMD_ARG0
 	    $CMD_OPT1 $CMD_ARG_OPT1	# make file does not recognize "DEBUG"
 	    CMD_RET=$?
-	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    printCMDExitStatus $CMD $CMD_ARG0
 	    ;;
 	$CMD_ARG_OPT3)
 	    CMD=$CMD_OPT1
@@ -45,7 +46,7 @@ handleBuildWithArgOptions()
 	    printCMDInfo $CMD $CMD_ARG0
 	    $CMD_OPT1 $CMD_ARG_OPT3
 	    CMD_RET=$?
-	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    printCMDExitStatus $CMD $CMD_ARG0
 	    ;;
 	$CMD_ARG_OPT4)
 	    CMD=$CMD_OPT2
@@ -54,7 +55,13 @@ handleBuildWithArgOptions()
 	    printCMDInfo $CMD $CMD_ARG0
 	    $CMD_OPT2 $CMD_OPT2_ARG
 	    CMD_RET=$?
-	    printCMDExitStatus $? $CMD $CMD_ARG0
+	    CMD=$CMD_OPT2_ENHANCEMENT
+	    CMD_ARG0=""
+	    printCMDInfo
+	    $CMD_OPT2_ENHANCEMENT
+	    CMD=$CMD_OPT2
+	    CMD_ARG0=$CMD_OPT2_ARG
+	    printCMDExitStatus $CMD $CMD_ARG0
 	    ;;
 	*)
 	    echo -e "${RED}Error argument (${1}) is not recognised! The only \
@@ -110,7 +117,7 @@ then
     printCMDInfo $CMD $CMD_ARG0
     $CMD
     CMD_RET=$?
-    printCMDExitStatus $? $CMD $CMD_ARG0    
+    printCMDExitStatus $CMD $CMD_ARG0    
 else
     if [ $# -le $CMD_ARG_OPTIONS_MAX ] # -le <- less then or equal.
     then

@@ -7,22 +7,14 @@
 
 
 CSS_FILE="docs/html/doxygen.css"
-HTML_FILE=""
 FILE_PATH="docs/html/*.html"
 HTML_REPLACE_FIRST="<div class=\"memdoc\">"
 HTML_REPLACE_SECOND="<\/div><!-- fragment -->"
 EMPTY_STRING=""
 TRUE="0"
 FALSE="1"
-#NEW_LINE='\033[0a'
-#EMPTY=""
 
-
-# FILES=`ls -1 docs/html/*.html`
-# cut -d' ' -f2 "${FILES}
-
-
-# The following for loop does the following
+# The following for loop does the following (as well as generating unique id's.)
 # First:
 # Add wrap-collapsible after class="memdoc
 # Then: Add the following...
@@ -96,35 +88,6 @@ do
     echo -e $NEW_FILE > $iter
     #    echo -e $NEW_FILE
 done
-
-
-# for iter in $FILE_PATH;
-# do
-#     echo $iter
-#     if [ "$iter" == "$FILE_PATH" ]
-#     then echo "${iter}"
-#     else
-# 	echo "No match"
-#     fi
-# done
-
-
-# First:
-# Add wrap-collapsible after class="memdoc
-# Then: Add the following...
-#	<input id="collapsible" class="toggle" type="checkbox">
-#	<label for="collapsible" class="lbl-toggle">See source</label>
-#	<div class="collapsible-content">
-#	<div class="content-inner">
-# sed -i -e 's/<div class="memdoc">/<div class="memdoc wrap-collapsible">\
-# <input id="collapsible" class="toggle" type="checkbox">\
-# <label for="collapsible" class="lbl-toggle">See source<\/label>\
-# <div class="collapsible-content"><div class="content-inner">\
-# /g' docs/html/*.html
-# # Now we need to add two closing tags for the two unclosed div's we've added
-# sed -i -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\
-# <\/div>\
-# <\/div>/g' docs/html/*.html
 
 
 # Now add the required css to doxygen.css file
