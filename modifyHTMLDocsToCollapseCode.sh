@@ -11,6 +11,7 @@ HTML_FILE=""
 FILE_PATH="docs/html/*.html"
 HTML_REPLACE_FIRST="<div class=\"memdoc\">"
 HTML_REPLACE_SECOND="<\/div><!-- fragment -->"
+EMPTY_STRING=""
 TRUE="0"
 FALSE="1"
 #NEW_LINE='\033[0a'
@@ -43,42 +44,54 @@ FALSE="1"
 # Iterate over html files in documentation directory
 for iter in `ls $FILE_PATH`
 do
+    FIRST_ITER=$TRUE
+    LAST_LINE=""
     NEW_FILE=""
     # Iterate over each line of the file. We found the code to do this on the
     # following site:
     # https://unix.stackexchange.com/questions/7011/how-to-loop-over-the-lines-of-a-file
     while IFS='' read -r LINE || [ -n "${LINE}" ]; do # -n s <-(s has non-zero length)
 	REPLACED=$FALSE
-	if echo "$LINE" | grep -q "${HTML_REPLACE_FIRST}";
+	if [ $FIRST_ITER != $TRUE ]
 	then
-	    NEW_FILE="${NEW_FILE}\n`echo $LINE | sed -e 's/<div class="memdoc">\
+	    if [ "${LINE}" != "${EMPTY_STRING}" ]
+	    then		
+		if echo "$LAST_LINE" | grep -q "${HTML_REPLACE_FIRST}";
+		then
+		    NEW_FILE="${NEW_FILE}\n`echo $LAST_LINE | sed -e 's/<div class="memdoc">\
 /<div class="memdoc wrap-collapsible">\
 <input id="collapsible" class="toggle" type="checkbox">\
 <label for="collapsible" class="lbl-toggle">See source<\/label>\
 <div class="collapsible-content"><div class="content-inner">\
 /g'`"
-	    REPLACED=$TRUE
-	fi
-	
-	if echo "$LINE" | grep -q "${HTML_REPLACE_SECOND}"
-	then
-	    NEW_FILE="${NEW_FILE}\n`echo $LINE | sed -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\
+		    REPLACED=$TRUE
+		fi
+	    fi
+	    
+	    if echo "$LAST_LINE" | grep -q "${HTML_REPLACE_SECOND}"
+	    then
+		NEW_FILE="${NEW_FILE}\n`echo $LAST_LINE | sed -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\
 <\/div>\
 <\/div>/g'`"
-	    REPLACED=$TRUE
-	fi
-	 
+		REPLACED=$TRUE
+	    fi
+	    
 
-	if [ ${REPLACED:-FALSE} == $FALSE ]
-	then
-	    GREEN='\033[0;32m'
-	    NC='\033[0m'	 
-	    NEW_FILE="${NEW_FILE}\n${LINE}"
+	    if [ ${REPLACED:-FALSE} == $FALSE ]
+	    then
+		GREEN='\033[0;32m'
+		NC='\033[0m'	 
+		NEW_FILE="${NEW_FILE}\n${LAST_LINE}"
+	    fi
+	else
+	    FIRST_ITER=$FALSE
 	fi
-	#echo "processing line: ${LINE}"
+	
+	LAST_LINE=$LINE
+	    #echo "processing line: ${LINE}"
     done < $iter
     echo -e $NEW_FILE > $iter
-#    echo -e $NEW_FILE
+    #    echo -e $NEW_FILE
 done
 
 

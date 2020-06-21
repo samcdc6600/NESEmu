@@ -2,9 +2,11 @@
 
 * GENERAL ======================================================================
 	- Consider using raw string for output handlePrintHelpCommand()
-  	- Consider using Doxygen for documentation!
 	- Fix problems when compiling with g++!
 	- Improve error messages for debug commands.
+	- Handle escape sequences in code included in doxygen documentation
+	  that is run through modifyHTMLDocsToCollapseCode.sh, e.g. "\n" is
+	  interprited as an escape sequence rather then being displayed!
 	- Improve code for "handlePrintHelp()"
 	- Make variables for parts of duplicated debug commands exception out
 	  put's in utils.cpp?
