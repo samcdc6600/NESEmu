@@ -46,7 +46,9 @@ for iter in `ls $FILE_PATH`
 do
     FIRST_ITER=$TRUE
     LAST_LINE=""
+    CODE_BLOCKS_ENCOUNTERED=0
     NEW_FILE=""
+    
     # Iterate over each line of the file. We found the code to do this on the
     # following site:
     # https://unix.stackexchange.com/questions/7011/how-to-loop-over-the-lines-of-a-file
@@ -58,12 +60,14 @@ do
 	    then		
 		if echo "$LAST_LINE" | grep -q "${HTML_REPLACE_FIRST}";
 		then
+		    export CODE_BLOCKS_ENCOUNTERED
 		    NEW_FILE="${NEW_FILE}\n`echo $LAST_LINE | sed -e 's/<div class="memdoc">\
 /<div class="memdoc wrap-collapsible">\
-<input id="collapsible" class="toggle" type="checkbox">\
-<label for="collapsible" class="lbl-toggle">See source<\/label>\
+<input id="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="toggle" type="checkbox">\
+<label for="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="lbl-toggle">See source<\/label>\
 <div class="collapsible-content"><div class="content-inner">\
 /g'`"
+		    CODE_BLOCKS_ENCOUNTERED=`expr "${CODE_BLOCKS_ENCOUNTERED}" + "1"`
 		    REPLACED=$TRUE
 		fi
 	    fi
@@ -88,7 +92,6 @@ do
 	fi
 	
 	LAST_LINE=$LINE
-	    #echo "processing line: ${LINE}"
     done < $iter
     echo -e $NEW_FILE > $iter
     #    echo -e $NEW_FILE
