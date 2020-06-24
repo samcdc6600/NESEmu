@@ -15,6 +15,12 @@
 	  type is not signed.
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
 	  can take advantge of pretty colours to help distinguish things.
+	- (LOW PRIORITY) fix problem with modifyHTMLDocsToCollapseCode.sh that
+	  causes code in the "See source" section that is too long too not fully
+	  display.
+	- (LOW PRIORITY) fix problem with modifyHTMLDocsToCollapseCode.sh that
+	  causes enumerator values to appear inside the "See source" section as
+	  opposed to outside it (see enum error::_error for example.)
 
 * CPU ==========================================================================
 	- Implement instructions.
