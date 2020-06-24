@@ -203,10 +203,22 @@ inline void plp_28()
 }
 
 
-/*! \brief ()
- */
-inline void eor_49()	// EOR	#i
+/*! \brief Exclusive-OR Memory with Accumulator.
+
+  A EOR M -> A					||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Immediate	||
+  Assembly Language Form:	EOR #Operand	||
+  Opcode:			49		||
+  Bytes 2					||
+  Cycles 2					|| */
+inline void eor_49()
 {
+  architecturalState::A ^= get8BitImmediate();
+  setNegativeFlagOn(architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
 }
 
 
