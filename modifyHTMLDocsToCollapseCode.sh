@@ -8,7 +8,8 @@
 
 CSS_FILE="docs/html/doxygen.css"
 FILE_PATH="docs/html/*.html"
-HTML_REPLACE_FIRST="<div class=\"memdoc\">"
+#HTML_REPLACE_FIRST="<div class=\"memdoc\">"
+HTML_REPLACE_FIRST="<div class=\"fragment\">"
 HTML_REPLACE_SECOND="<\/div><!-- fragment -->"
 EMPTY_STRING=""
 TRUE="0"
@@ -36,8 +37,6 @@ FALSE="1"
 # Iterate over html files in documentation directory
 for iter in `ls $FILE_PATH`
 do
-    FIRST_ITER=$TRUE
-    LAST_LINE=""
     CODE_BLOCKS_ENCOUNTERED=0
     NEW_FILE=""
     
@@ -46,47 +45,30 @@ do
     # https://unix.stackexchange.com/questions/7011/how-to-loop-over-the-lines-of-a-file
     while IFS='' read -r LINE || [ -n "${LINE}" ]; do # -n s <-(s has non-zero length)
 	REPLACED=$FALSE
-	if [ $FIRST_ITER != $TRUE ]
+	if echo "$LINE" | grep -q "${HTML_REPLACE_FIRST}";
 	then
-	    if [ "${LINE}" != "${EMPTY_STRING}" ]
-	    then		
-		if echo "$LAST_LINE" | grep -q "${HTML_REPLACE_FIRST}";
-		then
-		    export CODE_BLOCKS_ENCOUNTERED
-		    NEW_FILE="${NEW_FILE}\n`echo $LAST_LINE | sed -e 's/<div class="memdoc">\
-/<div class="memdoc wrap-collapsible">\
+	    export CODE_BLOCKS_ENCOUNTERED
+	    
+	    LINE="`echo $LINE | sed -e 's/<div class="fragment">\
+/<div class="fragment wrap-collapsible">\
 <input id="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="toggle" type="checkbox">\
 <label for="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="lbl-toggle">See source<\/label>\
 <div class="collapsible-content"><div class="content-inner">\
-/g'`"
-		    CODE_BLOCKS_ENCOUNTERED=`expr "${CODE_BLOCKS_ENCOUNTERED}" + "1"`
-		    REPLACED=$TRUE
-		fi
-	    fi
-	    
-	    if echo "$LAST_LINE" | grep -q "${HTML_REPLACE_SECOND}"
-	    then
-		NEW_FILE="${NEW_FILE}\n`echo $LAST_LINE | sed -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\
-<\/div>\
-<\/div>/g'`"
-		REPLACED=$TRUE
-	    fi
-	    
-
-	    if [ ${REPLACED:-FALSE} == $FALSE ]
-	    then
-		GREEN='\033[0;32m'
-		NC='\033[0m'	 
-		NEW_FILE="${NEW_FILE}\n${LAST_LINE}"
-	    fi
-	else
-	    FIRST_ITER=$FALSE
+/g'`"		    
+	    CODE_BLOCKS_ENCOUNTERED=`expr "${CODE_BLOCKS_ENCOUNTERED}" + "1"`
 	fi
 	
-	LAST_LINE=$LINE
+	if echo "$LINE" | grep -q "${HTML_REPLACE_SECOND}"
+	then
+	    LINE="`echo $LINE | sed -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\
+<\/div>\
+<\/div>/g'`"
+	fi
+	
+	NEW_FILE="${NEW_FILE}\n${LINE}"
+	
     done < $iter
     echo -e $NEW_FILE > $iter
-    #    echo -e $NEW_FILE
 done
 
 

@@ -203,6 +203,8 @@ inline void plp_28()
 }
 
 
+/*! \brief ()
+ */
 inline void eor_49()	// EOR	#i
 {
 }

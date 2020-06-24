@@ -1,6 +1,7 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * GENERAL ======================================================================
+	- Update comments to work with Doxygen.
 	- Consider using raw string for output handlePrintHelpCommand()
 	- Fix problems when compiling with g++!
 	- Improve error messages for debug commands.
@@ -19,8 +20,8 @@
 	  causes code in the "See source" section that is too long too not fully
 	  display.
 	- (LOW PRIORITY) fix problem with modifyHTMLDocsToCollapseCode.sh that
-	  causes enumerator values to appear inside the "See source" section as
-	  opposed to outside it (see enum error::_error for example.)
+	  causes newlines in the "See source" section to be interprited as
+	  newliens.
 
 * CPU ==========================================================================
 	- Implement instructions.
