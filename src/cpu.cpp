@@ -374,6 +374,7 @@ bool dispatchInstruction()
     case 0x8f:			// SAX	a
       break;
     case 0x90:			// BCC	*+d
+      bcc_90();
       break;
     case 0x91:			// STA	(d),y
       break;

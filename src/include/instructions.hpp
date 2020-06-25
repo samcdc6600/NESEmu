@@ -44,28 +44,29 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
    OPERATIONS", as these functions assume it has not been altered yet! */
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
-inline void bpl_10();	// BPL	*+d
-inline void clc_18();	// CLC
-inline void plp_28();	// PLP
-inline void eor_49();	// EOR	#i
-inline void jmp_4c();	// JMP	a
-inline void adc_69();	// ADC	#i
-inline void dey_88();	// DEY
-inline void sta_8d();	// STA	a
-inline void tya_98();	// TYA
-inline void txs_9a();	// TXS
-inline void ldy_a0();	// LDY	#i
-inline void ldx_a2();	// LDX	#i
-inline void lda_a9();	// TAX
-inline void tax_aa();	// TAX
-inline void lda_ad();	// LDA	a
-inline void cpy_c0();	// CPY	#
-inline void cmp_c9();	// CMP	#i
-inline void dex_ca();	// DEX
-inline void bne_d0();	// BNE	*+d
-inline void cdl_d8();	// CLD
-inline void nop_ea();	// NOP
-inline void beq_f0();	// BEQ	*+d
+inline void bpl_10();
+inline void clc_18();
+inline void plp_28();
+inline void eor_49();
+inline void jmp_4c();
+inline void adc_69();
+inline void dey_88();
+inline void sta_8d();
+inline void bcc_90();
+inline void tya_98();
+inline void txs_9a();
+inline void ldy_a0();
+inline void ldx_a2();
+inline void lda_a9();
+inline void tax_aa();
+inline void lda_ad();
+inline void cpy_c0();
+inline void cmp_c9();
+inline void dex_ca();
+inline void bne_d0();
+inline void cdl_d8();
+inline void nop_ea();
+inline void beq_f0();
 
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
@@ -187,7 +188,8 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
   Cycles 2**					||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
-  branch is taken and add one more if the branch crosses a page boundary. */
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC*/
 inline void bpl_10()
 {
   if(architecturalState::status.u.N == 0)
@@ -278,6 +280,29 @@ inline void sta_8d()
   storeAbsoluteThis(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
+}
+
+
+
+/*! \brief Branch on Carry Clear
+
+  branch on C = 0			        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative	||
+  Assembly Language Form:	BCC oper	||
+  Opcode:			90		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC*/
+inline void bcc_90()
+{
+  if(architecturalState::status.u.C == 0)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
 }
 
 
