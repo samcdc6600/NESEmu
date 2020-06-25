@@ -404,7 +404,9 @@ void handlePrintHelpCommand(const char * argv[], const std::string command)
      statment! */
   if(command[command::cmdIndex] != command::helpCmd &&
      command[command::cmdIndex] != command::helpCmdUpper)
-    std::cerr<<"Invalid command (\""<<command<<"\") entered: ";
+    {
+      std::cerr<<"Invalid command (\""<<command<<"\") entered: ";
+    }
   std::cerr<<"Please enter one of the following:\n\t"<<command::helpCmd<<"\t\t:"
     " where \""<<command::helpCmd<<"\" stands for \"help\" and will print this "
     "\n\t\t\t  message. Note that \""<<command::helpCmdUpper<<"\" is also "
@@ -436,12 +438,17 @@ void handlePrintHelpCommand(const char * argv[], const std::string command)
     "it\n\t\t\t  to list all breakpoints and giving it addresses X and\n\t\t\t "
     " Z as it's arguments will cause it to list out the\n\t\t\t  contents of "
     "memory in the range [X, Z]. Note that "<<command::listCmdUpper<<"\n\t\t\t "
-    " is also accepted.\n\t"<<command::runCmd<<"\t\t: where \""
-	   <<command::runCmd<<"\" stands for \"run\". This will cause "
-	   <<argv[startCmd::binName]<<"\n\t\t\t  to execute instructions untill"
-    " the PC is equal to a\n\t\t\t  breakpoint (if there are no breakpoints set"
-    " then\n\t\t\t  execution will not stop.) Note that \""
-	   <<command::runCmdUpper<<"\" is also\n\t\t\t  accepted.\n\t"
+    " is also accepted.\n\t"<<command::runCmd<<" [X]\t\t: where \""
+	   <<command::runCmd<<"\" stands for \"run\" and \"X\" is an optional\n"
+    "\t\t\t  positive number (if the number is negative it will \n\t\t\t  "
+    "wrap around) including 0. Without the optional\n\t\t\t  "
+    "argument "<<argv[startCmd::binName]<<" will execute instructions untill "
+    "the\n\t\t\t  PC is equal to a breakpoint (if there are no\n\t\t\t  "
+    "breakpoints set then execution will not stop.) With\n\t\t\t  the optional "
+    "argument "<<argv[startCmd::binName]<<" will execute X\n\t\t\t  "
+    "instructions (where X is a non negative number as\n\t\t\t  previously "
+    "stated) unless the PC becomes equal to a\n\t\t\t  breakpoint. Note that \""
+	   <<command::runCmdUpper<<"\" is also accepted.\n\t"
 	   <<command::fiddleCmd<<" X Y\t\t: where \""<<command::fiddleCmd<<"\" "
     "stands for \"fiddle with architectural\n\t\t\t  state\", \"X\" is one of {"
 	   <<command::fiddleArgs::accumulator<<" | "<<command::fiddleArgs::X
