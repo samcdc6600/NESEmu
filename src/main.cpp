@@ -18,6 +18,7 @@ void checkArgs(const int argc, const char * argv[]);
 void initialise(const int argc, const char * argv[]);
 #ifdef DEBUG
 bool handleDebugCommand(const char * argv[], bool & next, bool & run,
+			unsigned long long & runLen,
 			std::vector<memory::address> & breakpoints);
 void handlePrintCommand(const std::string command);
 /* Returns false if a command (command) of the form "C X ... ", has a malformed
@@ -35,7 +36,12 @@ void handleBreakCommand(const std::string command,
 			std::vector<memory::address> & breakpoints);
 void handleListCommand(const std::string command,
 		       std::vector<memory::address> & breakpoints);
-void handleRunCommand(const std::string command, bool & run);
+/* Returns with run set to true and runLen unchanged if command =
+   "r" or "R". Returns with run unchanged and runLen set to n if command =
+   "r n" or "R n", where n is some number in the range
+   [0, std::numeric_limits<unsigned long long>::max()]. */
+void handleRunCommand(const std::string command, bool & run, unsigned long
+		      long & runLen);
 inline bool checkCommandWithNoArgsConstraint(const std::string command,
 					     const char cmd, const char altCmd);
 void handleFiddleCommand(const std::string command);
@@ -67,8 +73,11 @@ int main(const int argc, const char * argv[])
 #ifdef DEBUG
   bool next {false};	       // Don't execute the first instruction.
   bool run {false};	       // Don't execute the first instruction.
+  // How many instructions to execute without interruption.
+  unsigned long long runLen {};
   memory::address currentPC {};
   std::vector<memory::address> breakpoints {};
+  
   do
     {
     AFTER_TEST:
@@ -76,23 +85,31 @@ int main(const int argc, const char * argv[])
       if(std::find(breakpoints.begin(), breakpoints.end(), currentPC) ==
 	 breakpoints.end())
 	{			// We haven't reached a breakpoint
-	  if(next || run)
-	    {
+	  if(next)
+	    {			// Execute the next instruction.
 	      cpu();
-	      if(run)
+	    }
+	  else
+	    { // Execute indefinitly if run = true or untill runLen = 0
+	      if(run || runLen > 0)
+		{
+		  --runLen;
+		  cpu();
 		  goto AFTER_TEST;
+		}
 	    }
 	}
       else
 	{
 	  run = false;
+	  runLen = 0;
 	  breakpoints.erase(std::remove(breakpoints.begin(), breakpoints.end(),
 					currentPC), breakpoints.end());
 	}
       next = false;
       std::cout<<": ";		// Print a prompt...
     }
-  while(handleDebugCommand(argv, next, run, breakpoints));
+  while(handleDebugCommand(argv, next, run, runLen, breakpoints));
   std::cout<<"================================== Goodbye :) =================="
     "================\n";
 #endif
@@ -123,6 +140,7 @@ void initialise(const int argc, const char * argv[])
 
 #ifdef DEBUG
 bool handleDebugCommand(const char * argv[], bool & next, bool & run,
+			unsigned long long & runLen,
 			std::vector<memory::address> & breakpoints)
 {
   bool ret {true};
@@ -154,7 +172,7 @@ bool handleDebugCommand(const char * argv[], bool & next, bool & run,
 	  break;
 	case command::runCmd:
 	case command::runCmdUpper:
-	  handleRunCommand(command, run);
+	  handleRunCommand(command, run, runLen);
 	  break;
 	case command::fiddleCmd:
 	case command::fiddleCmdUpper:
@@ -298,19 +316,53 @@ void handleListCommand(const std::string command,
 }
 
 
-void handleRunCommand(const std::string command, bool & run)
+void handleRunCommand(const std::string command, bool & run,
+		      unsigned long long & runLen)
 {
+  size_t pos {};
+  size_t getNumbersFromStrInHexCallCount {};
+  size_t runLenMin {std::numeric_limits<unsigned long long>::min()},
+    runLenMax {std::numeric_limits<unsigned long long>::max()};
+  
   if(checkCommandWithNoArgsConstraint(command, command::runCmd,
 				      command::runCmdUpper))
+    {
       run = true;
+    }
   else
-      std::cerr<<"Error: malformed run command (\""<<command
-	       <<"\") encountered.\n";
+    {
+      if(checkCommandWithArgsConstraint(command))
+	{
+	  if(command[command::cmdIndex] == command::runCmd)
+	    {
+	      pos = getPosAfterDelimAfterCommand(command, command::runCmd);
+	    }
+	  else
+	    {
+	      pos = getPosAfterDelimAfterCommand(command, command::runCmdUpper);
+	    }
+	  std::stringstream ssCommand {command.substr(pos)};
+	  getNumbersFromStrInHex(ssCommand, getNumbersFromStrInHexCallCount, runLen);
+	  
+	  if(runLen < runLenMin)
+	    {
+	      std::cerr<<"Error: malformed run command (\""<<command<<"\") "
+		"encountered. argument ("<<runLen<<") out of range ["<<runLenMin
+		       <<", "<<runLenMax<<"]. Note that negative numbers wrap "
+		"around\n";
+	    }
+	}
+      else
+	{
+	  std::cerr<<"Error: malformed run command (\""<<command
+		   <<"\") encountered.\n";
+	}
+    }
 }
 
 
 /* This would be more flexible as a recursive template function (however we dont
-need anything other then two argument right now.) */
+   need anything other than two argument right now.) */
 inline bool checkCommandWithNoArgsConstraint(const std::string command,
 					     const char cmd, const char altCmd)
 {

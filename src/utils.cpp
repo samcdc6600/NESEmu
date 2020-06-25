@@ -77,34 +77,34 @@ void printBufferAsMemory(const memory::minimumAddressableUnit buff [],
 }
 
 
-void printMemeory(std::stringstream argsSS)
+void printMemeory(std::stringstream ssArgs)
 {		     // We expect addressStr to be in base addressBase
   memory::address address {};
 
   try
     {
-      getNumbersFromStrInHex(argsSS, defaultCallCount, address);
+      getNumbersFromStrInHex(ssArgs, defaultCallCount, address);
       checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize));
       std::cout<<std::hex<<memory::address(memory::mem[address])<<'\n';
     }
   catch(const std::exception & e)
     {
       std::cerr<<"Error: converting print command argument (\""
-	       <<argsSS.str()<<"\") to integer of type (\""
+	       <<ssArgs.str()<<"\") to integer of type (\""
 	       <<typeid(memory::address).name()<<"\"), recived exception \""
 	       <<e.what()<<".\"\n";
     }
 }
 
 
-void alterMemory(std::stringstream argsSS)
+void alterMemory(std::stringstream ssArgs)
 {
   memory::address address {};
   memory::minimumAddressableUnit value {};
   
   try
     {
-      getNumbersFromStrInHex(argsSS, defaultCallCount, address, value);
+      getNumbersFromStrInHex(ssArgs, defaultCallCount, address, value);
       checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize),
 		     numRange(value, 0,
 			      memory::minimumAddressableUnitMax +1));
@@ -113,7 +113,7 @@ void alterMemory(std::stringstream argsSS)
   catch(const std::exception & e)
     {
       std::cerr<<"Error: converting alter command arguments (\""
-	       <<argsSS.str()<<"\") to integers of types (\""
+	       <<ssArgs.str()<<"\") to integers of types (\""
 	       <<typeid(memory::address).name()<<"\") and (\""
 	       <<typeid(memory::minimumAddressableUnit).name()<<"\"), recived "
 	"exception \""<<e.what()<<".\"\n";
@@ -121,14 +121,14 @@ void alterMemory(std::stringstream argsSS)
 }
 
 
-void setBreakpoint(std::stringstream argsSS,
+void setBreakpoint(std::stringstream ssArgs,
 	      std::vector<memory::address> & breakpoints)
 {
   memory::address address {};
 
   try
     {
-      getNumbersFromStrInHex(argsSS, defaultCallCount, address);
+      getNumbersFromStrInHex(ssArgs, defaultCallCount, address);
       checkIntRanges(defaultCallCount, numRange(address, 0, memory::memSize));
 
       bool removed {false};
@@ -147,7 +147,7 @@ void setBreakpoint(std::stringstream argsSS,
   catch(const std::exception & e)
     {
       std::cerr<<"Error: converting set breakpoint command argument (\""
-	       <<argsSS.str()<<"\") to integer of type (\""
+	       <<ssArgs.str()<<"\") to integer of type (\""
 	       <<typeid(memory::address).name()<<"\"), recived exception \""
 	       <<e.what()<<".\"\n";
     }
@@ -164,13 +164,13 @@ void listBreakpoints(std::vector<memory::address> & breakpoints)
 }
 
 
-void listMemory(std::stringstream argsSS)
+void listMemory(std::stringstream ssArgs)
 {
   memory::address addressX {}, addressZ {};
 
   try
     {
-      getNumbersFromStrInHex(argsSS, defaultCallCount, addressX, addressZ);
+      getNumbersFromStrInHex(ssArgs, defaultCallCount, addressX, addressZ);
       checkIntRanges(defaultCallCount, numRange(addressX, 0, memory::memSize),
 		     numRange(addressZ, 0, memory::memSize));
       enforce1stLessThenOrEqTo2nd(defaultCallCount, addressX, addressZ);
@@ -179,7 +179,7 @@ void listMemory(std::stringstream argsSS)
   catch(const std::exception & e)
     {
       std::cerr<<"Error: converting list (memory) command arguments (\""
-	       <<argsSS.str()<<"\") to integers of types (\""
+	       <<ssArgs.str()<<"\") to integers of types (\""
 	       <<typeid(memory::address).name()<<"\") and (\""
 	       <<typeid(memory::address).name()<<"\"), recived exception \""
 	       <<e.what()<<".\"\n";
@@ -207,7 +207,7 @@ void listMemoryProper(const memory::address addressX,
   ======================== of the follow include statment! =================== */
 #include "include/architecturalState.hpp"
 
-void fiddleWithArchitecturalState(std::stringstream argsSS)
+void fiddleWithArchitecturalState(std::stringstream ssArgs)
 {  
   try
     {
@@ -221,36 +221,36 @@ void fiddleWithArchitecturalState(std::stringstream argsSS)
       size_t cycles {};			// Current clock cycle
 
       char toFiddle {};
-      argsSS>>toFiddle;
+      ssArgs>>toFiddle;
 
       switch(toFiddle)
 	{
 	case command::fiddleArgs::accumulator:
 	  
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, A);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, A);
 	  checkIntRanges(defaultCallCount, numRange(A, std::numeric_limits<unsigned char>::lowest(),
 						    std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::A = A;
 	  break;
 	case command::fiddleArgs::X:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, X);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, X);
 	  checkIntRanges(defaultCallCount, numRange(X, std::numeric_limits<unsigned char>::lowest(),
 						    std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::X = X;
 	  break;
 	case command::fiddleArgs::Y:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, Y);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, Y);
 	  checkIntRanges(defaultCallCount, numRange(Y, std::numeric_limits<unsigned char>::lowest(),
 						    std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::Y = Y;
 	  break;
 	case command::fiddleArgs::PC:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, PC);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, PC);
 	  checkIntRanges(defaultCallCount, numRange(PC, 0, size_t(memory::memSize)));
 	  architecturalState::PC = PC;
 	  break;
 	case command::fiddleArgs::stack:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, S);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, S);
 	  /* Stack Starts at offset 0x0100 and covers the range [0x0100, 0x01ff]
 	     it wraps around (basically just let the numbers do their thing :)
 	     .) */
@@ -259,13 +259,13 @@ void fiddleWithArchitecturalState(std::stringstream argsSS)
 	  architecturalState::S = S;
 	  break;
 	case command::fiddleArgs::status:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, status);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, status);
 	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<unsigned char>::lowest(),
 						    std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::status.flags = status;
 	  break;
 	case command::fiddleArgs::cycles:
-	  getNumbersFromStrInHex(argsSS, defaultCallCount, cycles);
+	  getNumbersFromStrInHex(ssArgs, defaultCallCount, cycles);
 	  /* Can't do +1 here because we will wrap around. Probably don't need
 	     that last cycle anyway ;) */
 	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<size_t>::lowest(),
@@ -274,14 +274,14 @@ void fiddleWithArchitecturalState(std::stringstream argsSS)
 	  break;
 	default:
 	  e<<"unknown argument (\""
-	   <<argsSS.str()[command::argsStrippedOfCmdIndex]<<"\")";
+	   <<ssArgs.str()[command::argsStrippedOfCmdIndex]<<"\")";
 	  throw std::invalid_argument(e.str());
 	}
     }
   catch(const std::exception & e)
     {
       std::cerr<<"Error: processing fiddle command arguments (\""
-	       <<argsSS.str()<<"\"), recived exception \""
+	       <<ssArgs.str()<<"\"), recived exception \""
 	       <<e.what()<<".\"\n";
     }
 }

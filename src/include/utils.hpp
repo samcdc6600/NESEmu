@@ -130,20 +130,20 @@ void loadFile(const std::string & path, unsigned char buff [], const size_t s,
 // Where s is the size of the buffer in bytes.
 void printBufferAsMemory(const memory::minimumAddressableUnit buff [], const size_t s);
 /* Print minimumAddressableUnitSize bit of memory starting at addressStr. That
-   is if argsSS is well-formed, otherwise print error message.*/
-void printMemeory(std::stringstream argsSS);
-/* Set memory at addressStr equal to x. That is if argsSS is well-formed,
+   is if ssArgs is well-formed, otherwise print error message.*/
+void printMemeory(std::stringstream ssArgs);
+/* Set memory at addressStr equal to x. That is if ssArgs is well-formed,
    otherwise print error message. */
-void alterMemory(std::stringstream argsSS);
-/* Add breakpoint at address in argsSS to breakpoints. That is if argsSS is
+void alterMemory(std::stringstream ssArgs);
+/* Add breakpoint at address in ssArgs to breakpoints. That is if ssArgs is
    well-formed, otherwise print error message. */
-void setBreakpoint(std::stringstream argsSS,
+void setBreakpoint(std::stringstream ssArgs,
 	      std::vector<memory::address> & breakpoints);
 void listBreakpoints(std::vector<memory::address> & breakpoints);
-/* List memory in the range [X, Z], where X and Z come from argsSS. That is if
-argsSS is well-formed, otherwise print error message. */
-void listMemory(std::stringstream argsSS);
-void fiddleWithArchitecturalState(std::stringstream argsSS);
+/* List memory in the range [X, Z], where X and Z come from ssArgs. That is if
+ssArgs is well-formed, otherwise print error message. */
+void listMemory(std::stringstream ssArgs);
+void fiddleWithArchitecturalState(std::stringstream ssArgs);
 
 
 //================= Functions To Extract Numbers From A String =================
@@ -207,7 +207,7 @@ inline void getNumbersFromStrInHex(std::stringstream & str, size_t callCount)
 
 
 /* Extracts numbers of type T for str and stores in retNumber, throws exception
-   if there number cannot be read from str or if there are too few (a case where
+   if the number cannot be read from str or if there are too few (a case where
    the number cannot be read) or too many numbers in str. Note that the argument
    callCount should generally be 0 unless you are doing something wired. */
 template <typename T, typename ... Args>
