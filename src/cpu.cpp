@@ -477,6 +477,7 @@ bool dispatchInstruction()
     case 0xbf:			// LAX	a,y
       break;
     case 0xc0:			// CPY	#i
+      cpy_c0();
       break;
     case 0xc1:			// CMP	(d,x)
       break;

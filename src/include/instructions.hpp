@@ -59,6 +59,7 @@ inline void ldx_a2();	// LDX	#i
 inline void lda_a9();	// TAX
 inline void tax_aa();	// TAX
 inline void lda_ad();	// LDA	a
+inline void cpy_c0();	// CPY	#
 inline void cmp_c9();	// CMP	#i
 inline void dex_ca();	// DEX
 inline void bne_d0();	// BNE	*+d
@@ -175,10 +176,20 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 // ============ (indicated by their prefixs) are grouped together.) ============
 
 
+/*! \brief Branch on Result Plus.
+
+  branch on N = 0		       		||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative	||
+  Assembly Language Form:	BPL oper	||
+  Opcode:			10		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. */
 inline void bpl_10()
-{ /* Branches are dependant on the status of the flag bits when the op code is
-     encountered. A branch not taken requires two machine cycles. Add one if the
-     branch is taken and add one more if the branch crosses a page boundary. */
+{
   if(architecturalState::status.u.N == 0)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
@@ -186,8 +197,17 @@ inline void bpl_10()
 }
 
 
+/*! \brief Clear Carry Flag.
+
+  0 -> C			       		||
+  (N-, Z-, C 0, I-, D-, V-) 			||
+  Addressing Mode:		implied		||
+  Assembly Language Form:	CLC		||
+  Opcode:			18		||
+  Bytes 1					||
+  Cycles 2					|| */
 inline void clc_18()
-{				// Clear Carry Flag
+{
   architecturalState::status.u.C = 0;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
@@ -332,12 +352,44 @@ inline void lda_ad()
 }
 
 
+/*! \brief Compare Memory and Index Y
+
+  Y - M						||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Immediate	||
+  Assembly Language Form:	CPY #oper	||
+  Opcode:			C0		||
+  Bytes 2					||
+  Cycles 2					|| */
+inline void cpy_c0()
+{
+  architecturalState::status.u.C = ((architecturalState::Y == get8BitImmediate())
+				    || (architecturalState::Y >
+					get8BitImmediate())) ? 1 : 0;
+  setZeroFlagOn(architecturalState::Y - get8BitImmediate());
+  setNegativeFlagOn(architecturalState::Y - get8BitImmediate());
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Immediate	||
+  Assembly Language Form:	CMP #oper	||
+  Opcode:			C9		||
+  Bytes 2					||
+  Cycles 2					||
+  Compare sets flags as if a subtraction had been carried out. If the value
+  in the accumulator is equal or greater than the compared value, the Carry
+  will be set. The equal (Z) and negative (N) flags will be set based on
+  equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
+  - http://6502.org/tutorials/6502opcodes.html#CMP */
+
 inline void cmp_c9()
-{ /* Compare sets flags as if a subtraction had been carried out. If the value
-     in the accumulator is equal or greater than the compared value, the Carry
-     will be set. The equal (Z) and negative (N) flags will be set based on
-     equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
-     - http://6502.org/tutorials/6502opcodes.html#CMP */
+{
   architecturalState::status.u.C = ((architecturalState::A == get8BitImmediate())
 				    || (architecturalState::A >
 					get8BitImmediate())) ? 1 : 0;
