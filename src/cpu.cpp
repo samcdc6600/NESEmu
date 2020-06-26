@@ -177,6 +177,7 @@ bool dispatchInstruction()
     case 0x2f:			// RLA	a
       break;
     case 0x30:			// BMI	*+d
+      bmi_30();
       break;
     case 0x31:			// AND	(d),y
       break;
@@ -446,6 +447,7 @@ bool dispatchInstruction()
     case 0xaf:			// LAX	a
       break;
     case 0xb0:			// BCS	*+d
+      bcs_b0();
       break;
     case 0xb1:			// LDA	(d),y
       break;
@@ -547,6 +549,7 @@ bool dispatchInstruction()
     case 0xdf:			// DCP	a,x
       break;
     case 0xe0:			// CPX	#i
+      cpx_e0();
       break;
     case 0xe1:			// SBC	(d,x)
       break;

@@ -47,6 +47,7 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 inline void bpl_10();
 inline void clc_18();
 inline void plp_28();
+inline void bmi_30();
 inline void eor_49();
 inline void jmp_4c();
 inline void adc_69();
@@ -60,11 +61,13 @@ inline void ldx_a2();
 inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
+inline void bcs_b0();
 inline void cpy_c0();
 inline void cmp_c9();
 inline void dex_ca();
 inline void bne_d0();
 inline void cdl_d8();
+inline void cpx_e0();
 inline void nop_ea();
 inline void beq_f0();
 
@@ -189,7 +192,7 @@ inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
-  http://6502.org/tutorials/6502opcodes.html#BCC*/
+  http://6502.org/tutorials/6502opcodes.html#BCC */
 inline void bpl_10()
 {
   if(architecturalState::status.u.N == 0)
@@ -222,6 +225,28 @@ inline void plp_28()
   architecturalState::status.flags = pullFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Branch on Result Minus
+
+  Branch on N = 1		       		||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative	||
+  Assembly Language Form:	BMI oper	||
+  Opcode:			30		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC */
+inline void bmi_30()
+{
+  if(architecturalState::status.u.N == 1)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
 }
 
 
@@ -296,7 +321,7 @@ inline void sta_8d()
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
-  http://6502.org/tutorials/6502opcodes.html#BCC*/
+  http://6502.org/tutorials/6502opcodes.html#BCC */
 inline void bcc_90()
 {
   if(architecturalState::status.u.C == 0)
@@ -377,6 +402,28 @@ inline void lda_ad()
 }
 
 
+/*! \brief Branch on Carry Set
+
+  Branch on C = 1			       	||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative	||
+  Assembly Language Form:	BCS oper	||
+  Opcode:			B0		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC */
+inline void bcs_b0()
+{
+  if(architecturalState::status.u.C == 1)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
 /*! \brief Compare Memory and Index Y
 
   Y - M						||
@@ -412,7 +459,6 @@ inline void cpy_c0()
   will be set. The equal (Z) and negative (N) flags will be set based on
   equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
   - http://6502.org/tutorials/6502opcodes.html#CMP */
-
 inline void cmp_c9()
 {
   architecturalState::status.u.C = ((architecturalState::A == get8BitImmediate())
@@ -455,6 +501,27 @@ inline void cdl_d8()
      - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=CLD */
   setDecimalFlagOn(false);
   architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory and Index X
+
+  X - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Immediate	||
+  Assembly Language Form:	CPX #oper	||
+  Opcode:			e0		||
+  Bytes 2					||
+  Cycles 2					|| */
+inline void cpx_e0()
+{
+  architecturalState::status.u.C = ((architecturalState::X == get8BitImmediate())
+				    || (architecturalState::X >
+					get8BitImmediate())) ? 1 : 0;
+  setZeroFlagOn(architecturalState::X - get8BitImmediate());
+  setNegativeFlagOn(architecturalState::X - get8BitImmediate());
+  architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
 
