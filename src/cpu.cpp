@@ -428,6 +428,7 @@ bool dispatchInstruction()
     case 0xa7:			// LAX	d
       break;
     case 0xa8:			// TAY
+      tay_a8();
       break;
     case 0xa9:			// LDA	#i
       lda_a9();

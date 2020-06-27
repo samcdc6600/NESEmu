@@ -48,6 +48,7 @@ inline void bpl_10();
 inline void clc_18();
 inline void plp_28();
 inline void bmi_30();
+inline void pha_48();
 inline void eor_49();
 inline void jmp_4c();
 inline void adc_69();
@@ -58,6 +59,7 @@ inline void tya_98();
 inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
+inline void tay_a8();
 inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
@@ -168,6 +170,13 @@ inline memory::minimumAddressableUnit pullFromStack()
 }
 
 
+inline memory::minimumAddressableUnit pushToStack(const memory::minimumAddressableUnit var)
+{
+  // return get8BitAtAddress(architecturalState::stackBase |
+  // 			  architecturalState::S--);
+}
+
+
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 {
   return memory::mem[a];
@@ -250,6 +259,20 @@ inline void bmi_30()
 }
 
 
+/*! \brief Push Accumulator on Stack
+
+  Push A					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	PHA		||
+  Opcode:			48		||
+  Bytes 1					||
+  Cycles 3					|| */
+inline void pha_48()
+{
+}
+
+
 /*! \brief Exclusive-OR Memory with Accumulator.
 
   A EOR M -> A					||
@@ -262,8 +285,8 @@ inline void bmi_30()
 inline void eor_49()
 {
   architecturalState::A ^= get8BitImmediate();
-  setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
@@ -283,8 +306,8 @@ inline void adc_69()
   setCarryFlagOnAdditionOn(architecturalState::A, get8BitImmediate());
   setOverFlowOnAdditionOn(architecturalState::A, get8BitImmediate(), aR);
   architecturalState::A = aR;
-  setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
@@ -293,8 +316,8 @@ inline void adc_69()
 inline void dey_88()
 {
   architecturalState::Y -= 1;
-  setNegativeFlagOn(architecturalState::Y);
   setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
@@ -334,8 +357,8 @@ inline void bcc_90()
 inline void tya_98()
 {
   architecturalState::A = architecturalState::Y;
-  setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
@@ -345,8 +368,8 @@ inline void txs_9a()
 { /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X
      index to the stack pointer."
      - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
-  setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::S = architecturalState::X;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
@@ -355,8 +378,8 @@ inline void txs_9a()
 inline void ldy_a0()
 {
   architecturalState::Y = get8BitImmediate();
-  setNegativeFlagOn(architecturalState::Y);
   setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
@@ -365,9 +388,28 @@ inline void ldy_a0()
 inline void ldx_a2()
 {
   architecturalState::X = get8BitImmediate();
-  setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Transfer Accumulator to Index Y
+
+  A -> Y				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	TAY		||
+  Opcode:			A8		||
+  Bytes 1					||
+  Cycles 2					|| */
+inline void tay_a8()
+{
+  architecturalState::Y = architecturalState::A;
+  setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
@@ -375,8 +417,8 @@ inline void ldx_a2()
 inline void lda_a9()
 {
   architecturalState::A = get8BitImmediate();
-  setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
@@ -385,8 +427,8 @@ inline void lda_a9()
 inline void tax_aa()
 {
   architecturalState::X = architecturalState::A;
-  setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
@@ -395,8 +437,8 @@ inline void tax_aa()
 inline void lda_ad()
 {
   architecturalState::A = memory::mem[get16BitImmediate()];
-  setNegativeFlagOn(architecturalState::A);
   setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -474,8 +516,8 @@ inline void cmp_c9()
 inline void dex_ca()
 {
   architecturalState::X -= 1;
-  setNegativeFlagOn(architecturalState::X);
   setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
