@@ -226,6 +226,7 @@ bool dispatchInstruction()
     case 0x47:			// SRE	d
       break;
     case 0x48:			// PHA
+      pha_48();
       break;
     case 0x49:			// EOR	#i
       eor_49();
@@ -428,7 +429,7 @@ bool dispatchInstruction()
     case 0xa7:			// LAX	d
       break;
     case 0xa8:			// TAY
-      tay_a8();
+     tay_a8();
       break;
     case 0xa9:			// LDA	#i
       lda_a9();
@@ -510,6 +511,7 @@ bool dispatchInstruction()
     case 0xcc:			// CPY	a
       break;
     case 0xcd:			// CMP	a
+      cmp_cd();
       break;
     case 0xce:			// DEC	a
       break;

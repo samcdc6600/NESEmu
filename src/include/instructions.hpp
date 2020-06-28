@@ -35,8 +35,10 @@ inline void loadPCFrom16BitImmediate();
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 inline void branchTaken();
 inline memory::minimumAddressableUnit pullFromStack();
+inline void pushToStack(const memory::minimumAddressableUnit var);
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
-
+inline void set8BitAtAddress(const memory::address a,
+			     const memory::minimumAddressableUnit var);
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
 // ==== instructions. Functions that belong to the same class of instruction ===
@@ -67,6 +69,7 @@ inline void bcs_b0();
 inline void cpy_c0();
 inline void cmp_c9();
 inline void dex_ca();
+inline void cmp_cd();
 inline void bne_d0();
 inline void cdl_d8();
 inline void cpx_e0();
@@ -170,16 +173,23 @@ inline memory::minimumAddressableUnit pullFromStack()
 }
 
 
-inline memory::minimumAddressableUnit pushToStack(const memory::minimumAddressableUnit var)
+inline void pushToStack(const memory::minimumAddressableUnit var)
 {
-  // return get8BitAtAddress(architecturalState::stackBase |
-  // 			  architecturalState::S--);
+  set8BitAtAddress(architecturalState::stackBase | ++architecturalState::S,
+		   var);
 }
 
 
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
 {
   return memory::mem[a];
+}
+
+
+inline void set8BitAtAddress(const memory::address a,
+			     const memory::minimumAddressableUnit var)
+{
+  memory::mem[a] = var;
 }
 
 
@@ -270,6 +280,9 @@ inline void bmi_30()
   Cycles 3					|| */
 inline void pha_48()
 {
+  pushToStack(architecturalState::A);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 3;
 }
 
 
@@ -436,7 +449,7 @@ inline void tax_aa()
 
 inline void lda_ad()
 {
-  architecturalState::A = memory::mem[get16BitImmediate()];
+  architecturalState::A = get8BitAtAddress(get16BitImmediate());
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 3;
@@ -521,6 +534,52 @@ inline void dex_ca()
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	CMP oper	||
+  Opcode:			CD		||
+  Bytes 3					||
+  Cycles 4					|| */
+inline void cmp_cd()
+{
+  architecturalState::status.u.C = ((architecturalState::A == get8BitAtAddress(get16BitImmediate()))
+				    || (architecturalState::A >
+					get8BitAtAddress(get16BitImmediate()))) ? 1 : 0;
+  setZeroFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
+  setNegativeFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Immediate	||
+  Assembly Language Form:	CMP #oper	||
+  Opcode:			C9		||
+  Bytes 2					||
+  Cycles 2					||
+  Compare sets flags as if a subtraction had been carried out. If the value
+  in the accumulator is equal or greater than the compared value, the Carry
+  will be set. The equal (Z) and negative (N) flags will be set based on
+  equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
+  - http://6502.org/tutorials/6502opcodes.html#CMP */
+/*inline void cmp_c9()
+{
+  architecturalState::status.u.C = ((architecturalState::A == get8BitImmediate())
+				    || (architecturalState::A >
+					get8BitImmediate())) ? 1 : 0;
+  setZeroFlagOn(architecturalState::A - get8BitImmediate());
+  setNegativeFlagOn(architecturalState::A - get8BitImmediate());
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;*/
 
 
 inline void bne_d0()
