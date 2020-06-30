@@ -24,6 +24,8 @@
 	  newliens.
 
 * CPU ==========================================================================
+	- Test branchTaken() as we think there may be a bug that occures when a
+	  branch is takens!
 	- Implement instructions.
 	- See if code to set carry in "cmp_c9()" can be replaced with
 	  "setCarryFlagOnAdditionOn()" or why we would need both if that is the

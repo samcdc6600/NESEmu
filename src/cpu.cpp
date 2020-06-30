@@ -466,6 +466,7 @@ bool dispatchInstruction()
     case 0xb9:			// LDA	a,y
       break;
     case 0xba:			// TSX
+      tsx_ba();
       break;
     case 0xbb:			// LAS	a,y
       break;

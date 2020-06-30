@@ -66,6 +66,7 @@ inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
+inline void tsx_ba();
 inline void cpy_c0();
 inline void cmp_c9();
 inline void dex_ca();
@@ -475,6 +476,25 @@ inline void bcs_b0()
   if(architecturalState::status.u.C == 1)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Transfer Stack Pointer to Index X
+
+  SP -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	TSX		||
+  Opcode:			BA		||
+  Bytes 1					||
+  Cycles 2					|| */
+inline void tsx_ba()
+{
+  architecturalState::X = architecturalState::S;
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
