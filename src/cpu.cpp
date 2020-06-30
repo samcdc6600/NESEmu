@@ -65,12 +65,8 @@ void cpu()
 
 bool dispatchInstruction()
 {
-#ifdef DEBUG
-  std::cout<<"Entered dispatchInstruction() with state:\n";
-  printArchitecturalState();
-  debugDispatchInstruction();
-#endif
-
+  bool ret {true};
+  
   switch(unsigned(memory::mem[architecturalState::PC]))
     {				// There are 151 official 6502 opcodes organized
       // into 56 instructions (note that the NES does
@@ -619,10 +615,16 @@ bool dispatchInstruction()
     case 0xff:			// ISC	a,x
       break;
     default:
-      return false;
+      ret = false;
     }
-      
-  return true;
+
+#ifdef DEBUG
+  std::cout<<"Entered dispatchInstruction() with state:\n";
+  printArchitecturalState();
+  debugDispatchInstruction();
+#endif
+  
+  return ret;
 }
 
 

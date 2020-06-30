@@ -149,7 +149,7 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
   bool ret {false};
   const memory::address pageNum {memory::address(architecturalState::PC %
 						 memory::pageSize)};
-  
+
   architecturalState::PC += (signed char)get8BitImmediate();
   
   if(pageNum != (architecturalState::PC % memory::pageSize))
@@ -169,13 +169,13 @@ inline void branchTaken()
 inline memory::minimumAddressableUnit pullFromStack()
 {
   return get8BitAtAddress(architecturalState::stackBase |
-			  architecturalState::S--);
+			  ++architecturalState::S);
 }
 
 
 inline void pushToStack(const memory::minimumAddressableUnit var)
 {
-  set8BitAtAddress(architecturalState::stackBase | ++architecturalState::S,
+  set8BitAtAddress(architecturalState::stackBase | architecturalState::S--,
 		   var);
 }
 
@@ -552,6 +552,8 @@ inline void cmp_cd()
 					get8BitAtAddress(get16BitImmediate()))) ? 1 : 0;
   setZeroFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
   setNegativeFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
+  std::cout<<std::hex<<get16BitImmediate()<<"\n";
+  std::cout<<std::hex<<get8BitAtAddress(get16BitImmediate())<<"\n";
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -589,6 +591,7 @@ inline void bne_d0()
      - http://6502.org/tutorials/6502opcodes.html#BNE */
   if(architecturalState::status.u.Z == 0)
     branchTaken();
+  std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
 }
