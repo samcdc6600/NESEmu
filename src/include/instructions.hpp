@@ -46,6 +46,7 @@ inline void set8BitAtAddress(const memory::address a,
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
    OPERATIONS", as these functions assume it has not been altered yet! */
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
+inline void php_08();
 inline void bpl_10();
 inline void clc_18();
 inline void plp_28();
@@ -53,8 +54,12 @@ inline void bmi_30();
 inline void pha_48();
 inline void eor_49();
 inline void jmp_4c();
+inline void bvc_50();
+inline void pla_68();
 inline void adc_69();
+inline void bvs_70();
 inline void dey_88();
+inline void txa_8a();
 inline void sta_8d();
 inline void bcc_90();
 inline void tya_98();
@@ -200,6 +205,54 @@ inline void set8BitAtAddress(const memory::address a,
 // ============ (indicated by their prefixs) are grouped together.) ============
 
 
+/*! \brief Push Processor Status on Stack
+
+  Push SR			       		||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	PHP		||
+  Opcode:			08		||
+  Bytes 1					||
+  Cycles 3					||
+
+  From: http://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
+  "While there are only six flags in the processor status register within the
+  CPU, when transferred to the stack, there are two additional bits. These do
+  not represent a register that can hold a value but can be used to distinguish
+  how the flags were pushed.
+
+  Some 6502 references call this the "B flag", though it does not represent an
+  actual CPU register. Two interrupts (/IRQ and /NMI) and two instructions (PHP
+  and BRK) push the flags to the stack. In the byte pushed, bit 5 is always set
+  to 1, and bit 4 is 1 if from an instruction (PHP or BRK) or 0 if from an
+  interrupt line being pulled low (/IRQ or /NMI). This is the only time and
+  place where the B flag actually exists: not in the status register itself, but
+  in bit 4 of the copy that is written to the stack."
+  Note that the flags struct is defined as:
+  @code
+  typedef union
+  {
+    struct
+    {
+      unsigned char C : 1;	// Carry	~===<( Lowest order byte )>===~
+      unsigned char Z : 1;	// Zero
+      unsigned char I : 1;	// Interrupt Disable
+      unsigned char D : 1;	// Decimal
+      unsigned char s0 : 1;	// No CPU effect. (refere to the comment at the
+      unsigned char s1 : 1;	// top of the file.)
+      unsigned char V : 1;	// Overflow
+      unsigned char N : 1;	// Negative	~===<( Highest order byte )>===~
+    }u;
+    isaReg flags;
+  }Status; @endcode*/
+inline void php_08()
+{
+  pushToStack(architecturalState::A);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 3;
+}
+
+
 /*! \brief Branch on Result Plus.
 
   branch on N = 0		       		||
@@ -313,6 +366,47 @@ inline void jmp_4c()
 }
 
 
+/*! \brief Branch on Overflow Clear
+
+  Branch on V = 0      				||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative       	||
+  Assembly Language Form:	BVC oper       	||
+  Opcode:			50		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC */
+inline void bvc_50()
+{
+  if(architecturalState::status.u.V == 0)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Pull Accumulator from Stack
+
+  Pull A					||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	PLA		||
+  Opcode:			68		||
+  Bytes 1					||
+  Cycles 4					|| */
+inline void pla_68()
+{
+  architecturalState::A = pullFromStack();
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 4;
+}
+
+
 inline void adc_69()
 {
   architecturalState::isaReg aR {architecturalState::isaReg(architecturalState::A
@@ -327,11 +421,52 @@ inline void adc_69()
 }
 
 
+/*! \brief Branch on Overflow Set
+
+  Branch on V = 1      				||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Relative       	||
+  Assembly Language Form:	BVS oper       	||
+  Opcode:			50		||
+  Bytes 2					||
+  Cycles 2**					||
+  Branches are dependant on the status of the flag bits when the op code is
+  encountered. A branch not taken requires two machine cycles. Add one if the
+  branch is taken and add one more if the branch crosses a page boundary. From:
+  http://6502.org/tutorials/6502opcodes.html#BCC */
+inline void bvs_70()
+{
+  if(architecturalState::status.u.V == 1)
+    branchTaken();
+  architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
 inline void dey_88()
 {
   architecturalState::Y -= 1;
   setZeroFlagOn(architecturalState::Y);
   setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Transfer Index X to Accumulator
+
+  X -> A				        ||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	TXA		||
+  Opcode:			8A		||
+  Bytes 1					||
+  Cycles 2					|| */
+inline void txa_8a()
+{
+  architecturalState::A = architecturalState::X;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
@@ -611,7 +746,6 @@ inline void bne_d0()
      - http://6502.org/tutorials/6502opcodes.html#BNE */
   if(architecturalState::status.u.Z == 0)
     branchTaken();
-  std::cout<<"architecturalState::PC = "<<architecturalState::PC<<'\n';
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
 }

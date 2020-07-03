@@ -36,14 +36,14 @@ namespace architecturalState
   {
     struct
     {
-      unsigned char C : 1;	// Carry
+      unsigned char C : 1;	// Carry	~===<( Lowest order byte )>===~
       unsigned char Z : 1;	// Zero
       unsigned char I : 1;	// Interrupt Disable
       unsigned char D : 1;	// Decimal
       unsigned char s0 : 1;	// No CPU effect. (refere to the comment at the
       unsigned char s1 : 1;	// top of the file.)
       unsigned char V : 1;	// Overflow
-      unsigned char N : 1;	// Negative
+      unsigned char N : 1;	// Negative	~===<( Highest order byte )>===~
     }u;
     isaReg flags;
   }Status;

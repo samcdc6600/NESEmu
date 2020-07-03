@@ -90,6 +90,7 @@ bool dispatchInstruction()
     case 0x07:			// SLO	d
       break;
     case 0x08:	       		// PHP	(God personal home page is terrible!)
+      php_08();
       break;
     case 0x09:			// ORA	#i
       break;
@@ -241,6 +242,7 @@ bool dispatchInstruction()
     case 0x4f:			// SRE	a
       break;
     case 0x50:			// BVC	*+d
+      bvc_50();
       break;
     case 0x51:			// EOR	(d),y
       break;
@@ -289,6 +291,7 @@ bool dispatchInstruction()
     case 0x67:			// RRA	d
       break;
     case 0x68:			// PLA
+      pla_68();
       break;
     case 0x69:			// ADC	#i
       adc_69();
@@ -306,6 +309,7 @@ bool dispatchInstruction()
     case 0x6f:			// RRA	a
       break;
     case 0x70:			// BVS	*+d
+      bvs_70();
       break;
     case 0x71:			// ADC	(d),y
       break;
@@ -359,6 +363,7 @@ bool dispatchInstruction()
     case 0x89:			// NOP	#i
       break;
     case 0x8a:			// TXA
+      txa_8a();
       break;
     case 0x8b:			// XAA	#i
       break;
@@ -620,7 +625,7 @@ bool dispatchInstruction()
     }
 
 #ifdef DEBUG
-  std::cout<<"Entered dispatchInstruction() with state:\n";
+  std::cout<<"Exiting dispatchInstruction() with state:\n";
   printArchitecturalState();
   debugDispatchInstruction();
 #endif
