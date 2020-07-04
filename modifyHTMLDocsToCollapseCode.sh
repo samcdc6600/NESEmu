@@ -39,25 +39,52 @@ for iter in `ls $FILE_PATH`
 do
     CODE_BLOCKS_ENCOUNTERED=0
     NEW_FILE=""
+
+    echo "Working on file '$iter'..."
     
     # Iterate over each line of the file. We found the code to do this on the
     # following site:
     # https://unix.stackexchange.com/questions/7011/how-to-loop-over-the-lines-of-a-file
     while IFS='' read -r LINE || [ -n "${LINE}" ]; do # -n s <-(s has non-zero length)
 	REPLACED=$FALSE
+	# SubCount is the number of substitutions we need to make for this line.
+	subCount=0
 	if echo "$LINE" | grep -q "${HTML_REPLACE_FIRST}";
 	then
-	    export CODE_BLOCKS_ENCOUNTERED
+	    export CODE_BLOCKS_ENCOUNTERED	    
+	    # The next 8 or so lines of code were found at (it is very slow. We
+	    # think it would be batter to use awk but we couldn't get it to work
+	    # the way we wanted with a shell variable and not a file. We
+	    # probabbly could if we read up about it but we just want to get
+	    # this working now so we can get back to working on the emulator
+	    # proper.):
+	    # https://unix.stackexchange.com/questions/442349/count-the-number-of-occurrences-of-a-substring-in-a-string
+	    tmpLine=$LINE
+	    until
+		t=${tmpLine#*"<div class=\"fragment\">"}
+		[ "$t" = "$tmpLine" ]
+	    do
+		subCount=$((subCount + 1))
+		tmpLine=$t
+	    done
 	    
-	    LINE="`echo $LINE | sed -e 's/<div class="fragment">\
+	    for lineIter in $(seq 1 $subCount);
+	    do
+		LINE="`echo $LINE | sed -e 's/<div class="fragment">\
 /<div class="fragment wrap-collapsible">\
 <input id="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="toggle" type="checkbox">\
 <label for="collapsible'${CODE_BLOCKS_ENCOUNTERED}'" class="lbl-toggle">See source<\/label>\
 <div class="collapsible-content"><div class="content-inner">\
-/g'`"		    
-	    CODE_BLOCKS_ENCOUNTERED=`expr "${CODE_BLOCKS_ENCOUNTERED}" + "1"`
+/1'`" # After each replace the next occurence will be the first occurence!
+		CODE_BLOCKS_ENCOUNTERED=`expr "${CODE_BLOCKS_ENCOUNTERED}" + "1\
+"`
+	    done
 	fi
-	
+
+	# Each code section should have the <!-- fragment --> comment after it
+	# (as far as we are aware) and therefor we don't need to worry about
+	# subCount because the g option with sed will replace all occurences
+	# that match and we don't need them to be unique.
 	if echo "$LINE" | grep -q "${HTML_REPLACE_SECOND}"
 	then
 	    LINE="`echo $LINE | sed -e 's/<\/div><!-- fragment -->/<\/div><!-- fragment -->\

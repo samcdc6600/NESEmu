@@ -36,7 +36,7 @@ namespace architecturalState
   {
     struct
     {
-      unsigned char C : 1;	// Carry	~===<( Lowest order byte )>===~
+      unsigned char C : 1;	// Carry	~===<( Lowest order byte  )>===~
       unsigned char Z : 1;	// Zero
       unsigned char I : 1;	// Interrupt Disable
       unsigned char D : 1;	// Decimal

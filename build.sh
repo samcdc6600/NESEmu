@@ -12,7 +12,7 @@ handleBuildWithArgOptions()
     
     CMD_OPT1="gmake -j8"
     CMD_OPT2="doxygen"
-    CMD_OPT2_ENHANCEMENT="./modifyHTMLDocsToCollapseCode.sh "
+#    CMD_OPT2_ENHANCEMENT="./modifyHTMLDocsToCollapseCode.sh "
     CMD_OPT2_ARG="Doxyfile"
 
     MAKE_ARG=$1
