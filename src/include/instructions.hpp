@@ -244,10 +244,11 @@ inline void set8BitAtAddress(const memory::address a,
       unsigned char N : 1;	// Negative	~===<( Highest order byte )>===~
     }u;
     isaReg flags;
-  }Status; @endcode*/
+  }Status; @endcode */
 inline void php_08()
 {
-  pushToStack(architecturalState::A);
+  pushToStack(architecturalState::A |
+	      architecturalState::bFlagMaskPhpBrkAndIrqNmi);
   architecturalState::PC += 1;
   architecturalState::cycles += 3;
 }
