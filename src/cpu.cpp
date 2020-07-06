@@ -571,6 +571,7 @@ bool dispatchInstruction()
     case 0xe7:			// ISC	d
       break;
     case 0xe8:			// INX
+      inx_e8();
       break;
     case 0xe9:			// SBC	#i
       break;

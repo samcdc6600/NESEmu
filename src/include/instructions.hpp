@@ -79,6 +79,7 @@ inline void cmp_cd();
 inline void bne_d0();
 inline void cdl_d8();
 inline void cpx_e0();
+inline void inx_e8();
 inline void nop_ea();
 inline void beq_f0();
 
@@ -212,8 +213,8 @@ inline void set8BitAtAddress(const memory::address a,
   Addressing Mode:		Implied		||
   Assembly Language Form:	PHP		||
   Opcode:			08		||
-  Bytes 1					||
-  Cycles 3					||
+  Bytes:			1		||
+  Cycles:			3		||
 
   From: http://wiki.nesdev.com/w/index.php/Status_flags#The_B_flag
   "While there are only six flags in the processor status register within the
@@ -247,7 +248,7 @@ inline void set8BitAtAddress(const memory::address a,
   }Status; @endcode */
 inline void php_08()
 {
-  pushToStack(architecturalState::A |
+  pushToStack(architecturalState::status.flags |
 	      architecturalState::bFlagMaskPhpBrkAndIrqNmi);
   architecturalState::PC += 1;
   architecturalState::cycles += 3;
@@ -261,8 +262,8 @@ inline void php_08()
   Addressing Mode:		Relative	||
   Assembly Language Form:	BPL oper	||
   Opcode:			10		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -283,8 +284,8 @@ inline void bpl_10()
   Addressing Mode:		implied		||
   Assembly Language Form:	CLC		||
   Opcode:			18		||
-  Bytes 1					||
-  Cycles 2					|| */
+  Bytes:			1		||
+  Cycles:			2		|| */
 inline void clc_18()
 {
   architecturalState::status.u.C = 0;
@@ -293,6 +294,15 @@ inline void clc_18()
 }
 
 
+/*! \brief Pull Processor Status from Stack
+
+  Pull SR			       		||
+  ((N, Z, C, I, D, V) <-- From Stack!)		||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	PLP		||
+  Opcode:			28		||
+  Bytes:			1		||
+  Cycles:			4		|| */
 inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
@@ -309,8 +319,8 @@ inline void plp_28()
   Addressing Mode:		Relative	||
   Assembly Language Form:	BMI oper	||
   Opcode:			30		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -331,8 +341,8 @@ inline void bmi_30()
   Addressing Mode:		Implied		||
   Assembly Language Form:	PHA		||
   Opcode:			48		||
-  Bytes 1					||
-  Cycles 3					|| */
+  Bytes:			1		||
+  Cycles:			3		|| */
 inline void pha_48()
 {
   pushToStack(architecturalState::A);
@@ -348,8 +358,8 @@ inline void pha_48()
   Addressing Mode:		Immediate	||
   Assembly Language Form:	EOR #Operand	||
   Opcode:			49		||
-  Bytes 2					||
-  Cycles 2					|| */
+  Bytes:			2		||
+  Cycles:			2		|| */
 inline void eor_49()
 {
   architecturalState::A ^= get8BitImmediate();
@@ -374,8 +384,8 @@ inline void jmp_4c()
   Addressing Mode:		Relative       	||
   Assembly Language Form:	BVC oper       	||
   Opcode:			50		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -396,8 +406,8 @@ inline void bvc_50()
   Addressing Mode:		Implied		||
   Assembly Language Form:	PLA		||
   Opcode:			68		||
-  Bytes 1					||
-  Cycles 4					|| */
+  Bytes:			1		||
+  Cycles:			4		|| */
 inline void pla_68()
 {
   architecturalState::A = pullFromStack();
@@ -429,8 +439,8 @@ inline void adc_69()
   Addressing Mode:		Relative       	||
   Assembly Language Form:	BVS oper       	||
   Opcode:			50		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -461,8 +471,8 @@ inline void dey_88()
   Addressing Mode:		Implied		||
   Assembly Language Form:	TXA		||
   Opcode:			8A		||
-  Bytes 1					||
-  Cycles 2					|| */
+  Bytes:			1	        ||
+  Cycles:			2		|| */
 inline void txa_8a()
 {
   architecturalState::A = architecturalState::X;
@@ -489,8 +499,8 @@ inline void sta_8d()
   Addressing Mode:		Relative	||
   Assembly Language Form:	BCC oper	||
   Opcode:			90		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -552,8 +562,8 @@ inline void ldx_a2()
   Addressing Mode:		Implied		||
   Assembly Language Form:	TAY		||
   Opcode:			A8		||
-  Bytes 1					||
-  Cycles 2					|| */
+  Bytes:			1		||
+  Cycles:			2		|| */
 inline void tay_a8()
 {
   architecturalState::Y = architecturalState::A;
@@ -574,6 +584,15 @@ inline void lda_a9()
 }
 
 
+/*! \brief Transfer Accumulator to Index X
+
+  A -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	TAX		||
+  Opcode:			AA		||
+  Bytes:			1		||
+  Cycles:			2		|| */
 inline void tax_aa()
 {
   architecturalState::X = architecturalState::A;
@@ -601,8 +620,8 @@ inline void lda_ad()
   Addressing Mode:		Relative	||
   Assembly Language Form:	BCS oper	||
   Opcode:			B0		||
-  Bytes 2					||
-  Cycles 2**					||
+  Bytes:			2		||
+  Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
   branch is taken and add one more if the branch crosses a page boundary. From:
@@ -623,8 +642,8 @@ inline void bcs_b0()
   Addressing Mode:		Implied		||
   Assembly Language Form:	TSX		||
   Opcode:			BA		||
-  Bytes 1					||
-  Cycles 2					|| */
+  Bytes:			1		||
+  Cycles:			2		|| */
 inline void tsx_ba()
 {
   architecturalState::X = architecturalState::S;
@@ -642,8 +661,8 @@ inline void tsx_ba()
   Addressing Mode:		Immediate	||
   Assembly Language Form:	CPY #oper	||
   Opcode:			C0		||
-  Bytes 2					||
-  Cycles 2					|| */
+  Bytes:			2		||
+  Cycles:			2		|| */
 inline void cpy_c0()
 {
   architecturalState::status.u.C = ((architecturalState::Y == get8BitImmediate())
@@ -663,8 +682,8 @@ inline void cpy_c0()
   Addressing Mode:		Immediate	||
   Assembly Language Form:	CMP #oper	||
   Opcode:			C9		||
-  Bytes 2					||
-  Cycles 2					||
+  Bytes:			2		||
+  Cycles:			2		||
   Compare sets flags as if a subtraction had been carried out. If the value
   in the accumulator is equal or greater than the compared value, the Carry
   will be set. The equal (Z) and negative (N) flags will be set based on
@@ -699,8 +718,8 @@ inline void dex_ca()
   Addressing Mode:		Absolute	||
   Assembly Language Form:	CMP oper	||
   Opcode:			CD		||
-  Bytes 3					||
-  Cycles 4					|| */
+  Bytes:			3		||
+  Cycles:			4		|| */
 inline void cmp_cd()
 {
   architecturalState::status.u.C = ((architecturalState::A == get8BitAtAddress(get16BitImmediate()))
@@ -722,8 +741,8 @@ inline void cmp_cd()
   Addressing Mode:		Immediate	||
   Assembly Language Form:	CMP #oper	||
   Opcode:			C9		||
-  Bytes 2					||
-  Cycles 2					||
+  Bytes:			2		||
+  Cycles:			2		||
   Compare sets flags as if a subtraction had been carried out. If the value
   in the accumulator is equal or greater than the compared value, the Carry
   will be set. The equal (Z) and negative (N) flags will be set based on
@@ -771,8 +790,8 @@ inline void cdl_d8()
   Addressing Mode:		Immediate	||
   Assembly Language Form:	CPX #oper	||
   Opcode:			e0		||
-  Bytes 2					||
-  Cycles 2					|| */
+  Bytes:			2		||
+  Cycles:			2		|| */
 inline void cpx_e0()
 {
   architecturalState::status.u.C = ((architecturalState::X == get8BitImmediate())
@@ -781,6 +800,25 @@ inline void cpx_e0()
   setZeroFlagOn(architecturalState::X - get8BitImmediate());
   setNegativeFlagOn(architecturalState::X - get8BitImmediate());
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Increment Index X by One
+
+  X + 1 -> X   					||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	INX		||
+  Opcode:			E8		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void inx_e8()
+{
+  architecturalState::X += 1;
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
