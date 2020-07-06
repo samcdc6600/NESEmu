@@ -73,6 +73,7 @@ inline void lda_ad();
 inline void bcs_b0();
 inline void tsx_ba();
 inline void cpy_c0();
+inline void iny_c8();
 inline void cmp_c9();
 inline void dex_ca();
 inline void cmp_cd();
@@ -671,6 +672,25 @@ inline void cpy_c0()
   setZeroFlagOn(architecturalState::Y - get8BitImmediate());
   setNegativeFlagOn(architecturalState::Y - get8BitImmediate());
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Increment Index Y by One
+
+  Y + 1 -> Y	       				||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	INY		||
+  Opcode:			C8		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void iny_c8()
+{
+  architecturalState::Y += 1;
+  setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 

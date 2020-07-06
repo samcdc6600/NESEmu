@@ -501,6 +501,7 @@ bool dispatchInstruction()
     case 0xc7:			// DCP	d
       break;
     case 0xc8:			// INY
+      iny_c8();
       break;
     case 0xc9:			// CMP	#i
       cmp_c9();
