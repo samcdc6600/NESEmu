@@ -1,0 +1,16 @@
+roms
+~*
+*~
+#*
+*#
+NESEmu
+src/*~
+src/*~
+src/#*
+src/*#
+obj/*
+docs
+src/include/*~
+src/include/*~
+src/include/#*
+src/include/*#

@@ -50,6 +50,7 @@ inline void set8BitAtAddress(const memory::address a,
 inline void php_08();
 inline void bpl_10();
 inline void clc_18();
+inline void jsr_20();
 inline void plp_28();
 inline void bmi_30();
 inline void pha_48();
@@ -178,7 +179,7 @@ inline void loadPCFrom16BitImmediateIndirect()
   using namespace memory;
   const address indirectAddress {get16BitImmediate()};
   const address addressLowByte {mem[indirectAddress]};
-  const address addressHighByte {(unsigned char)(indirectAddress +1) %
+  const address addressHighByte {byte(indirectAddress +1) %
 				 pageSize == 0 ?
 				 address(mem[indirectAddress + 1 - pageSize]) :
 				 address(mem[indirectAddress +1])};
@@ -317,7 +318,7 @@ inline void bpl_10()
 
   0 -> C			       		||
   (N-, Z-, C 0, I-, D-, V-) 			||
-  Addressing Mode:		implied		||
+  Addressing Mode:		Implied		||
   Assembly Language Form:	CLC		||
   Opcode:			18		||
   Bytes:			1		||
@@ -327,6 +328,36 @@ inline void clc_18()
   architecturalState::status.u.C = 0;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Jump to New Location Saving Return Address
+
+  Push (PC + 2)					||
+  (PC + 1) -> PCL				||
+  (PC + 2) -> PCH			       	||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	JSR oper       	||
+  Opcode:			20		||
+  Bytes:			3		||
+  Cycles:			6		||
+  "I know the 6502 always fetches two bytes on the first two cycles of each
+  instruction. For 1-byte opcodes, it throws the extra one away and doesn't
+  further increment PC (which was already incremented to fetch the thrown away
+  second byte). For 2-byte opcodes, it uses both bytes and does increment PC.
+  And for 3-byte ones, it increments PC, fetches the final byte, uses it, and
+  increments the PC once more. In JSR (a 3-byte opcode), it must be pushing the
+  program counter to the stack before incrementing PC for the last time.":
+  https://stackoverflow.com/questions/21465200/6502-assembler-the-rts-command-and-the-stack */
+inline void jsr_20()
+{ /* "The high byte is pushed first so that the low byte is in the lower
+     address": https://stackoverflow.com/questions/21465200/6502-assembler-the-rts-command-and-the-stack */
+  pushToStack((architecturalState::PC + 2) >>
+	      memory::minimumAddressableUnitSize);
+  pushToStack(memory::byte(architecturalState::PC + 2));
+  loadPCFrom16BitImmediate();
+  architecturalState::cycles += 4;
 }
 
 

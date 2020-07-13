@@ -141,6 +141,7 @@ bool dispatchInstruction()
     case 0x1f:			// SLO	a,x
       break;
     case 0x20:			// JSR	a
+      jsr_20();
       break;
     case 0x21:			// AND	(d,x)
       break;
