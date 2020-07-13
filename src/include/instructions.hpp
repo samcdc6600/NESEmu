@@ -65,6 +65,8 @@ inline void pla_68();
 inline void adc_69();
 inline void jmp_6c();
 inline void bvs_70();
+inline void sta_85();
+inline void stx_86();
 inline void dey_88();
 inline void txa_8a();
 inline void sta_8d();
@@ -611,6 +613,42 @@ inline void bvs_70()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Store Accumulator in Memory
+
+  A -> M      					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		ZeroPage       	||
+  Assembly Language Form:	STA oper       	||
+  Opcode:			85		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void sta_85()
+{
+  memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
+	      get8BitImmediate()] = architecturalState::A;
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
+}
+
+
+/*! \brief Store Index X in Memory
+
+  X -> M      					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		ZeroPage       	||
+  Assembly Language Form:	STX oper       	||
+  Opcode:			86		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void stx_86()
+{
+  memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
+	      get8BitImmediate()] = architecturalState::X;
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
