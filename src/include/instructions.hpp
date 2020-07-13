@@ -57,6 +57,7 @@ inline void pha_48();
 inline void eor_49();
 inline void jmp_4c();
 inline void bvc_50();
+inline void rts_60();
 inline void pla_68();
 inline void adc_69();
 inline void jmp_6c();
@@ -463,6 +464,26 @@ inline void bvc_50()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Return from Subroutine
+
+  Pull PC					||
+  PC + 1 -> PC					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	RTS		||
+  Opcode:			60		||
+  Bytes:			1		||
+  Cycles:			6		|| */
+inline void rts_60()
+{				      // The low byte is pulled first.
+
+  architecturalState::PC = pullFromStack() |
+    (pullFromStack() << memory::minimumAddressableUnitSize);
+  architecturalState::PC += 1;
+  architecturalState::cycles += 6;
 }
 
 

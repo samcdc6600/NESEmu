@@ -276,6 +276,7 @@ bool dispatchInstruction()
     case 0x5f:			// SRE	a,x
       break;
     case 0x60:			// RTS
+      rts_60();
       break;
     case 0x61:			// ADC	(d,x)
       break;
