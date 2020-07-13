@@ -8,8 +8,6 @@
 
 namespace memory
 {
-  // That is bits :).
-
   typedef unsigned char minimumAddressableUnit;
     constexpr size_t minimumAddressableUnitSize
     {sizeof(minimumAddressableUnit) * 8};

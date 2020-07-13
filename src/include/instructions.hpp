@@ -31,6 +31,7 @@ inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
 inline void storeAbsoluteThis(const architecturalState::isaReg var);
 inline void loadPCFrom16BitImmediate();
+inline void loadPCFrom16BitImmediateIndirect();
 // Return true if we have crossed a page boundry
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 inline void branchTaken();
@@ -57,6 +58,7 @@ inline void jmp_4c();
 inline void bvc_50();
 inline void pla_68();
 inline void adc_69();
+inline void jmp_6c();
 inline void bvs_70();
 inline void dey_88();
 inline void txa_8a();
@@ -134,9 +136,9 @@ inline memory::minimumAddressableUnit get8BitImmediate()
 
 inline memory::address get16BitImmediate()
 {
-   return (memory::address(memory::mem[architecturalState::PC + 2])
+  return (memory::address(memory::mem[architecturalState::PC + 2]
 			  << memory::minimumAddressableUnitSize) |
-     memory::address(memory::mem[architecturalState::PC + 1]);
+	  memory::address(memory::mem[architecturalState::PC + 1]));
 }
 
 
@@ -149,6 +151,39 @@ inline void storeAbsoluteThis(const architecturalState::isaReg var)
 inline void loadPCFrom16BitImmediate()
 {
   architecturalState::PC = get16BitImmediate();
+}
+
+
+/*! \brief This is a sub function that is only called by jmp_6c(), it has more
+  to it than one might expect.
+
+  There is no carry associated with the indirect jump so:
+
+  AN INDIRECT JUMP MUST NEVER USE A
+  VECTOR BEGINNING ON THE LAST BYTE
+  OF A PAGE
+
+  For example if address $3000 contains $40, $30FF contains $80, and $3100
+  contains $50, the result of JMP ($30FF) will be a transfer of control to $4080
+  rather than $5080 as you intended i.e. the 6502 took the low byte of the
+  address from $30FF and the high byte from $3000. */
+inline void loadPCFrom16BitImmediateIndirect()
+{ /* First we get the operand (the address of the address we are going to jump
+     to.) Then we get the low byte of the address we are going to jump to.
+     Finally we get the high byte of the address we are going to jump to,
+     however if the low byte of the operand (address of the address) is FF (the
+     last address in a page) we get the high byte of the address we are going to
+     jump to from the start of the page pointed to by the operand (address of
+     the address) rather then the start of the page after that. */
+  using namespace memory;
+  const address indirectAddress {get16BitImmediate()};
+  const address addressLowByte {mem[indirectAddress]};
+  const address addressHighByte {(unsigned char)(indirectAddress +1) %
+				 pageSize == 0 ?
+				 address(mem[indirectAddress + 1 - pageSize]) :
+				 address(mem[indirectAddress +1])};
+  architecturalState::PC = (addressHighByte
+			    << minimumAddressableUnitSize) | addressLowByte;
 }
 
 
@@ -430,6 +465,35 @@ inline void adc_69()
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+
+/*! \brief Jump to New Location
+
+  (PC + 1) -> PCL				||
+  (PC + 1) -> PCH			       	||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Indirect       	||
+  Assembly Language Form:	JMP (oper)     	||
+  Opcode:			6C		||
+  Bytes:			3		||
+  Cycles:			5		||
+
+  There is no carry associated with the indirect jump so:
+
+  AN INDIRECT JUMP MUST NEVER USE A
+  VECTOR BEGINNING ON THE LAST BYTE
+  OF A PAGE
+
+  For example if address $3000 contains $40, $30FF contains $80, and $3100
+  contains $50, the result of JMP ($30FF) will be a transfer of control to $4080
+  rather than $5080 as you intended i.e. the 6502 took the low byte of the
+  address from $30FF and the high byte from $3000. */
+inline void jmp_6c()
+{
+  loadPCFrom16BitImmediateIndirect();
+  architecturalState::cycles += 5;
 }
 
 
@@ -747,8 +811,6 @@ inline void cmp_cd()
 					get8BitAtAddress(get16BitImmediate()))) ? 1 : 0;
   setZeroFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
   setNegativeFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
-  std::cout<<std::hex<<get16BitImmediate()<<"\n";
-  std::cout<<std::hex<<get8BitAtAddress(get16BitImmediate())<<"\n";
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }

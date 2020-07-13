@@ -301,6 +301,7 @@ bool dispatchInstruction()
     case 0x6b:			// ARR	#i
       break;
     case 0x6c:			// JMP	(a)
+      jmp_6c();
       break;
     case 0x6d:			// ADC	a
       break;
