@@ -74,6 +74,7 @@ bool dispatchInstruction()
       // are a number of unofficial opcodes.)
 
     case 0x00:			// BRK
+      brk_00();
       break;
     case 0x01:			// ORA	(d,x)
       break;

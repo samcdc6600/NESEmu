@@ -29,7 +29,6 @@ namespace architecturalState
   extern isaReg X, Y;	// Index's
   extern memory::address PC;		// Program Counter
   extern isaReg S;		// Stack Pointer
-  constexpr memory::address stackBase {0x100}; // Base address of stack
   
 
   typedef union

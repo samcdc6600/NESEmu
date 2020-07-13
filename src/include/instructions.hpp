@@ -37,6 +37,8 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 inline void branchTaken();
 inline memory::minimumAddressableUnit pullFromStack();
 inline void pushToStack(const memory::minimumAddressableUnit var);
+inline void pushPCPlusTwoToStack();
+inline void pushStatusFlagsToStack();
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 inline void set8BitAtAddress(const memory::address a,
 			     const memory::minimumAddressableUnit var);
@@ -47,6 +49,7 @@ inline void set8BitAtAddress(const memory::address a,
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
    OPERATIONS", as these functions assume it has not been altered yet! */
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
+inline void brk_00();
 inline void php_08();
 inline void bpl_10();
 inline void clc_18();
@@ -180,7 +183,7 @@ inline void loadPCFrom16BitImmediateIndirect()
   using namespace memory;
   const address indirectAddress {get16BitImmediate()};
   const address addressLowByte {mem[indirectAddress]};
-  const address addressHighByte {byte(indirectAddress +1) %
+  const address addressHighByte {(maskAddressLow & (indirectAddress +1)) %
 				 pageSize == 0 ?
 				 address(mem[indirectAddress + 1 - pageSize]) :
 				 address(mem[indirectAddress +1])};
@@ -213,15 +216,30 @@ inline void branchTaken()
 
 inline memory::minimumAddressableUnit pullFromStack()
 {
-  return get8BitAtAddress(architecturalState::stackBase |
+  return get8BitAtAddress(memory::stackBase |
 			  ++architecturalState::S);
 }
 
 
 inline void pushToStack(const memory::minimumAddressableUnit var)
 {
-  set8BitAtAddress(architecturalState::stackBase | architecturalState::S--,
+  set8BitAtAddress(memory::stackBase | architecturalState::S--,
 		   var);
+}
+
+
+inline void pushPCPlusTwoToStack()
+{
+  pushToStack((architecturalState::PC + 2) >>
+	      memory::minimumAddressableUnitSize);
+  pushToStack(memory::maskAddressLow & (architecturalState::PC + 2));
+}
+
+
+inline void pushStatusFlagsToStack()
+{
+  pushToStack(architecturalState::status.flags |
+	      architecturalState::bFlagMaskPhpBrkAndIrqNmi);
 }
 
 
@@ -242,6 +260,34 @@ inline void set8BitAtAddress(const memory::address a,
 // ============== (The below functions comprise full instructions. =============
 // =========== Functions that belong to the same class of instruction ==========
 // ============ (indicated by their prefixs) are grouped together.) ============
+
+
+/*! \brief Force Break
+
+  Interrupt					||
+  Push PC + 2					||
+  Push SR			       		||
+  (N-, Z-, C-, I 1, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	BRK		||
+  Opcode:			00		||
+  Bytes:			1		||
+  Cycles:			7		||
+  "...the BRK instruction advances the program counter by 2, pushes the Program
+  Counter Register and processor status register to the stack, sets the
+  Interrupt Flag to temporarily prevent other IRQs from being executed, and
+  reloads the Program Counter from the vector at $FFFE-$FFFF.":
+  http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=BRK */
+inline void brk_00()
+{
+  pushPCPlusTwoToStack();
+  pushStatusFlagsToStack();
+  architecturalState::status.u.I = 1;
+  architecturalState::PC = (memory::mem[memory::brkPCLoadVector + 1]
+			    << memory::minimumAddressableUnitSize) |
+    memory::mem[memory::brkPCLoadVector];
+  architecturalState::cycles += 7;
+}
 
 
 /*! \brief Push Processor Status on Stack
@@ -286,8 +332,7 @@ inline void set8BitAtAddress(const memory::address a,
   }Status; @endcode */
 inline void php_08()
 {
-  pushToStack(architecturalState::status.flags |
-	      architecturalState::bFlagMaskPhpBrkAndIrqNmi);
+  pushStatusFlagsToStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 3;
 }
@@ -354,9 +399,7 @@ inline void clc_18()
 inline void jsr_20()
 { /* "The high byte is pushed first so that the low byte is in the lower
      address": https://stackoverflow.com/questions/21465200/6502-assembler-the-rts-command-and-the-stack */
-  pushToStack((architecturalState::PC + 2) >>
-	      memory::minimumAddressableUnitSize);
-  pushToStack(memory::byte(architecturalState::PC + 2));
+  pushPCPlusTwoToStack();
   loadPCFrom16BitImmediate();
   architecturalState::cycles += 4;
 }
