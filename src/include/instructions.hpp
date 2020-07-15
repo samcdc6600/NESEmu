@@ -76,6 +76,7 @@ inline void tya_98();
 inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
+inline void ldx_a6();
 inline void tay_a8();
 inline void lda_a9();
 inline void tax_aa();
@@ -764,6 +765,27 @@ inline void ldx_a2()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Index X with Memory
+
+  M -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	LDX oper       	||
+  Opcode:			A6		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void ldx_a6()
+{
+  architecturalState::X = {memory::mem[(memory::zeroPageBase <<
+					memory::minimumAddressableUnitSize) |
+				       get8BitImmediate()]};
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 

@@ -432,6 +432,7 @@ bool dispatchInstruction()
     case 0xa5:			// LDA	d
       break;
     case 0xa6:			// LDX	d
+      ldx_a6();
       break;
     case 0xa7:			// LAX	d
       break;
