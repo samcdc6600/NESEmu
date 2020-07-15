@@ -76,6 +76,7 @@ inline void tya_98();
 inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
+inline void lda_a5();
 inline void ldx_a6();
 inline void tay_a8();
 inline void lda_a9();
@@ -765,6 +766,27 @@ inline void ldx_a2()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	LDA oper       	||
+  Opcode:			A5		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void lda_a5()
+{
+  architecturalState::A = {memory::mem[(memory::zeroPageBase <<
+					memory::minimumAddressableUnitSize) |
+				       get8BitImmediate()]};
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 

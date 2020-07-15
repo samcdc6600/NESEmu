@@ -430,6 +430,7 @@ bool dispatchInstruction()
     case 0xa4:			// LDY	d
       break;
     case 0xa5:			// LDA	d
+      lda_a5();
       break;
     case 0xa6:			// LDX	d
       ldx_a6();
