@@ -18,7 +18,7 @@ namespace memory
   typedef unsigned short address;
   constexpr address maskAddressLow {0x00ff};
   constexpr address maskAddressHigh {0xff00};
-  constexpr address pageSize {256};
+  constexpr address pageSize {0x100};	   // 256
   constexpr address zeroPageBase {0x0000}; // Bas address of the zero page.
   constexpr address stackBase {0x0100}; // Base address of stack
   constexpr address brkPCLoadVector {0xfffe};  // Brk loads the new PC from this address.

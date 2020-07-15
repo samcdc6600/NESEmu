@@ -42,6 +42,7 @@ inline void pushStatusFlagsToStack();
 inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
 inline void set8BitAtAddress(const memory::address a,
 			     const memory::minimumAddressableUnit var);
+inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
 // ==== instructions. Functions that belong to the same class of instruction ===
@@ -81,6 +82,7 @@ inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
 inline void tsx_ba();
+inline void lda_bd();
 inline void cpy_c0();
 inline void iny_c8();
 inline void cmp_c9();
@@ -197,12 +199,11 @@ inline void loadPCFrom16BitImmediateIndirect()
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
 {  
   bool ret {false};
-  const memory::address pageNum {memory::address(architecturalState::PC %
-						 memory::pageSize)};
+  const memory::address pageNum {memory::address(architecturalState::PC &
+						 memory::maskAddressHigh)};
 
-  architecturalState::PC += (signed char)get8BitImmediate();
-  
-  if(pageNum != (architecturalState::PC % memory::pageSize))
+  architecturalState::PC += (signed char)get8BitImmediate();  
+  if(pageNum != (architecturalState::PC & memory::maskAddressHigh))
     ret = true;
   return ret;
 }
@@ -255,6 +256,19 @@ inline void set8BitAtAddress(const memory::address a,
 			     const memory::minimumAddressableUnit var)
 {
   memory::mem[a] = var;
+}
+
+
+inline void loadAccumulatorIndexed(const architecturalState::isaReg index)
+{ /* * add 1 cycle if page boundary crossed. "oper, x" means we add x to to
+     oper, where x is either the X or the Y register. */
+  const memory::address baseAddress {get16BitImmediate()};
+  const memory::address address {memory::address(baseAddress + index)};
+  const memory::address pageNum {memory::address(baseAddress &
+						  memory::maskAddressHigh)};
+  if(pageNum != (address & memory::maskAddressHigh))
+    ++architecturalState::cycles;
+   architecturalState::A = memory::mem[address];
 }
 
 
@@ -849,6 +863,25 @@ inline void tsx_ba()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		absolute, X    	||
+  Assembly Language Form:	LDA oper, X    	||
+  Opcode:			BD		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void lda_bd()
+{
+  loadAccumulatorIndexed(architecturalState::X);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
