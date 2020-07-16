@@ -53,6 +53,7 @@ inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 /* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
 inline void brk_00();
 inline void php_08();
+inline void ora_09();
 inline void bpl_10();
 inline void clc_18();
 inline void jsr_20();
@@ -365,6 +366,25 @@ inline void php_08()
 }
 
 
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Immidiate	||
+  Assembly Language Form:	ORA #oper	||
+  Opcode:			09		||
+  Bytes:			2		||
+  Cycles:			2		|| */
+inline void ora_09()
+{
+  architecturalState::A |= get8BitImmediate();
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
 /*! \brief Branch on Result Plus.
 
   branch on N = 0		       		||
@@ -435,7 +455,7 @@ inline void jsr_20()
 /*! \brief Pull Processor Status from Stack
 
   Pull SR			       		||
-  ((N, Z, C, I, D, V) <-- From Stack!)		||
+  (From Stack -> (N, Z, C, I, D, V))		||
   Addressing Mode:		Implied		||
   Assembly Language Form:	PLP		||
   Opcode:			28		||
@@ -476,7 +496,7 @@ inline void bmi_30()
 
   Pull SR					||
   Pull PC					||
-  ((N, Z, C, I, D, V) <-- From Stack!) 	       	||
+  (From Stack -> (N, Z, C, I, D, V)) 	       	||
   Addressing Mode:		Implied		||
   Assembly Language Form:	RTI		||
   Opcode:			40		||

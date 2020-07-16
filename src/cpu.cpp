@@ -94,6 +94,7 @@ bool dispatchInstruction()
       php_08();
       break;
     case 0x09:			// ORA	#i
+      ora_09();
       break;
     case 0x0a:			// ASL
       break;
