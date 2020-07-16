@@ -32,6 +32,7 @@ inline memory::address get16BitImmediate();
 inline void storeAbsoluteThis(const architecturalState::isaReg var);
 inline void loadPCFrom16BitImmediate();
 inline void loadPCFrom16BitImmediateIndirect();
+inline void loadPCFromStack();
 // Return true if we have crossed a page boundry
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 inline void branchTaken();
@@ -57,6 +58,7 @@ inline void clc_18();
 inline void jsr_20();
 inline void plp_28();
 inline void bmi_30();
+inline void rti_40();
 inline void pha_48();
 inline void eor_49();
 inline void jmp_4c();
@@ -162,6 +164,13 @@ inline void storeAbsoluteThis(const architecturalState::isaReg var)
 inline void loadPCFrom16BitImmediate()
 {
   architecturalState::PC = get16BitImmediate();
+}
+
+
+inline void loadPCFromStack()
+{
+  architecturalState::PC = pullFromStack() |
+    (pullFromStack() << memory::minimumAddressableUnitSize);
 }
 
 
@@ -463,6 +472,25 @@ inline void bmi_30()
 }
 
 
+/*! \brief Return from Interrupt
+
+  Pull SR					||
+  Pull PC					||
+  ((N, Z, C, I, D, V) <-- From Stack!) 	       	||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	RTI		||
+  Opcode:			40		||
+  Bytes:			1		||
+  Cycles:			6		|| */
+inline void rti_40()
+{ /* Note that unlike RTS, the return address on the stack is the actual address
+     rather than the address-1. */
+  architecturalState::status.flags = pullFromStack();
+  loadPCFromStack();
+  architecturalState::cycles += 6;
+}
+
+
 /*! \brief Push Accumulator on Stack
 
   Push A					||
@@ -541,8 +569,7 @@ inline void bvc_50()
 inline void rts_60()
 {				      // The low byte is pulled first.
 
-  architecturalState::PC = pullFromStack() |
-    (pullFromStack() << memory::minimumAddressableUnitSize);
+  loadPCFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 6;
 }

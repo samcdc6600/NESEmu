@@ -209,6 +209,7 @@ bool dispatchInstruction()
     case 0x3f:			// RLA	a,x
       break;
     case 0x40:			// RTI
+      rti_40();
       break;
     case 0x41:			// EOR	(d,x)
       break;
