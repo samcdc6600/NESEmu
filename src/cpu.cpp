@@ -480,6 +480,7 @@ bool dispatchInstruction()
     case 0xb7:			// LAX	d,y
       break;
     case 0xb8:			// CLV
+      clv_b8();
       break;
     case 0xb9:			// LDA	a,y
       break;

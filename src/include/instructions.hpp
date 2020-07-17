@@ -89,6 +89,7 @@ inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
+inline void clv_b8();
 inline void tsx_ba();
 inline void lda_bd();
 inline void cpy_c0();
@@ -989,6 +990,23 @@ inline void bcs_b0()
   if(architecturalState::status.u.C == 1)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Clear Overflow Flag
+
+  0 -> V				       	||
+  (N-, Z-, C-, I-, D-, V = 0) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	CLV		||
+  Opcode:			B8		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void clv_b8()
+{
+  architecturalState::status.u.V = 0;
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
