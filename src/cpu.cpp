@@ -621,6 +621,7 @@ bool dispatchInstruction()
     case 0xf7:			// ISC	d,x
       break;
     case 0xf8:			// SED
+      sed_f8();
       break;
     case 0xf9:			// SBC	a,y
       break;

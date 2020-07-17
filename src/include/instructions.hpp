@@ -102,6 +102,7 @@ inline void cpx_e0();
 inline void inx_e8();
 inline void nop_ea();
 inline void beq_f0();
+inline void sed_f8();
 
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
@@ -1228,6 +1229,25 @@ inline void beq_f0()
   if(architecturalState::status.u.Z == 1)
     branchTaken();
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Set Decimal Flag
+
+  1 -> D   					||
+  (N-, Z-, C-, I-, D = 1, V-)			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	SED		||
+  Opcode:			F8		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void sed_f8()
+{ /*  "Even though the NES doesn't use decimal mode, the opcodes to clear and
+      set the flag do work...":
+      http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=SED */
+  architecturalState::status.u.D = 1;
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
