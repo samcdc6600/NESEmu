@@ -71,6 +71,7 @@ inline void pla_68();
 inline void adc_69();
 inline void jmp_6c();
 inline void bvs_70();
+inline void sei_78();
 inline void sta_85();
 inline void stx_86();
 inline void dey_88();
@@ -711,6 +712,23 @@ inline void bvs_70()
   if(architecturalState::status.u.V == 1)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Set Interrupt Disable Status
+
+  1 -> I      					||
+  (N-, Z-, C-, I = 1, D-, V-) 			||
+  Addressing Mode:		Implied       	||
+  Assembly Language Form:	SEI       	||
+  Opcode:			78		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void sei_78()
+{
+  architecturalState::status.u.I = 1;
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 

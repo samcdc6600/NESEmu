@@ -334,6 +334,7 @@ bool dispatchInstruction()
     case 0x77:			// RRA	d,x
       break;
     case 0x78:			// SEI
+      sei_78();
       break;
     case 0x79:			// ADC	a,y
       break;
