@@ -264,6 +264,7 @@ bool dispatchInstruction()
     case 0x57:			// SRE	d,x
       break;
     case 0x58:			// CLI
+      cli_58();
       break;
     case 0x59:			// EOR	a,y
       break;

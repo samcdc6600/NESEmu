@@ -65,6 +65,7 @@ inline void pha_48();
 inline void eor_49();
 inline void jmp_4c();
 inline void bvc_50();
+inline void cli_58();
 inline void rts_60();
 inline void pla_68();
 inline void adc_69();
@@ -590,6 +591,23 @@ inline void bvc_50()
   if(architecturalState::status.u.V == 0)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Clear Interrupt Disable Bit
+
+  0 -> I					||
+  (N-, Z-, C-, I = 0, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	CLI		||
+  Opcode:			58		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void cli_58()
+{
+  architecturalState::status.u.I = 0;
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
