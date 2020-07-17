@@ -194,6 +194,7 @@ bool dispatchInstruction()
     case 0x37:			// RLA	d,x
       break;
     case 0x38:			// SEC
+      sec_38();
       break;
     case 0x39:			// AND	a,y
       break;

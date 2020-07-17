@@ -59,6 +59,7 @@ inline void clc_18();
 inline void jsr_20();
 inline void plp_28();
 inline void bmi_30();
+inline void sec_38();
 inline void rti_40();
 inline void pha_48();
 inline void eor_49();
@@ -295,7 +296,7 @@ inline void loadAccumulatorIndexed(const architecturalState::isaReg index)
   Interrupt					||
   Push PC + 2					||
   Push SR			       		||
-  (N-, Z-, C-, I 1, D-, V-) 			||
+  (N-, Z-, C-, I = 1, D-, V-) 			||
   Addressing Mode:		Implied		||
   Assembly Language Form:	BRK		||
   Opcode:			00		||
@@ -410,7 +411,7 @@ inline void bpl_10()
 /*! \brief Clear Carry Flag.
 
   0 -> C			       		||
-  (N-, Z-, C 0, I-, D-, V-) 			||
+  (N-, Z-, C = 0, I-, D-, V-) 			||
   Addressing Mode:		Implied		||
   Assembly Language Form:	CLC		||
   Opcode:			18		||
@@ -488,6 +489,23 @@ inline void bmi_30()
   if(architecturalState::status.u.N == 1)
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Set Carry Flag
+
+  1 -> C			       		||
+  (N-, Z-, C = 1, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	SEC		||
+  Opcode:			38		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void sec_38()
+{
+  architecturalState::status.u.C = 1;
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
