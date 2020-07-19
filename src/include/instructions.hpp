@@ -89,6 +89,7 @@ inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
+inline void ldx_b6();
 inline void clv_b8();
 inline void tsx_ba();
 inline void lda_bd();
@@ -996,6 +997,27 @@ inline void bcs_b0()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Index X with Memory
+
+  M -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, Y    	||
+  Assembly Language Form:	LDX oper, Y    	||
+  Opcode:			B6		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void ldx_b6()
+{
+  architecturalState::X = memory::mem[memory::zeroPageBase +
+				      (memory::maskAddressLow &
+				       (architecturalState::Y + get8BitImmediate()))];
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
