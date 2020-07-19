@@ -841,12 +841,17 @@ inline void tya_98()
 }
 
 
+/*! \brief Transfer Index X to Stack Register
+
+  X -> SP				       	||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Implied		||
+  Assembly Language Form:	TXS		||
+  Opcode:			9A		||
+  Bytes:			1		||
+  Cycles:			2		|| */
 inline void txs_9a()
-{ /* "TXS (Transfer X Index to Stack Pointer) transfers the value in the X
-     index to the stack pointer."
-     - http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=TXS */
-  setZeroFlagOn(architecturalState::X);
-  setNegativeFlagOn(architecturalState::X);
+{
   architecturalState::S = architecturalState::X;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
