@@ -32,12 +32,18 @@ inline void setNegativeFlagOn(const architecturalState::isaReg var);
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
+inline memory::address
+getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
+inline memory::minimumAddressableUnit
+getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // ~~~~~~~~~~~~~~~~<{ Functions for storing values in memory. }>~~~~~~~~~~~~~~~~
 inline void storeVarAtAddressA(const memory::address a,
 			     const memory::minimumAddressableUnit var);
-inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
-inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
-						      const architecturalState::isaReg var);
+inline void
+storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
+inline void
+storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+					  const architecturalState::isaReg var);
 // ~~~~~~~<{ Functions for loading registers with values from memory. }>~~~~~~~~
 inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 inline void loadPCFrom16BitImmediate();
@@ -180,6 +186,36 @@ inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a)
 }
 
 
+/*! \brief Used to get an address that is the combination of an index register
+  (index) and the current 16-bit operand. Note that this function will
+  incremente the PC if a page boundry is crossed! */
+inline memory::address
+getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
+{
+  const memory::address baseAddress {get16BitImmediate()};
+  const memory::address address {memory::address(baseAddress + index)};
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  
+  if(pageNum != (address & memory::maskAddressHigh))
+    {
+      architecturalState::PC += 1;
+    }
+  return address;
+}
+
+
+/*! \brief For use with instructions that read an 8-bit value at an
+   absolute address indexed by one of the index registers (index) and where the
+   absolute address is specified by that instructions 16 bit operand. Note that
+   this function will increment the PC if a page boundry is crossed. */
+inline memory::minimumAddressableUnit
+getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
+{
+  return memory::mem[getIndexedAbsoluteImmediateAddress(index)];
+}
+
+
 inline void storeVarAtAddressA(const memory::address a,
 			     const memory::minimumAddressableUnit var)
 {
@@ -189,7 +225,8 @@ inline void storeVarAtAddressA(const memory::address a,
 
 /*! \brief For use with instructions that store a registers value (var) at an
   absolute address specified by the instructions 16 bit operand. */
-inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
+inline void
+storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
 {
   memory::mem[get16BitImmediate()] = var;
 }
@@ -198,7 +235,7 @@ inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg 
 /* \brief For use with instructions that store a registers value (var) at an
    absolute address indexed by one of the index registers (index) and where the
    absolute address is specified by that instructions 16 bit operand. Note that
-   is function will increment the PC if a page boundry is crossed.
+   this function will increment the PC if a page boundry is crossed.
 
    Note that when looking at the listing for sta (99) at:
    https://www.masswerk.at/6502/6502_instruction_set.html#STA
@@ -220,19 +257,11 @@ inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg 
    Note also that the page (http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA)
    on Nes Hacker for this instruction says the following:
    "...Add one cycle if indexing across page boundary"  */
-inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
-						      const architecturalState::isaReg index)
+inline void
+storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
+					  const architecturalState::isaReg index)
 {
-  const memory::address baseAddress {get16BitImmediate()};
-  const memory::address address {memory::address(baseAddress + index)};
-  const memory::address pageNum {memory::address(baseAddress &
-						 memory::maskAddressHigh)};
-  
-  if(pageNum != (address & memory::maskAddressHigh))
-    {
-      architecturalState::PC += 1;
-    }
-  memory::mem[address] = var;
+  memory::mem[getIndexedAbsoluteImmediateAddress(index)] = var;
 }
 
 
@@ -1282,6 +1311,18 @@ inline void cdl_d8()
   Cycles:			4*		|| */
 inline void cmp_d9()
 {
+  const memory::minimumAddressableUnit compVal
+    {memory::minimumAddressableUnit
+     (architecturalState::A -
+      getVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y))};
+  /* Note here that we negate the second argument so our addition is actually a
+     subtraction. */
+  setCarryFlagOnAdditionOn(architecturalState::A,
+			   - getVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y));
+  setZeroFlagOn(compVal);
+  setNegativeFlagOn(compVal);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
