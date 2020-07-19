@@ -9,7 +9,7 @@
    function definitions be in this file. */
 #ifndef INSTRUCTIONS_HPP_
 #define INSTRUCTIONS_HPP_
-// We have a separet function for each opcode for performance reasons.
+
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
 // =========== (The below functions prototypes are used for operations =========
@@ -19,6 +19,7 @@
    the function is used as such.) Also note that "minimumAddressableUnit" and
    "isaReg" are both of type unsigned char (so they can be used interchangeably,
    however we try not to do so for reasons of consistency.)  */
+// ~~~~~~~~~~~~~~~~~~~~~<{ Functions for setting flags. }>~~~~~~~~~~~~~~~~~~~~~~
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 				     const architecturalState::isaReg b);
 inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
@@ -27,25 +28,32 @@ inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
 inline void setZeroFlagOn(const architecturalState::isaReg var);
 inline void setDecimalFlagOn(const bool d);
 inline void setNegativeFlagOn(const architecturalState::isaReg var);
+// ~~~~~~~~~~~~~~~<{ Functions for getting values from memory. }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
-inline void storeAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
-inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
-						      const architecturalState::isaReg index);
+inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
+// ~~~~~~~~~~~~~~~~<{ Functions for storing values in memory. }>~~~~~~~~~~~~~~~~
+inline void storeVarAtAddressA(const memory::address a,
+			     const memory::minimumAddressableUnit var);
+inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
+inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+						      const architecturalState::isaReg var);
+// ~~~~~~~<{ Functions for loading registers with values from memory. }>~~~~~~~~
+inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 inline void loadPCFrom16BitImmediate();
 inline void loadPCFrom16BitImmediateIndirect();
 inline void loadPCFromStack();
-// Return true if we have crossed a page boundry
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
+// ~~~~~~~~~~~~~~<{ Called when a conditional branch is taken. }>~~~~~~~~~~~~~~~
 inline void branchTaken();
-inline memory::minimumAddressableUnit pullFromStack();
+// ~~~~~~~~~~~~~~~~~~<{ Functions for pushing to the stack. }>~~~~~~~~~~~~~~~~~~
 inline void pushToStack(const memory::minimumAddressableUnit var);
 inline void pushPCPlusTwoToStack();
 inline void pushStatusFlagsToStack();
-inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a);
-inline void set8BitAtAddress(const memory::address a,
-			     const memory::minimumAddressableUnit var);
-inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
+// ~~~~~~~~~~~~~~<{ Called to pull top value off of the stack. }>~~~~~~~~~~~~~~~
+inline memory::minimumAddressableUnit pullFromStack();
+
+
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
 // ==== instructions. Functions that belong to the same class of instruction ===
@@ -103,6 +111,7 @@ inline void dex_ca();
 inline void cmp_cd();
 inline void bne_d0();
 inline void cdl_d8();
+inline void cmp_d9();
 inline void cpx_e0();
 inline void inx_e8();
 inline void nop_ea();
@@ -165,9 +174,22 @@ inline memory::address get16BitImmediate()
 }
 
 
+inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a)
+{
+  return memory::mem[a];
+}
+
+
+inline void storeVarAtAddressA(const memory::address a,
+			     const memory::minimumAddressableUnit var)
+{
+  memory::mem[a] = var;
+}
+
+
 /*! \brief For use with instructions that store a registers value (var) at an
   absolute address specified by the instructions 16 bit operand. */
-inline void storeAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
+inline void storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
 {
   memory::mem[get16BitImmediate()] = var;
 }
@@ -211,6 +233,19 @@ inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::
       architecturalState::PC += 1;
     }
   memory::mem[address] = var;
+}
+
+
+inline void loadAccumulatorIndexed(const architecturalState::isaReg index)
+{ /* * add 1 cycle if page boundary crossed. "oper, x" means we add x to to
+     oper, where x is either the X or the Y register. */
+  const memory::address baseAddress {get16BitImmediate()};
+  const memory::address address {memory::address(baseAddress + index)};
+  const memory::address pageNum {memory::address(baseAddress &
+						  memory::maskAddressHigh)};
+  if(pageNum != (address & memory::maskAddressHigh))
+    ++architecturalState::cycles;
+   architecturalState::A = memory::mem[address];
 }
 
 
@@ -260,6 +295,7 @@ inline void loadPCFrom16BitImmediateIndirect()
 }
 
 
+// Return true if we have crossed a page boundry.
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition()
 {  
   bool ret {false};
@@ -281,16 +317,9 @@ inline void branchTaken()
 }
 
 
-inline memory::minimumAddressableUnit pullFromStack()
-{
-  return get8BitAtAddress(memory::stackBase |
-			  ++architecturalState::S);
-}
-
-
 inline void pushToStack(const memory::minimumAddressableUnit var)
 {
-  set8BitAtAddress(memory::stackBase | architecturalState::S--,
+  storeVarAtAddressA(memory::stackBase | architecturalState::S--,
 		   var);
 }
 
@@ -310,29 +339,10 @@ inline void pushStatusFlagsToStack()
 }
 
 
-inline memory::minimumAddressableUnit get8BitAtAddress(const memory::address a)
+inline memory::minimumAddressableUnit pullFromStack()
 {
-  return memory::mem[a];
-}
-
-
-inline void set8BitAtAddress(const memory::address a,
-			     const memory::minimumAddressableUnit var)
-{
-  memory::mem[a] = var;
-}
-
-
-inline void loadAccumulatorIndexed(const architecturalState::isaReg index)
-{ /* * add 1 cycle if page boundary crossed. "oper, x" means we add x to to
-     oper, where x is either the X or the Y register. */
-  const memory::address baseAddress {get16BitImmediate()};
-  const memory::address address {memory::address(baseAddress + index)};
-  const memory::address pageNum {memory::address(baseAddress &
-						  memory::maskAddressHigh)};
-  if(pageNum != (address & memory::maskAddressHigh))
-    ++architecturalState::cycles;
-   architecturalState::A = memory::mem[address];
+  return getVarAtAddress(memory::stackBase |
+			  ++architecturalState::S);
 }
 
 
@@ -849,7 +859,7 @@ inline void txa_8a()
 
 inline void sta_8d()
 {
-  storeAtAbsoluteImmediateAddress(architecturalState::A);
+  storeVarAtAbsoluteImmediateAddress(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -896,32 +906,11 @@ inline void tya_98()
   Assembly Language Form:	STA oper, Y    	||
   Opcode:			99		||
   Bytes:			3		||
-  Cycles:			4*		||
-  NOTE THAT THE LISTING FOR THIS INSTRUCTION AT:
-  https://www.masswerk.at/6502/6502_instruction_set.html#STA
-  SAYS THAT THIS INSTRUCTION TAKES 5 CYCLES, HOWEVER IT ALSO SAYS THE FOLLOWING:
-  "abs,Y		....	absolute, Y-indexed	 	OPC $LLHH,Y
-  operand is address; effective address is address incremented by Y with
-  carry **
-
-  ...
-
-  **  The available 16-bit address space is conceived as consisting of pages of
-  256 bytes each, with address hi-bytes represententing the page index. An
-  increment with carry may affect the hi-byte and may thus result in a crossing
-  of page boundaries, adding an extra cycle to the execution. Increments without
-  carry do not affect the hi-byte of an address and no page transitions do
-  occur. Generally, increments of 16-bit addresses include a carry, increments
-  of zeropage addresses don't. Notably this is not related in any way to the
-  state of the carry bit of the accumulator."
-  FURTHER MORE THE PAGE ON THIS INSTRUCTION ON NES HACKER
-  (http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA) SAYS
-  THAT THIS INSTRUCTION TAKES 4* CYCLES, WHERE * MEANS THE FOLLOWING "...Add one
-  cycle if indexing across page boundary" */
+  Cycles:			4*		|| */
 inline void sta_99()
 {
-  storeVarAtIndexedAbsoluteImmediateAddress(architecturalState::A,
-					    architecturalState::Y);
+  storeVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y,
+					    architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -1055,7 +1044,7 @@ inline void tax_aa()
 
 inline void lda_ad()
 {
-  architecturalState::A = get8BitAtAddress(get16BitImmediate());
+  architecturalState::A = getVarAtAddress(get16BitImmediate());
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 3;
@@ -1248,39 +1237,14 @@ inline void dex_ca()
   Cycles:			4		|| */
 inline void cmp_cd()
 {
-  architecturalState::status.u.C = ((architecturalState::A == get8BitAtAddress(get16BitImmediate()))
+  architecturalState::status.u.C = ((architecturalState::A == getVarAtAddress(get16BitImmediate()))
 				    || (architecturalState::A >
-					get8BitAtAddress(get16BitImmediate()))) ? 1 : 0;
-  setZeroFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
-  setNegativeFlagOn(architecturalState::A - get8BitAtAddress(get16BitImmediate()));
+					getVarAtAddress(get16BitImmediate()))) ? 1 : 0;
+  setZeroFlagOn(architecturalState::A - getVarAtAddress(get16BitImmediate()));
+  setNegativeFlagOn(architecturalState::A - getVarAtAddress(get16BitImmediate()));
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
-
-
-/*! \brief Compare Memory with Accumulator
-
-  A - M						||
-  (N+, Z+, C+, I-, D-, V-)			||
-  Addressing Mode:		Immediate	||
-  Assembly Language Form:	CMP #oper	||
-  Opcode:			C9		||
-  Bytes:			2		||
-  Cycles:			2		||
-  Compare sets flags as if a subtraction had been carried out. If the value
-  in the accumulator is equal or greater than the compared value, the Carry
-  will be set. The equal (Z) and negative (N) flags will be set based on
-  equality or lack thereof and the sign (i.e. A>=$80) of the accumulator.
-  - http://6502.org/tutorials/6502opcodes.html#CMP */
-/*inline void cmp_c9()
-{
-  architecturalState::status.u.C = ((architecturalState::A == get8BitImmediate())
-				    || (architecturalState::A >
-					get8BitImmediate())) ? 1 : 0;
-  setZeroFlagOn(architecturalState::A - get8BitImmediate());
-  setNegativeFlagOn(architecturalState::A - get8BitImmediate());
-  architecturalState::PC += 2;
-  architecturalState::cycles += 2;*/
 
 
 inline void bne_d0()
@@ -1304,6 +1268,20 @@ inline void cdl_d8()
   setDecimalFlagOn(false);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Absolute, Y	||
+  Assembly Language Form:	CMP oper, Y	||
+  Opcode:			D9		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void cmp_d9()
+{
 }
 
 

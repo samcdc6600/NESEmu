@@ -558,6 +558,7 @@ bool dispatchInstruction()
       cdl_d8();
       break;
     case 0xd9:			// CMP	a,y
+      cmp_d9();
       break;
     case 0xda:			// NOP
       break;
