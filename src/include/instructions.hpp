@@ -29,7 +29,9 @@ inline void setDecimalFlagOn(const bool d);
 inline void setNegativeFlagOn(const architecturalState::isaReg var);
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
-inline void storeAbsoluteThis(const architecturalState::isaReg var);
+inline void storeAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
+inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
+						      const architecturalState::isaReg index);
 inline void loadPCFrom16BitImmediate();
 inline void loadPCFrom16BitImmediateIndirect();
 inline void loadPCFromStack();
@@ -79,6 +81,7 @@ inline void txa_8a();
 inline void sta_8d();
 inline void bcc_90();
 inline void tya_98();
+inline void sta_99();
 inline void txs_9a();
 inline void ldy_a0();
 inline void ldx_a2();
@@ -162,9 +165,52 @@ inline memory::address get16BitImmediate()
 }
 
 
-inline void storeAbsoluteThis(const architecturalState::isaReg var)
+/*! \brief For use with instructions that store a registers value (var) at an
+  absolute address specified by the instructions 16 bit operand. */
+inline void storeAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
 {
   memory::mem[get16BitImmediate()] = var;
+}
+
+
+/* \brief For use with instructions that store a registers value (var) at an
+   absolute address indexed by one of the index registers (index) and where the
+   absolute address is specified by that instructions 16 bit operand. Note that
+   is function will increment the PC if a page boundry is crossed.
+
+   Note that when looking at the listing for sta (99) at:
+   https://www.masswerk.at/6502/6502_instruction_set.html#STA
+   We see the following:
+   "abs,Y		....	absolute, Y-indexed	 	OPC $LLHH,Y
+   operand is address; effective address is address incremented by Y with
+   carry **
+
+   ...
+
+   **  The available 16-bit address space is conceived as consisting of pages of
+   256 bytes each, with address hi-bytes represententing the page index. An
+   increment with carry may affect the hi-byte and may thus result in a crossing
+   of page boundaries, adding an extra cycle to the execution. Increments without
+   carry do not affect the hi-byte of an address and no page transitions do
+   occur. Generally, increments of 16-bit addresses include a carry, increments
+   of zeropage addresses don't. Notably this is not related in any way to the
+   state of the carry bit of the accumulator."
+   Note also that the page (http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA)
+   on Nes Hacker for this instruction says the following:
+   "...Add one cycle if indexing across page boundary"  */
+inline void storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
+						      const architecturalState::isaReg index)
+{
+  const memory::address baseAddress {get16BitImmediate()};
+  const memory::address address {memory::address(baseAddress + index)};
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  
+  if(pageNum != (address & memory::maskAddressHigh))
+    {
+      architecturalState::PC += 1;
+    }
+  memory::mem[address] = var;
 }
 
 
@@ -803,7 +849,7 @@ inline void txa_8a()
 
 inline void sta_8d()
 {
-  storeAbsoluteThis(architecturalState::A);
+  storeAtAbsoluteImmediateAddress(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -839,6 +885,45 @@ inline void tya_98()
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Store Accumulator in Memory
+
+  A -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, Y	||
+  Assembly Language Form:	STA oper, Y    	||
+  Opcode:			99		||
+  Bytes:			3		||
+  Cycles:			4*		||
+  NOTE THAT THE LISTING FOR THIS INSTRUCTION AT:
+  https://www.masswerk.at/6502/6502_instruction_set.html#STA
+  SAYS THAT THIS INSTRUCTION TAKES 5 CYCLES, HOWEVER IT ALSO SAYS THE FOLLOWING:
+  "abs,Y		....	absolute, Y-indexed	 	OPC $LLHH,Y
+  operand is address; effective address is address incremented by Y with
+  carry **
+
+  ...
+
+  **  The available 16-bit address space is conceived as consisting of pages of
+  256 bytes each, with address hi-bytes represententing the page index. An
+  increment with carry may affect the hi-byte and may thus result in a crossing
+  of page boundaries, adding an extra cycle to the execution. Increments without
+  carry do not affect the hi-byte of an address and no page transitions do
+  occur. Generally, increments of 16-bit addresses include a carry, increments
+  of zeropage addresses don't. Notably this is not related in any way to the
+  state of the carry bit of the accumulator."
+  FURTHER MORE THE PAGE ON THIS INSTRUCTION ON NES HACKER
+  (http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA) SAYS
+  THAT THIS INSTRUCTION TAKES 4* CYCLES, WHERE * MEANS THE FOLLOWING "...Add one
+  cycle if indexing across page boundary" */
+inline void sta_99()
+{
+  storeVarAtIndexedAbsoluteImmediateAddress(architecturalState::A,
+					    architecturalState::Y);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
@@ -1061,7 +1146,7 @@ inline void tsx_ba()
 
   M -> A				       	||
   (N+, Z+, C-, I-, D-, V-) 			||
-  Addressing Mode:		absolute, X    	||
+  Addressing Mode:		Absolute, X    	||
   Assembly Language Form:	LDA oper, X    	||
   Opcode:			BD		||
   Bytes:			3		||

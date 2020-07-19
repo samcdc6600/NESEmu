@@ -408,6 +408,7 @@ bool dispatchInstruction()
       tya_98();
       break;
     case 0x99:			// STA	a,y
+      sta_99();
       break;
     case 0x9a:			// TXS
       txs_9a();
