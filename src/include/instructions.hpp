@@ -25,9 +25,9 @@ inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
 				    const architecturalState::isaReg b,
 				    const architecturalState::isaReg c);
-inline void setZeroFlagOn(const architecturalState::isaReg var);
+inline void setZeroFlagOn(const architecturalState::isaReg reg);
 inline void setDecimalFlagOn(const bool d);
-inline void setNegativeFlagOn(const architecturalState::isaReg var);
+inline void setNegativeFlagOn(const architecturalState::isaReg reg);
 // ~~~~~~~~~~~~~~~<{ Functions for getting values from memory. }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
@@ -37,13 +37,15 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // ~~~~~~~~~~~~~~~~<{ Functions for storing values in memory. }>~~~~~~~~~~~~~~~~
-inline void storeVarAtAddressA(const memory::address a,
-			     const memory::minimumAddressableUnit var);
+inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
+				      const architecturalState::isaReg reg);
+inline void storeRegAtAddress(const memory::address a,
+			      const architecturalState::isaReg reg);
 inline void
-storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var);
+storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg);
 inline void
-storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
-					  const architecturalState::isaReg var);
+storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+					  const architecturalState::isaReg reg);
 // ~~~~~~~<{ Functions for loading registers with values from memory. }>~~~~~~~~
 inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 inline void loadPCFrom16BitImmediate();
@@ -53,7 +55,7 @@ inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
 // ~~~~~~~~~~~~~~<{ Called when a conditional branch is taken. }>~~~~~~~~~~~~~~~
 inline void branchTaken();
 // ~~~~~~~~~~~~~~~~~~<{ Functions for pushing to the stack. }>~~~~~~~~~~~~~~~~~~
-inline void pushToStack(const memory::minimumAddressableUnit var);
+inline void pushToStack(const memory::minimumAddressableUnit reg);
 inline void pushPCPlusTwoToStack();
 inline void pushStatusFlagsToStack();
 // ~~~~~~~~~~~~~~<{ Called to pull top value off of the stack. }>~~~~~~~~~~~~~~~
@@ -94,6 +96,7 @@ inline void dey_88();
 inline void txa_8a();
 inline void sta_8d();
 inline void bcc_90();
+inline void stx_96();
 inline void tya_98();
 inline void sta_99();
 inline void txs_9a();
@@ -149,9 +152,9 @@ inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
 }
 
 
-inline void setZeroFlagOn(const architecturalState::isaReg var)
+inline void setZeroFlagOn(const architecturalState::isaReg reg)
 {
-  architecturalState::status.u.Z = !var ? 1 : 0;
+  architecturalState::status.u.Z = !reg ? 1 : 0;
 }
 
 
@@ -161,9 +164,9 @@ inline void setDecimalFlagOn(const bool d)
 }
 
 
-void setNegativeFlagOn(const architecturalState::isaReg var)
+void setNegativeFlagOn(const architecturalState::isaReg reg)
 {
-  architecturalState::status.u.N = (var & masks::bit7) ? 1 : 0;
+  architecturalState::status.u.N = (reg & masks::bit7) ? 1 : 0;
 }
 
 
@@ -217,23 +220,30 @@ getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 }
 
 
-inline void storeVarAtAddressA(const memory::address a,
-			     const memory::minimumAddressableUnit var)
+inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg reg)
 {
-  memory::mem[a] = var;
+      // memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
+      // 	      get8BitImmediate() + ] = reg;
 }
 
 
-/*! \brief For use with instructions that store a registers value (var) at an
+inline void storeRegAtAddress(const memory::address a,
+			     const architecturalState::isaReg reg)
+{
+  memory::mem[a] = reg;
+}
+
+
+/*! \brief For use with instructions that store a registers value (reg) at an
   absolute address specified by the instructions 16 bit operand. */
 inline void
-storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
+storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg)
 {
-  memory::mem[get16BitImmediate()] = var;
+  memory::mem[get16BitImmediate()] = reg;
 }
 
 
-/* \brief For use with instructions that store a registers value (var) at an
+/* \brief For use with instructions that store a registers value (reg) at an
    absolute address indexed by one of the index registers (index) and where the
    absolute address is specified by that instructions 16 bit operand. Note that
    this function will increment the PC if a page boundry is crossed.
@@ -259,10 +269,10 @@ storeVarAtAbsoluteImmediateAddress(const architecturalState::isaReg var)
    on Nes Hacker for this instruction says the following:
    "...Add one cycle if indexing across page boundary"  */
 inline void
-storeVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg var,
+storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg reg,
 					  const architecturalState::isaReg index)
 {
-  memory::mem[getIndexedAbsoluteImmediateAddress(index)] = var;
+  memory::mem[getIndexedAbsoluteImmediateAddress(index)] = reg;
 }
 
 
@@ -347,10 +357,10 @@ inline void branchTaken()
 }
 
 
-inline void pushToStack(const memory::minimumAddressableUnit var)
+inline void pushToStack(const memory::minimumAddressableUnit reg)
 {
-  storeVarAtAddressA(memory::stackBase | architecturalState::S--,
-		   var);
+  storeRegAtAddress(memory::stackBase | architecturalState::S--,
+		   reg);
 }
 
 
@@ -889,7 +899,7 @@ inline void txa_8a()
 
 inline void sta_8d()
 {
-  storeVarAtAbsoluteImmediateAddress(architecturalState::A);
+  storeRegAtAbsoluteImmediateAddress(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -918,6 +928,23 @@ inline void bcc_90()
 }
 
 
+/*! \brief Store Index X in Memory
+
+  X -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, Y	||
+  Assembly Language Form:	STX oper, Y	||
+  Opcode:			96		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void stx_96()
+{
+  // storeRegAtIndexedZeroPage
+  //   architecturalState::PC += 2;
+  //   architecturalState::cycles += 4;
+}
+
+
 inline void tya_98()
 {
   architecturalState::A = architecturalState::Y;
@@ -939,7 +966,7 @@ inline void tya_98()
   Cycles:			4*		|| */
 inline void sta_99()
 {
-  storeVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y,
+  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::Y,
 					    architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
