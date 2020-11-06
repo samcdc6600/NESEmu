@@ -220,10 +220,11 @@ getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 }
 
 
-inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg reg)
+inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
+				      const architecturalState::isaReg reg)
 {
-      // memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
-      // 	      get8BitImmediate() + ] = reg;
+  // memory::mem[memory::zeroPageBase |
+  //      	      architecturalState::isaReg(get8BitImmediate() + index] = reg;
 }
 
 
@@ -843,8 +844,8 @@ inline void sei_78()
   Cycles:			3		|| */
 inline void sta_85()
 {
-  memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
-	      get8BitImmediate()] = architecturalState::A;
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] =
+    architecturalState::A;
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -861,8 +862,8 @@ inline void sta_85()
   Cycles:			3		|| */
 inline void stx_86()
 {
-  memory::mem[(memory::zeroPageBase << memory::minimumAddressableUnitSize) |
-	      get8BitImmediate()] = architecturalState::X;
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] =
+    architecturalState::X;
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -930,6 +931,12 @@ inline void bcc_90()
 
 /*! \brief Store Index X in Memory
 
+  : http://www.emulator101.com/6502-addressing-modes.html
+  This works just like absolute indexed, but the target address is limited to
+  the first 0xFF bytes. The target address will wrap around and will always be
+  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
+  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
+  calculation of the target address.
   X -> M				        ||
   (N-, Z-, C-, I-, D-, V-) 			||
   Addressing Mode:		Zeropage, Y	||
@@ -939,9 +946,9 @@ inline void bcc_90()
   Cycles:			4		|| */
 inline void stx_96()
 {
-  // storeRegAtIndexedZeroPage
+  // storeRegAtIndexedZeroPage()
   //   architecturalState::PC += 2;
-  //   architecturalState::cycles += 4;
+  // architecturalState::cycles += 4;
 }
 
 
@@ -1020,8 +1027,7 @@ inline void ldx_a2()
   Cycles:			3		|| */
 inline void lda_a5()
 {
-  architecturalState::A = {memory::mem[(memory::zeroPageBase <<
-					memory::minimumAddressableUnitSize) |
+  architecturalState::A = {memory::mem[memory::zeroPageBase |
 				       get8BitImmediate()]};
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
@@ -1041,8 +1047,7 @@ inline void lda_a5()
   Cycles:			3		|| */
 inline void ldx_a6()
 {
-  architecturalState::X = {memory::mem[(memory::zeroPageBase <<
-					memory::minimumAddressableUnitSize) |
+  architecturalState::X = {memory::mem[memory::zeroPageBase |
 				       get8BitImmediate()]};
   setZeroFlagOn(architecturalState::X);
   setNegativeFlagOn(architecturalState::X);
@@ -1133,6 +1138,12 @@ inline void bcs_b0()
 
 /*! \brief Load Index X with Memory
 
+  : http://www.emulator101.com/6502-addressing-modes.html
+  This works just like absolute indexed, but the target address is limited to
+  the first 0xFF bytes. The target address will wrap around and will always be
+  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
+  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
+  calculation of the target address.
   M -> X				       	||
   (N+, Z+, C-, I-, D-, V-) 			||
   Addressing Mode:		Zeropage, Y    	||
