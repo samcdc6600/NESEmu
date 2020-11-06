@@ -62,11 +62,11 @@ inline memory::minimumAddressableUnit pullFromStack();
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
 // ============== (The below functions prototypes comprise full  ===============
-// ==== instructions. Functions that belong to the same class of instruction ===
-// ============ (indicated by their prefixs) are grouped together.) ============
+// ====== instructions. We call them specializations because many of them  =====
+// =========== are variations of the same general instruction type.) ===========
 /* Note: PC should be altered after calling "SUB INSTRUCTION GRANULARITY
-   OPERATIONS", as these functions assume it has not been altered yet! */
-/* PLP  Pull Processor Status from Stack (where pull is analogous to pop.) */
+   OPERATIONS" (see above for SUB INSTRUCTION GRANULARITY OPERATIONS function
+   headers), as these functions assume it has not been altered yet! */
 inline void brk_00();
 inline void php_08();
 inline void ora_09();
