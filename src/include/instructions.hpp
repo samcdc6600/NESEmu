@@ -110,6 +110,7 @@ inline void ldx_b6();
 inline void clv_b8();
 inline void tsx_ba();
 inline void lda_bd();
+inline void ldx_be();
 inline void cpy_c0();
 inline void iny_c8();
 inline void cmp_c9();
@@ -1174,6 +1175,29 @@ inline void lda_bd()
   loadAccumulatorIndexed(architecturalState::X);
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Load Index X with Memory
+
+  M -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, Y    	||
+  Assembly Language Form:	LDX oper, Y    	||
+  Opcode:			BE		||
+  Bytes:			3		||
+  Cycles:			4*		|| 
+  Add Y register to 16 bit immediate to get address. Set X register to value at
+  address. If a page boundry is crossed add 1 to cycles. */
+
+inline void ldx_be()
+{
+  architecturalState::X =
+    getIndexedAbsoluteImmediateAddress(architecturalState::Y);
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }

@@ -497,6 +497,7 @@ bool dispatchInstruction()
       lda_bd();
       break;
     case 0xbe:			// LDX	a,y
+      ldx_be();
       break;
     case 0xbf:			// LAX	a,y
       break;
