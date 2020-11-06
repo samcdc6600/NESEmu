@@ -31,6 +31,8 @@ inline void setNegativeFlagOn(const architecturalState::isaReg reg);
 // ~~~~~~~~~~~~~~~<{ Functions for getting values from memory. }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
+inline memory::minimumAddressableUnit
+getVarAtIndexedZeroPage(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
 inline memory::address
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
@@ -184,6 +186,34 @@ inline memory::address get16BitImmediate()
 }
 
 
+/*! \brief Returns 8 bit value at from zero page at address composed of (8 bit
+  immediate + index register)
+
+  : http://www.emulator101.com/6502-addressing-modes.html
+  This works just like absolute indexed, but the target address is limited to
+  the first 0xFF bytes. The target address will wrap around and will always be
+  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
+  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
+  calculation of the target address. */
+inline memory::minimumAddressableUnit
+getVarAtIndexedZeroPage(const architecturalState::isaReg index)
+{
+  using namespace memory;
+  /* https://www.nayuki.io/page/summary-of-c-cpp-integer-rules:
+     If any operand of an operator has type bool, char, or short (whether signed
+     or unsigned), then it is promoted to (signed) int if int can hold all
+     values of the source type; otherwise it is promoted to unsigned int; the
+     promotion is designed to be lossless. Examples: */
+  const int potentialAddress {index + get8BitImmediate()};
+  // If potentialAddress is larger then pageSize wrape around.
+  const minimumAddressableUnit ret
+    {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
+					   (potentialAddress - (pageSize -1)) :
+					   potentialAddress))]};
+  return ret;
+}
+
+
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a)
 {
   return memory::mem[a];
@@ -220,6 +250,15 @@ getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 }
 
 
+/*! \brief Stores reg value in zero page at address composed of (8 bit
+  immediate + index register)
+
+  : http://www.emulator101.com/6502-addressing-modes.html
+  This works just like absolute indexed, but the target address is limited to
+  the first 0xFF bytes. The target address will wrap around and will always be
+  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
+  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
+  calculation of the target address. */
 inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
 				      const architecturalState::isaReg reg)
 {
@@ -1138,12 +1177,6 @@ inline void bcs_b0()
 
 /*! \brief Load Index X with Memory
 
-  : http://www.emulator101.com/6502-addressing-modes.html
-  This works just like absolute indexed, but the target address is limited to
-  the first 0xFF bytes. The target address will wrap around and will always be
-  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
-  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
-  calculation of the target address.
   M -> X				       	||
   (N+, Z+, C-, I-, D-, V-) 			||
   Addressing Mode:		Zeropage, Y    	||
@@ -1153,9 +1186,7 @@ inline void bcs_b0()
   Cycles:			4		|| */
 inline void ldx_b6()
 {
-  architecturalState::X = memory::mem[memory::zeroPageBase +
-				      (memory::maskAddressLow &
-				       (architecturalState::Y + get8BitImmediate()))];
+  architecturalState::X = getVarAtIndexedZeroPage(architecturalState::Y);
   setZeroFlagOn(architecturalState::X);
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
