@@ -198,7 +198,7 @@ inline memory::address get16BitImmediate()
 inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index)
 {
-  using namespace memory;
+  //  using namespace memory;
   /* https://www.nayuki.io/page/summary-of-c-cpp-integer-rules:
      If any operand of an operator has type bool, char, or short (whether signed
      or unsigned), then it is promoted to (signed) int if int can hold all
@@ -206,10 +206,18 @@ getVarAtIndexedZeroPage(const architecturalState::isaReg index)
      promotion is designed to be lossless. Examples: */
   const int potentialAddress {index + get8BitImmediate()};
   // If potentialAddress is larger then pageSize wrape around.
-  const minimumAddressableUnit ret
-    {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
-					   (potentialAddress - (pageSize -1)) :
+  const memory::minimumAddressableUnit ret
+    {memory::mem[memory::zeroPageBase + (memory::maskAddressLow & (potentialAddress > (memory::pageSize -1) ?
+					   (potentialAddress - (memory::pageSize -1)) :
 					   potentialAddress))]};
+
+
+  std::cout<<"potentialAddress = "<<potentialAddress<<'\n';
+  std::cout<<"Address in func = "<<memory::zeroPageBase + (memory::maskAddressLow & (potentialAddress > (memory::pageSize -1) ?
+									     (potentialAddress - (memory::pageSize -1)) :
+								     potentialAddress))<<'\n';
+  std::cout<<"ret = "<<ret<<'\n';
+  std::cout<<"ret should = "<<memory::mem[16]<<'\n';
   return ret;
 }
 
@@ -262,8 +270,19 @@ getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
 				      const architecturalState::isaReg reg)
 {
-  // memory::mem[memory::zeroPageBase |
-  //      	      architecturalState::isaReg(get8BitImmediate() + index] = reg;
+  using namespace memory;
+  /* https://www.nayuki.io/page/summary-of-c-cpp-integer-rules:
+     If any operand of an operator has type bool, char, or short (whether signed
+     or unsigned), then it is promoted to (signed) int if int can hold all
+     values of the source type; otherwise it is promoted to unsigned int; the
+     promotion is designed to be lossless. Examples: */
+  const int potentialAddress {index + get8BitImmediate()};
+  // If potentialAddress is larger then pageSize wrape around.
+  const minimumAddressableUnit address
+    {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
+					   (potentialAddress - (pageSize -1)) :
+					   potentialAddress))]};
+  memory::mem[address] = reg;
 }
 
 
@@ -970,12 +989,6 @@ inline void bcc_90()
 
 /*! \brief Store Index X in Memory
 
-  : http://www.emulator101.com/6502-addressing-modes.html
-  This works just like absolute indexed, but the target address is limited to
-  the first 0xFF bytes. The target address will wrap around and will always be
-  in the zero page. If the instruction is LDA $C0,X, and X is $60, then the
-  target address will be $20. $C0+$60 = $120, but the carry is discarded in the
-  calculation of the target address.
   X -> M				        ||
   (N-, Z-, C-, I-, D-, V-) 			||
   Addressing Mode:		Zeropage, Y	||
@@ -985,9 +998,9 @@ inline void bcc_90()
   Cycles:			4		|| */
 inline void stx_96()
 {
-  // storeRegAtIndexedZeroPage()
-  //   architecturalState::PC += 2;
-  // architecturalState::cycles += 4;
+  storeRegAtIndexedZeroPage(architecturalState::Y, architecturalState::X);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
@@ -1186,7 +1199,9 @@ inline void bcs_b0()
   Cycles:			4		|| */
 inline void ldx_b6()
 {
-  architecturalState::X = getVarAtIndexedZeroPage(architecturalState::Y);
+  architecturalState::X =
+    getVarAtIndexedZeroPage(architecturalState::Y);
+  std::cout<<"value = "<<architecturalState::X<<'\n';
   setZeroFlagOn(architecturalState::X);
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
@@ -1264,7 +1279,7 @@ inline void lda_bd()
 inline void ldx_be()
 {
   architecturalState::X =
-    getIndexedAbsoluteImmediateAddress(architecturalState::Y);
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)];
   setZeroFlagOn(architecturalState::X);
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 3;

@@ -401,6 +401,7 @@ bool dispatchInstruction()
     case 0x95:			// STA	d,x
       break;
     case 0x96:			// STX	d,y
+      stx_96();
       break;
     case 0x97:			// SAX	d,y
       break;

@@ -1,6 +1,8 @@
 # Priority of list is from top to bottom, with the top being the highest.
 
 * GENERAL ======================================================================
+	- Make build pass shellcheck.
+	- Make  modifyHTMLDocsToCollapseCode pass shellcheck.
 	- Fix problems when compiling with g++!
 	- Improve error messages for debug commands.
 	- Handle escape sequences in code included in doxygen documentation
