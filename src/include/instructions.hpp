@@ -198,7 +198,7 @@ inline memory::address get16BitImmediate()
 inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index)
 {
-  //  using namespace memory;
+  using namespace memory;
   /* https://www.nayuki.io/page/summary-of-c-cpp-integer-rules:
      If any operand of an operator has type bool, char, or short (whether signed
      or unsigned), then it is promoted to (signed) int if int can hold all
@@ -206,9 +206,9 @@ getVarAtIndexedZeroPage(const architecturalState::isaReg index)
      promotion is designed to be lossless. Examples: */
   const int potentialAddress {index + get8BitImmediate()};
   // If potentialAddress is larger then pageSize wrape around.
-  const memory::minimumAddressableUnit ret
-    {memory::mem[memory::zeroPageBase + (memory::maskAddressLow & (potentialAddress > (memory::pageSize -1) ?
-					   (potentialAddress - (memory::pageSize -1)) :
+  const minimumAddressableUnit ret
+    {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
+					   (potentialAddress - (pageSize -1)) :
 					   potentialAddress))]};
   return ret;
 }
