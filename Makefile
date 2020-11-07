@@ -6,6 +6,7 @@
 
 CXX	= clang++
 #CXX	= g++
+# fpermissive requred for compilation with g++.
 CXXFLAGS	= -std=c++2a -Wall -Wpedantic -Wextra -O2
 #CXXFLAGS	= -std=c++2a -fconcepts -fpermissive -Wall -Wpedantic -Wextra -O2
 LIBS	= -L/usr/local/lib/ -I/usr/local/include/ -lglut -lGLU -lGL

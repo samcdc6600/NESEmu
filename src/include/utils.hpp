@@ -3,6 +3,7 @@
 
 
 #include <climits>
+#include <cassert>
 #include <iostream>
 #include <fstream>
 #include <string>

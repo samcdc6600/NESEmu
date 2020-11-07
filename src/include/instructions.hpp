@@ -210,14 +210,6 @@ getVarAtIndexedZeroPage(const architecturalState::isaReg index)
     {memory::mem[memory::zeroPageBase + (memory::maskAddressLow & (potentialAddress > (memory::pageSize -1) ?
 					   (potentialAddress - (memory::pageSize -1)) :
 					   potentialAddress))]};
-
-
-  std::cout<<"potentialAddress = "<<potentialAddress<<'\n';
-  std::cout<<"Address in func = "<<memory::zeroPageBase + (memory::maskAddressLow & (potentialAddress > (memory::pageSize -1) ?
-									     (potentialAddress - (memory::pageSize -1)) :
-								     potentialAddress))<<'\n';
-  std::cout<<"ret = "<<ret<<'\n';
-  std::cout<<"ret should = "<<memory::mem[16]<<'\n';
   return ret;
 }
 
@@ -1201,7 +1193,6 @@ inline void ldx_b6()
 {
   architecturalState::X =
     getVarAtIndexedZeroPage(architecturalState::Y);
-  std::cout<<"value = "<<architecturalState::X<<'\n';
   setZeroFlagOn(architecturalState::X);
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
