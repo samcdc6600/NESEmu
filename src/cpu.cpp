@@ -496,6 +496,7 @@ bool dispatchInstruction()
     case 0xbb:			// LAS	a,y
       break;
     case 0xbc:			// LDY	a,x
+      ldy_bc();
       break;
     case 0xbd:			// LDA	a,x
       lda_bd();

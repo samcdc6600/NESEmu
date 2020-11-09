@@ -120,6 +120,7 @@ inline void ldx_b6();
 inline void clv_b8();
 inline void lda_b9();
 inline void tsx_ba();
+inline void ldy_bc();
 inline void lda_bd();
 inline void ldx_be();
 inline void cpy_c0();
@@ -1297,7 +1298,7 @@ inline void clv_b8()
 
   M -> A				       	||
   (N+, Z+, C-, I-, D-, V-) 			||
-  Addressing Mode:		Absolute       	||
+  Addressing Mode:		Absolute, Y   	||
   Assembly Language Form:	LDA oper, y    	||
   Opcode:			B9		||
   Bytes:			3		||
@@ -1306,7 +1307,7 @@ inline void clv_b8()
   address. If a page boundry is crossed add 1 to cycles. */
 inline void lda_b9()
 {
-    architecturalState::A =
+  architecturalState::A =
     memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)];
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
@@ -1331,6 +1332,26 @@ inline void tsx_ba()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Index Y with Memory
+
+  M -> Y				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, X    	||
+  Assembly Language Form:	LDY oper, X    	||
+  Opcode:			BC		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void ldy_bc()
+{
+    architecturalState::Y =
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)];
+  setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
