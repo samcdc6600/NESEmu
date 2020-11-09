@@ -19,7 +19,7 @@
    the function is used as such.) Also note that "minimumAddressableUnit" and
    "isaReg" are both of type unsigned char (so they can be used interchangeably,
    however we try not to do so for reasons of consistency.)  */
-// ~~~~~~~~~~~~~~~~~~~~~<{ Functions for setting flags. }>~~~~~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~~~~<{ Functions for Setting Flags }>~~~~~~~~~~~~~~~~~~~~~~
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 				     const architecturalState::isaReg b);
 inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
@@ -28,7 +28,7 @@ inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
 inline void setZeroFlagOn(const architecturalState::isaReg reg);
 inline void setDecimalFlagOn(const bool d);
 inline void setNegativeFlagOn(const architecturalState::isaReg reg);
-// ~~~~~~~~~~~~~~~<{ Functions for getting values from memory. }>~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~<{ Functions for Getting Values From Memory }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit get8BitImmediate();
 inline memory::address get16BitImmediate();
 inline memory::minimumAddressableUnit
@@ -38,7 +38,7 @@ inline memory::address
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
-// ~~~~~~~~~~~~~~~~<{ Functions for storing values in memory. }>~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~<{ Functions for Storing Values in Memory }>~~~~~~~~~~~~~~~~
 inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
 				      const architecturalState::isaReg reg);
 inline void storeRegAtAddress(const memory::address a,
@@ -48,19 +48,19 @@ storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg);
 inline void
 storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
 					  const architecturalState::isaReg reg);
-// ~~~~~~~<{ Functions for loading registers with values from memory. }>~~~~~~~~
+// ~~~~~~~~<{ Functions for Loading Registers With Values From Memory }>~~~~~~~~
 inline void loadAccumulatorIndexed(const architecturalState::isaReg index);
 inline void loadPCFrom16BitImmediate();
 inline void loadPCFrom16BitImmediateIndirect();
 inline void loadPCFromStack();
 inline bool add8BitImmediateToPCAndCheckPageBoundryTransition();
-// ~~~~~~~~~~~~~~<{ Called when a conditional branch is taken. }>~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~<{ Called When a Conditional Branch Is Taken }>~~~~~~~~~~~~~~~
 inline void branchTaken();
-// ~~~~~~~~~~~~~~~~~~<{ Functions for pushing to the stack. }>~~~~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~~~~~<{ Functions for Pushing to the Stack }>~~~~~~~~~~~~~~~~~~
 inline void pushToStack(const memory::minimumAddressableUnit reg);
 inline void pushPCPlusTwoToStack();
 inline void pushStatusFlagsToStack();
-// ~~~~~~~~~~~~~~<{ Called to pull top value off of the stack. }>~~~~~~~~~~~~~~~
+// ~~~~~~~~~~~~~~~<{ Called to Pull Top Value off of the Stack }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit pullFromStack();
 // ~~~~~~~~~~~~~~~~~~~~~~~<{ Called to Compare Values }>~~~~~~~~~~~~~~~~~~~~~~~~
 inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
