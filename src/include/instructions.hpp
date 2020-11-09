@@ -209,7 +209,7 @@ getVarAtIndexedZeroPage(const architecturalState::isaReg index)
   // If potentialAddress is larger then pageSize wrape around.
   const minimumAddressableUnit ret
     {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
-					   (potentialAddress - (pageSize -1)) :
+					   (potentialAddress - pageSize) :
 					   potentialAddress))]};
   return ret;
 }
@@ -234,7 +234,7 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
   
   if(pageNum != (address & memory::maskAddressHigh))
     {
-      architecturalState::PC += 1;
+      architecturalState::cycles += 1;
     }
   return address;
 }
