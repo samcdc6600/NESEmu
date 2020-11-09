@@ -111,6 +111,7 @@ inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
+inline void ldy_b4();
 inline void ldx_b6();
 inline void clv_b8();
 inline void lda_b9();
@@ -1178,6 +1179,26 @@ inline void bcs_b0()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Index Y with Memory
+
+  M -> Y				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	LDY oper, X    	||
+  Opcode:			B4		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void ldy_b4()
+{
+  architecturalState::Y =
+    getVarAtIndexedZeroPage(architecturalState::X);
+  setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 

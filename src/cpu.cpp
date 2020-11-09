@@ -474,6 +474,7 @@ bool dispatchInstruction()
     case 0xb3:			// LAX	(d),y
       break;
     case 0xb4:			// LDY	d,x
+      ldy_b4();
       break;
     case 0xb5:			// LDA	d,x
       break;
