@@ -486,6 +486,7 @@ bool dispatchInstruction()
       clv_b8();
       break;
     case 0xb9:			// LDA	a,y
+      lda_b9();
       break;
     case 0xba:			// TSX
       tsx_ba();

@@ -113,6 +113,7 @@ inline void lda_ad();
 inline void bcs_b0();
 inline void ldx_b6();
 inline void clv_b8();
+inline void lda_b9();
 inline void tsx_ba();
 inline void lda_bd();
 inline void ldx_be();
@@ -270,11 +271,11 @@ inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
      promotion is designed to be lossless. Examples: */
   const int potentialAddress {index + get8BitImmediate()};
   // If potentialAddress is larger then pageSize wrape around.
-  const minimumAddressableUnit address
-    {mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
-					   (potentialAddress - (pageSize -1)) :
-					   potentialAddress))]};
-  memory::mem[address] = reg;
+  memory::minimumAddressableUnit address {};
+  address = zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
+					      (potentialAddress - pageSize) :
+					      potentialAddress));
+  mem[address] = reg;
 }
 
 
@@ -1017,8 +1018,8 @@ inline void tya_98()
   Cycles:			4*		|| */
 inline void sta_99()
 {
-  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::Y,
-					    architecturalState::A);
+  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::A,
+					    architecturalState::Y);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -1217,6 +1218,28 @@ inline void clv_b8()
 }
 
 
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	LDA oper, y    	||
+  Opcode:			B9		||
+  Bytes:			3		||
+  Cycles:			4*		||
+  Add Y register to 16 bit immediate to get address. Set A register to value at
+  address. If a page boundry is crossed add 1 to cycles. */
+inline void lda_b9()
+{
+    architecturalState::A =
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
 /*! \brief Transfer Stack Pointer to Index X
 
   SP -> X				       	||
@@ -1266,7 +1289,6 @@ inline void lda_bd()
   Cycles:			4*		|| 
   Add Y register to 16 bit immediate to get address. Set X register to value at
   address. If a page boundry is crossed add 1 to cycles. */
-
 inline void ldx_be()
 {
   architecturalState::X =
