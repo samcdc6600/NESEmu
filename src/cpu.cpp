@@ -572,6 +572,7 @@ bool dispatchInstruction()
     case 0xdc:			// NOP	a,x
       break;
     case 0xdd:			// CMP	a,x
+      cmp_dd();
       break;
     case 0xde:			// DEC	a,x
       break;

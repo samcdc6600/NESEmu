@@ -62,6 +62,9 @@ inline void pushPCPlusTwoToStack();
 inline void pushStatusFlagsToStack();
 // ~~~~~~~~~~~~~~<{ Called to pull top value off of the stack. }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit pullFromStack();
+// ~~~~~~~~~~~~~~~~~~~~~~~<{ Called to Compare Values }>~~~~~~~~~~~~~~~~~~~~~~~~
+inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
+					       index);
 
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
@@ -127,6 +130,7 @@ inline void cmp_cd();
 inline void bne_d0();
 inline void cdl_d8();
 inline void cmp_d9();
+inline void cmp_dd();
 inline void cpx_e0();
 inline void inx_e8();
 inline void nop_ea();
@@ -437,6 +441,22 @@ inline memory::minimumAddressableUnit pullFromStack()
 {
   return getVarAtAddress(memory::stackBase |
 			  ++architecturalState::S);
+}
+
+
+inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
+					       index)
+{
+    const memory::minimumAddressableUnit compVal
+    {memory::minimumAddressableUnit
+     (architecturalState::A -
+      getVarAtIndexedAbsoluteImmediateAddress(index))};
+  /* Note here that we negate the second argument so our addition is actually a
+     subtraction. */
+  setCarryFlagOnAdditionOn(architecturalState::A,
+			   - getVarAtIndexedAbsoluteImmediateAddress(index));
+  setZeroFlagOn(compVal);
+  setNegativeFlagOn(compVal);
 }
 
 
@@ -1487,16 +1507,24 @@ inline void cdl_d8()
   Cycles:			4*		|| */
 inline void cmp_d9()
 {
-  const memory::minimumAddressableUnit compVal
-    {memory::minimumAddressableUnit
-     (architecturalState::A -
-      getVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y))};
-  /* Note here that we negate the second argument so our addition is actually a
-     subtraction. */
-  setCarryFlagOnAdditionOn(architecturalState::A,
-			   - getVarAtIndexedAbsoluteImmediateAddress(architecturalState::Y));
-  setZeroFlagOn(compVal);
-  setNegativeFlagOn(compVal);
+  cmpAgainsIndexedAbsoluteImmediate(architecturalState::Y);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Absolute, X	||
+  Assembly Language Form:	CMP oper, X	||
+  Opcode:			DD		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void cmp_dd()
+{
+  cmpAgainsIndexedAbsoluteImmediate(architecturalState::X);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
