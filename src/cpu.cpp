@@ -419,6 +419,7 @@ bool dispatchInstruction()
     case 0x9c:			// SHY	a,x
       break;
     case 0x9d:			// STA	a,x
+      sta_9d();
       break;
     case 0x9e:			// SHX	a,y
       break;
@@ -570,7 +571,7 @@ bool dispatchInstruction()
       break;
     case 0xdc:			// NOP	a,x
       break;
-    case 0xcdd:			// CMP	a,x
+    case 0xdd:			// CMP	a,x
       break;
     case 0xde:			// DEC	a,x
       break;

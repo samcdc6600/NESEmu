@@ -102,6 +102,7 @@ inline void stx_96();
 inline void tya_98();
 inline void sta_99();
 inline void txs_9a();
+inline void sta_9d();
 inline void ldy_a0();
 inline void ldx_a2();
 inline void lda_a5();
@@ -1016,7 +1017,14 @@ inline void tya_98()
   Assembly Language Form:	STA oper, Y    	||
   Opcode:			99		||
   Bytes:			3		||
-  Cycles:			4*		|| */
+  Cycles:			4*		||
+We note that here Cycles is specified as 5 at:
+https://www.masswerk.at/6502/6502_instruction_set.html#STA
+and as 4* at:
+http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA
+We use and assume 4* because it is more specific and we assume that the 4* is
+because we may crosses a page boundry. Or maybe this is specific to the
+Ricoh. */
 inline void sta_99()
 {
   storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::A,
@@ -1041,6 +1049,32 @@ inline void txs_9a()
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
+
+
+/*! \brief Store Accumulator in Memory
+
+  A -> M				       	||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, X    	||
+  Assembly Language Form:	STA oper, X    	||
+  Opcode:			9D		||
+  Bytes:			3		||
+  Cycles:			4*		||
+We note that here Cycles is specified as 5 at:
+https://www.masswerk.at/6502/6502_instruction_set.html#STA
+and as 4* at:
+http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA
+We use and assume 4* because it is more specific and we assume that the 4* is
+because we may crosses a page boundry. Or maybe this is specific to the
+Ricoh. */
+inline void sta_9d()
+{
+  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::A,
+					    architecturalState::X);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
 
 inline void ldy_a0()
 {
