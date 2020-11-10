@@ -384,6 +384,7 @@ bool dispatchInstruction()
       sta_8d();
       break;
     case 0x8e:			// STX	a
+      stx_8e();
       break;
     case 0x8f:			// SAX	a
       break;

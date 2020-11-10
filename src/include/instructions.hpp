@@ -100,6 +100,7 @@ inline void stx_86();
 inline void dey_88();
 inline void txa_8a();
 inline void sta_8d();
+inline void stx_8e();
 inline void bcc_90();
 inline void sty_94();
 inline void stx_96();
@@ -983,6 +984,23 @@ inline void sta_8d()
 }
 
 
+/*! \brief Store Index X in Memory
+
+  X -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	STX oper	||
+  Opcode:			8E		||
+  Bytes:			3	        ||
+  Cycles:			4		|| */
+inline void stx_8e()
+{
+  storeRegAtAbsoluteImmediateAddress(architecturalState::X);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
 
 /*! \brief Branch on Carry Clear
 
@@ -1623,7 +1641,7 @@ inline void cmp_dd()
   (N+, Z+, C+, I-, D-, V-)			||
   Addressing Mode:		Immediate	||
   Assembly Language Form:	CPX #oper	||
-  Opcode:			e0		||
+  Opcode:			E0		||
   Bytes:			2		||
   Cycles:			2		|| */
 inline void cpx_e0()
