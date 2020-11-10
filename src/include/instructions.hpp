@@ -117,6 +117,7 @@ inline void tax_aa();
 inline void lda_ad();
 inline void bcs_b0();
 inline void ldy_b4();
+inline void lda_b5();
 inline void ldx_b6();
 inline void clv_b8();
 inline void lda_b9();
@@ -1271,6 +1272,26 @@ inline void ldy_b4()
     getVarAtIndexedZeroPage(architecturalState::X);
   setZeroFlagOn(architecturalState::Y);
   setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	LDA oper, X    	||
+  Opcode:			B5		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void lda_b5()
+{
+    architecturalState::A =
+    getVarAtIndexedZeroPage(architecturalState::X);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 4;
 }
