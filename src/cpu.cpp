@@ -464,6 +464,7 @@ bool dispatchInstruction()
       lda_ad();
       break;
     case 0xae:			// LDX	a
+      ldx_ae();
       break;
     case 0xaf:			// LAX	a
       break;

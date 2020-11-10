@@ -116,6 +116,7 @@ inline void tay_a8();
 inline void lda_a9();
 inline void tax_aa();
 inline void lda_ad();
+inline void ldx_ae();
 inline void bcs_b0();
 inline void ldy_b4();
 inline void lda_b5();
@@ -1248,6 +1249,25 @@ inline void lda_ad()
   architecturalState::A = getVarAtAddress(get16BitImmediate());
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Load Index X with Memory
+
+  M -> X				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	LDX oper       	||
+  Opcode:			AE		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void ldx_ae()
+{
+  architecturalState::X = getVarAtAddress(get16BitImmediate());
+  setZeroFlagOn(architecturalState::X);
+  setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
