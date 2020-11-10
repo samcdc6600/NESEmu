@@ -101,6 +101,7 @@ inline void dey_88();
 inline void txa_8a();
 inline void sta_8d();
 inline void bcc_90();
+inline void sty_94();
 inline void stx_96();
 inline void tya_98();
 inline void sta_99();
@@ -1000,6 +1001,23 @@ inline void bcc_90()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Store Index Y in Memory
+
+  Y -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X	||
+  Assembly Language Form:	STY oper, X	||
+  Opcode:			94		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void sty_94()
+{
+  storeRegAtIndexedZeroPage(architecturalState::X, architecturalState::Y);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 

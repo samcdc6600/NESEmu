@@ -397,6 +397,7 @@ bool dispatchInstruction()
     case 0x93:			// AHX	(d),y
       break;
     case 0x94:			// STY	(d),y
+      sty_94();
       break;
     case 0x95:			// STA	d,x
       break;
