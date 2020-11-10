@@ -522,6 +522,7 @@ bool dispatchInstruction()
     case 0xc4:			// CPY	d
       break;
     case 0xc5:			// CMP	d
+      cmp_c5();
       break;
     case 0xc6:			// DEC	d
       break;
