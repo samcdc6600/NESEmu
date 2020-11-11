@@ -595,6 +595,7 @@ bool dispatchInstruction()
     case 0xe3:			// ISC	(d,x)
       break;
     case 0xe4:			// CPX	d
+      cpx_e4();
       break;
     case 0xe5:			// SBC	d
       break;

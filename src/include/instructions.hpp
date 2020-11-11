@@ -139,6 +139,7 @@ inline void cdl_d8();
 inline void cmp_d9();
 inline void cmp_dd();
 inline void cpx_e0();
+inline void cpx_e4();
 inline void inx_e8();
 inline void nop_ea();
 inline void beq_f0();
@@ -1697,6 +1698,29 @@ inline void cpx_e0()
   setNegativeFlagOn(architecturalState::X - get8BitImmediate());
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory and Index X
+
+  X - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	CPX oper	||
+  Opcode:			E4		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void cpx_e4()
+{
+  const memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+							 get8BitImmediate()]};
+    architecturalState::status.u.C = ((architecturalState::X == oper)
+				    || (architecturalState::X >
+					oper)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::X - oper);
+  setNegativeFlagOn(architecturalState::X - oper);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
