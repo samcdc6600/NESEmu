@@ -614,6 +614,7 @@ bool dispatchInstruction()
     case 0xeb:			// SBC	#i
       break;
     case 0xec:			// CPX	a
+      cpx_ec();
       break;
     case 0xed:			// SBC	a
       break;

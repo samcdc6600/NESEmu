@@ -142,6 +142,7 @@ inline void cpx_e0();
 inline void cpx_e4();
 inline void inx_e8();
 inline void nop_ea();
+inline void cpx_ec();
 inline void beq_f0();
 inline void sed_f8();
 
@@ -1747,6 +1748,29 @@ inline void nop_ea()
 {
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory and Index X
+
+  X - M   					||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	CPX oper       	||
+  Opcode:			EC		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void cpx_ec()
+{
+  const memory::minimumAddressableUnit oper
+    {getVarAtAddress(get16BitImmediate())};
+  architecturalState::status.u.C = ((architecturalState::X == oper)
+				    || (architecturalState::X >
+					oper)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::X - oper);
+  setNegativeFlagOn(architecturalState::X - oper);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
