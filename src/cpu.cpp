@@ -359,6 +359,7 @@ bool dispatchInstruction()
     case 0x83:			// SAX	(d,x)
       break;
     case 0x84:			// STY	d
+      sty_84();
       break;
     case 0x85:			// STA	d
       sta_85();

@@ -95,6 +95,7 @@ inline void adc_69();
 inline void jmp_6c();
 inline void bvs_70();
 inline void sei_78();
+inline void sty_84();
 inline void sta_85();
 inline void stx_86();
 inline void dey_88();
@@ -915,6 +916,24 @@ inline void sei_78()
   architecturalState::status.u.I = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Store Index Y in Memory
+
+  Y -> M      					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage       	||
+  Assembly Language Form:	STY oper       	||
+  Opcode:			84		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void sty_84()
+{
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] =
+    architecturalState::Y;
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
