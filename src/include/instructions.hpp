@@ -99,6 +99,7 @@ inline void sta_85();
 inline void stx_86();
 inline void dey_88();
 inline void txa_8a();
+inline void sty_8c();
 inline void sta_8d();
 inline void stx_8e();
 inline void bcc_90();
@@ -110,6 +111,7 @@ inline void txs_9a();
 inline void sta_9d();
 inline void ldy_a0();
 inline void ldx_a2();
+inline void ldy_a4();
 inline void lda_a5();
 inline void ldx_a6();
 inline void tay_a8();
@@ -980,6 +982,23 @@ inline void txa_8a()
 }
 
 
+/*! \brief Store Index Y in Memory
+
+  Y -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	STY oper       	||
+  Opcode:			8C		||
+  Bytes:			3	        ||
+  Cycles:			4		|| */
+inline void sty_8c()
+{
+  storeRegAtAbsoluteImmediateAddress(architecturalState::Y);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
 inline void sta_8d()
 {
   storeRegAtAbsoluteImmediateAddress(architecturalState::A);
@@ -1156,6 +1175,26 @@ inline void ldx_a2()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Index Y with Memory
+
+  M -> Y				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	LDY oper       	||
+  Opcode:			A4		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void ldy_a4()
+{
+  architecturalState::Y = {memory::mem[memory::zeroPageBase |
+				       get8BitImmediate()]};
+  setZeroFlagOn(architecturalState::Y);
+  setNegativeFlagOn(architecturalState::Y);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 

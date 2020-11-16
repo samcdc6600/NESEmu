@@ -379,6 +379,7 @@ bool dispatchInstruction()
     case 0x8b:			// XAA	#i
       break;
     case 0x8c:			// STY	a
+      sty_8c();
       break;
     case 0x8d:			// STA	a
       sta_8d();
@@ -438,6 +439,7 @@ bool dispatchInstruction()
     case 0xa3:			// LAX	(d,x)
       break;
     case 0xa4:			// LDY	d
+      ldy_a4();
       break;
     case 0xa5:			// LDA	d
       lda_a5();
