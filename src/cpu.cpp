@@ -545,6 +545,7 @@ bool dispatchInstruction()
     case 0xcb:			// AXS	#i
       break;
     case 0xcc:			// CPY	a
+      cpy_cc();
       break;
     case 0xcd:			// CMP	a
       cmp_cd();

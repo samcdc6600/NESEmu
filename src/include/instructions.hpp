@@ -137,6 +137,7 @@ inline void cmp_c5();
 inline void iny_c8();
 inline void cmp_c9();
 inline void dex_ca();
+inline void cpy_cc();
 inline void cmp_cd();
 inline void bne_d0();
 inline void cmp_d5();
@@ -1675,6 +1676,29 @@ inline void dex_ca()
   setNegativeFlagOn(architecturalState::X);
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory and Index Y
+
+  Y - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	CPY oper	||
+  Opcode:			CC		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void cpy_cc()
+{
+  const memory::minimumAddressableUnit oper
+    {getVarAtAddress(get16BitImmediate())};
+  architecturalState::status.u.C = ((architecturalState::Y == oper)
+				    || (architecturalState::Y >
+					oper)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::Y - oper);
+  setNegativeFlagOn(architecturalState::Y - oper);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
