@@ -132,6 +132,7 @@ inline void ldy_bc();
 inline void lda_bd();
 inline void ldx_be();
 inline void cpy_c0();
+inline void cpy_c4();
 inline void cmp_c5();
 inline void iny_c8();
 inline void cmp_c9();
@@ -1573,6 +1574,29 @@ inline void cpy_c0()
   setNegativeFlagOn(architecturalState::Y - get8BitImmediate());
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory and Index Y
+
+  Y - M						||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	CPY oper	||
+  Opcode:			C4		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void cpy_c4()
+{
+  const memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+							 get8BitImmediate()]};
+  architecturalState::status.u.C = ((architecturalState::Y == oper)
+				    || (architecturalState::Y >
+					oper)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::Y - oper);
+  setNegativeFlagOn(architecturalState::Y - oper);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 

@@ -524,6 +524,7 @@ bool dispatchInstruction()
     case 0xc3:			// DCP	(d,x)
       break;
     case 0xc4:			// CPY	d
+      cpy_c4();
       break;
     case 0xc5:			// CMP	d
       cmp_c5();
