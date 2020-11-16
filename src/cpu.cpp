@@ -403,6 +403,7 @@ bool dispatchInstruction()
       sty_94();
       break;
     case 0x95:			// STA	d,x
+      sta_95();
       break;
     case 0x96:			// STX	d,y
       stx_96();

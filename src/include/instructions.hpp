@@ -105,6 +105,7 @@ inline void sta_8d();
 inline void stx_8e();
 inline void bcc_90();
 inline void sty_94();
+inline void sta_95();
 inline void stx_96();
 inline void tya_98();
 inline void sta_99();
@@ -1081,6 +1082,23 @@ inline void bcc_90()
 inline void sty_94()
 {
   storeRegAtIndexedZeroPage(architecturalState::X, architecturalState::Y);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Store Accumulator in Memory
+
+  A -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X	||
+  Assembly Language Form:	STA oper, X	||
+  Opcode:			95		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void sta_95()
+{
+  storeRegAtIndexedZeroPage(architecturalState::X, architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 4;
 }
