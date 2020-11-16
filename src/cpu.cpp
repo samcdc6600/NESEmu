@@ -461,6 +461,7 @@ bool dispatchInstruction()
     case 0xab:			// LAX	#i
       break;
     case 0xac:			// LDY	a
+      ldy_ac();
       break;
     case 0xad:			// LDA	a
       lda_ad();
