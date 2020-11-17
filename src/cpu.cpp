@@ -394,6 +394,7 @@ bool dispatchInstruction()
       bcc_90();
       break;
     case 0x91:			// STA	(d),y
+      sta_91();
       break;
     case 0x92:			// STP
       break;

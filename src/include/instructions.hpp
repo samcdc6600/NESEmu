@@ -104,6 +104,7 @@ inline void sty_8c();
 inline void sta_8d();
 inline void stx_8e();
 inline void bcc_90();
+inline void sta_91();
 inline void sty_94();
 inline void sta_95();
 inline void stx_96();
@@ -1071,6 +1072,45 @@ inline void bcc_90()
 }
 
 
+/*! \brief Store Accumulator in Memory
+
+  A -> M				        ||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect), Y	||
+  Assembly Language Form:	STA (oper), Y	||
+  Opcode:			91		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void sta_91()
+{	// Get address pointed to by immediate.
+  const memory::address baseAddress
+    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
+		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
+		      << memory::minimumAddressableUnitSize))};
+  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
+  const memory::address address
+    {memory::address(baseAddress + architecturalState::Y)};
+  // Calculate page number.
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  /* Note here that 6 is specified for the cycles at:
+     https://www.masswerk.at/6502/6502_instruction_set.html#STA
+     however 5* is specified at:
+     http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA
+     We use the latter as it is more specific, hence the following test. */
+  if(pageNum != (address & memory::maskAddressHigh))
+    {				// If page boundry was crossed.
+      architecturalState::cycles += 1;
+    }
+
+  storeRegAtAddress(address, architecturalState::A);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
+}
+
+
 /*! \brief Store Index Y in Memory
 
   Y -> M				        ||
@@ -1410,7 +1450,7 @@ inline void bcs_b0()
   Load Accumulator from address obtained from the address calculated from "the
   value stored in the address $20" adding content of Index Register Y */
 inline void lda_b1()
-{				// Get address pointed to by immediate.
+{	// Get address pointed to by immediate.
   const memory::address baseAddress
     {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
 		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
@@ -1418,6 +1458,7 @@ inline void lda_b1()
   // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
   const memory::address address
     {memory::address(baseAddress + architecturalState::Y)};
+  // Calculate page number.
   const memory::address pageNum {memory::address(baseAddress &
 						 memory::maskAddressHigh)};
   if(pageNum != (address & memory::maskAddressHigh))
