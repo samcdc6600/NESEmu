@@ -59,9 +59,10 @@ inline void branchTaken();
 // ~~~~~~~~~~~~~~~~~~~<{ Functions for Pushing to the Stack }>~~~~~~~~~~~~~~~~~~
 inline void pushToStack(const memory::minimumAddressableUnit reg);
 inline void pushPCPlusTwoToStack();
-inline void pushStatusFlagsToStack();
+inline void pushStatusFlagsToStackWithBSet();
 // ~~~~~~~~~~~~~~~<{ Called to Pull Top Value off of the Stack }>~~~~~~~~~~~~~~~
 inline memory::minimumAddressableUnit pullFromStack();
+inline memory::minimumAddressableUnit pullStatusFlagsFromStack();
 // ~~~~~~~~~~~~~~~~~~~~~~~<{ Called to Compare Values }>~~~~~~~~~~~~~~~~~~~~~~~~
 inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
 					       index);
@@ -452,10 +453,10 @@ inline void pushPCPlusTwoToStack()
 }
 
 
-inline void pushStatusFlagsToStack()
+inline void pushStatusFlagsToStackWithBSet()
 {
   pushToStack(architecturalState::status.flags |
-	      architecturalState::bFlagMaskPhpBrkAndIrqNmi);
+	      architecturalState::statusFlagMaskPushForPhpBrk);
 }
 
 
@@ -463,6 +464,12 @@ inline memory::minimumAddressableUnit pullFromStack()
 {
   return getVarAtAddress(memory::stackBase |
 			  ++architecturalState::S);
+}
+
+
+inline memory::minimumAddressableUnit pullStatusFlagsFromStack()
+{
+  return architecturalState::statusFlagMaskPull & pullFromStack();
 }
 
 
@@ -507,7 +514,7 @@ inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
 inline void brk_00()
 {
   pushPCPlusTwoToStack();
-  pushStatusFlagsToStack();
+  pushStatusFlagsToStackWithBSet();
   architecturalState::status.u.I = 1;
   architecturalState::PC = (memory::mem[memory::brkPCLoadVector + 1]
 			    << memory::minimumAddressableUnitSize) |
@@ -558,7 +565,7 @@ inline void brk_00()
   }Status; @endcode */
 inline void php_08()
 {
-  pushStatusFlagsToStack();
+  pushStatusFlagsToStackWithBSet();
   architecturalState::PC += 1;
   architecturalState::cycles += 3;
 }
@@ -662,7 +669,7 @@ inline void jsr_20()
 inline void plp_28()
 { /* With the 6502, the stack is always on page one ($100-$1FF) and works top
      down. - http://6502.org/tutorials/6502opcodes.html#PLP */
-  architecturalState::status.flags = pullFromStack();
+  architecturalState::status.flags = pullStatusFlagsFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
 }
@@ -720,7 +727,7 @@ inline void sec_38()
 inline void rti_40()
 { /* Note that unlike RTS, the return address on the stack is the actual address
      rather than the address-1. */
-  architecturalState::status.flags = pullFromStack();
+  architecturalState::status.flags = pullStatusFlagsFromStack();
   loadPCFromStack();
   architecturalState::cycles += 6;
 }

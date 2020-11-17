@@ -48,9 +48,12 @@ namespace architecturalState
   }Status;
   constexpr size_t statusSize {8};
   /* The use of these variables is explained in a comment near the top of the
-     file. */
-  constexpr isaReg bFlagMaskPhpBrkAndIrqNmi {0b00110000};
-  constexpr isaReg bFlagMaskIrqNmi {0b11101111};
+     file. These are used for pushing the status flag.*/
+  constexpr isaReg statusFlagMaskPushForPhpBrk {0b00110000};
+  constexpr isaReg statusFlagMaskPushForIrqNmi {0b00010000};
+  // This is for pulling the status flag (status reg is only 6 bits wide!)
+  constexpr isaReg statusFlagMaskPull {0b11001111};
+  
 
   extern Status status;
   extern size_t cycles;
