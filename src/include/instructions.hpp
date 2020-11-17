@@ -1868,12 +1868,12 @@ inline void cmp_d1()
       architecturalState::cycles += 1;
     }
 
-  const memory::minimumAddressableUnit compVal {getVarAtAddress(address)};
+  const memory::minimumAddressableUnit compVal {memory::minimumAddressableUnit
+    (architecturalState::A - getVarAtAddress(address))};
 
   /* Note here that we negate the second argument so our addition is actually a
      subtraction. */
-  setCarryFlagOnAdditionOn(architecturalState::A,
-			   - getVarAtIndexedZeroPage(architecturalState::X));
+  setCarryFlagOnAdditionOn(architecturalState::A, - getVarAtAddress(address));
   setZeroFlagOn(compVal);
   setNegativeFlagOn(compVal); 
   architecturalState::PC += 2;
