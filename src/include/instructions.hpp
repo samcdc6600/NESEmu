@@ -123,6 +123,7 @@ inline void ldy_ac();
 inline void lda_ad();
 inline void ldx_ae();
 inline void bcs_b0();
+inline void lda_b1();
 inline void ldy_b4();
 inline void lda_b5();
 inline void ldx_b6();
@@ -209,7 +210,7 @@ inline memory::address get16BitImmediate()
 }
 
 
-/*! \brief Returns 8 bit value at from zero page at address composed of (8 bit
+/*! \brief Returns 8 bit value from zero page at address composed of (8 bit
   immediate + index register)
 
   : http://www.emulator101.com/6502-addressing-modes.html
@@ -1393,6 +1394,42 @@ inline void bcs_b0()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect), Y	||
+  Assembly Language Form:	LDA (oper), Y	||
+  Opcode:			B1		||
+  Bytes:			2		||
+  Cycles:			5*		||
+  https://sites.google.com/site/6502asembly/6502-instruction-set/lda/the-addressing-mode-summary-of-lda:
+  Load Accumulator from address obtained from the address calculated from "the
+  value stored in the address $20" adding content of Index Register Y */
+inline void lda_b1()
+{				// Get address pointed to by immediate.
+  const memory::address baseAddress
+    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
+		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
+		      << memory::minimumAddressableUnitSize))};
+  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
+  const memory::address address
+    {memory::address(baseAddress + architecturalState::Y)};
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  if(pageNum != (address & memory::maskAddressHigh))
+    {				// If page boundry was crossed.
+      architecturalState::cycles += 1;
+    }
+
+  architecturalState::A = getVarAtAddress(address);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

@@ -477,6 +477,7 @@ bool dispatchInstruction()
       bcs_b0();
       break;
     case 0xb1:			// LDA	(d),y
+      lda_b1();
       break;
     case 0xb2:			// STP
       break;
