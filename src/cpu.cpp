@@ -435,6 +435,7 @@ bool dispatchInstruction()
       ldy_a0();
       break;
     case 0xa1:			// LDA	(d,x)
+      lda_a1();
       break;
     case 0xa2:			// LDX	#i
       ldx_a2();

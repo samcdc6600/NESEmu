@@ -114,6 +114,7 @@ inline void sta_99();
 inline void txs_9a();
 inline void sta_9d();
 inline void ldy_a0();
+inline void lda_a1();
 inline void ldx_a2();
 inline void ldy_a4();
 inline void lda_a5();
@@ -456,7 +457,7 @@ inline void pushPCPlusTwoToStack()
 inline void pushStatusFlagsToStackWithBSet()
 {
   pushToStack(architecturalState::status.flags |
-	      architecturalState::statusFlagMaskPushForPhpBrk);
+	      architecturalState::statusFlagMaskForPhpBrk);
 }
 
 
@@ -1255,6 +1256,39 @@ inline void ldy_a0()
   setNegativeFlagOn(architecturalState::Y);
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Load Accumulator with Memory
+
+  M -> A				       	||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect, X)	||
+  Assembly Language Form:	LDA (oper, X)   ||
+  Opcode:			A1		||
+  Bytes:			2		||
+  Cycles:			6		||
+  https://sites.google.com/site/6502asembly/6502-instruction-set/lda/the-addressing-mode-summary-of-lda:
+  Load Accumulator from address obtained from the address calculated from "$20
+  adding content of Index Register X" */
+inline void lda_a1()
+{  	// Get address pointed to by immediate + X.
+  const memory::address addressOfAddress
+    {memory::address((memory::zeroPageBase | get8BitImmediate()) +
+		     architecturalState::X)};
+  // Get address that address (addressOfAddress) points to
+  const memory::address address
+    {memory::address((memory::zeroPageBase | memory::mem[addressOfAddress]) |
+		     ((memory::zeroPageBase | memory::mem[addressOfAddress +1])
+		      << memory::minimumAddressableUnitSize))};
+  
+  const memory::minimumAddressableUnit var = memory::mem[address];
+
+  architecturalState::A = getVarAtAddress(address);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 

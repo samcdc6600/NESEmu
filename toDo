@@ -5,9 +5,6 @@
 	- Make  modifyHTMLDocsToCollapseCode pass shellcheck.
 	- Fix problems when compiling with g++!
 	- Improve error messages for debug commands.
-	- Handle escape sequences in code included in doxygen documentation
-	  that is run through modifyHTMLDocsToCollapseCode.sh, e.g. "\n" is
-	  interprited as an escape sequence rather then being displayed!
 	- Improve code for "handlePrintHelp()"
 	- Make variables for parts of duplicated debug commands exception out
 	  put's in utils.cpp?
@@ -24,8 +21,6 @@
 	  newliens.
 
 * CPU ==========================================================================
-	- Test branchTaken() as we think there may be a bug that occures when a
-	  branch is takens!
 	- Implement instructions.
 	- See if code to set carry in "cmp_c9()" can be replaced with
 	  "setCarryFlagOnAdditionOn()" or why we would need both if that is the
