@@ -204,7 +204,7 @@ void listMemoryProper(const memory::address addressX,
 
 /* =================== The Following function/s should be the ==================
   =================== last in this file to limit the visibility ================
-  ======================== of the follow include statment! =================== */
+  ======================== of the follow include statment! ================== */
 #include "include/architecturalState.hpp"
 
 void fiddleWithArchitecturalState(std::stringstream ssArgs)
@@ -228,25 +228,29 @@ void fiddleWithArchitecturalState(std::stringstream ssArgs)
 	case command::fiddleArgs::accumulator:
 	  
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, A);
-	  checkIntRanges(defaultCallCount, numRange(A, std::numeric_limits<unsigned char>::lowest(),
-						    std::numeric_limits<unsigned char>::max() +1));
+	  checkIntRanges(defaultCallCount,
+			 numRange(A, std::numeric_limits<unsigned char>::lowest(),
+				  std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::A = A;
 	  break;
 	case command::fiddleArgs::X:
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, X);
-	  checkIntRanges(defaultCallCount, numRange(X, std::numeric_limits<unsigned char>::lowest(),
-						    std::numeric_limits<unsigned char>::max() +1));
+	  checkIntRanges(defaultCallCount,
+			 numRange(X, std::numeric_limits<unsigned char>::lowest(),
+				  std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::X = X;
 	  break;
 	case command::fiddleArgs::Y:
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, Y);
-	  checkIntRanges(defaultCallCount, numRange(Y, std::numeric_limits<unsigned char>::lowest(),
-						    std::numeric_limits<unsigned char>::max() +1));
+	  checkIntRanges(defaultCallCount,
+			 numRange(Y, std::numeric_limits<unsigned char>::lowest(),
+				  std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::Y = Y;
 	  break;
 	case command::fiddleArgs::PC:
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, PC);
-	  checkIntRanges(defaultCallCount, numRange(PC, 0, size_t(memory::memSize)));
+	  checkIntRanges(defaultCallCount, numRange(PC, 0,
+						    size_t(memory::memSize)));
 	  architecturalState::PC = PC;
 	  break;
 	case command::fiddleArgs::stack:
@@ -254,22 +258,25 @@ void fiddleWithArchitecturalState(std::stringstream ssArgs)
 	  /* Stack Starts at offset 0x0100 and covers the range [0x0100, 0x01ff]
 	     it wraps around (basically just let the numbers do their thing :)
 	     .) */
-	  checkIntRanges(defaultCallCount, numRange(S, std::numeric_limits<unsigned char>::lowest(),
-						    std::numeric_limits<unsigned char>::max() +1));
+	  checkIntRanges(defaultCallCount,
+			 numRange(S, std::numeric_limits<unsigned char>::lowest(),
+				  std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::S = S;
 	  break;
 	case command::fiddleArgs::status:
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, status);
-	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<unsigned char>::lowest(),
-						    std::numeric_limits<unsigned char>::max() +1));
+	  checkIntRanges(defaultCallCount,
+			 numRange(status, std::numeric_limits<unsigned char>::lowest(),
+				  std::numeric_limits<unsigned char>::max() +1));
 	  architecturalState::status.flags = status;
 	  break;
 	case command::fiddleArgs::cycles:
 	  getNumbersFromStrInHex(ssArgs, defaultCallCount, cycles);
 	  /* Can't do +1 here because we will wrap around. Probably don't need
 	     that last cycle anyway ;) */
-	  checkIntRanges(defaultCallCount, numRange(status, std::numeric_limits<size_t>::lowest(),
-						    std::numeric_limits<size_t>::max()));
+	  checkIntRanges(defaultCallCount,
+			 numRange(status, std::numeric_limits<size_t>::lowest(),
+				  std::numeric_limits<size_t>::max()));
 	  architecturalState::cycles = cycles;
 	  break;
 	default:

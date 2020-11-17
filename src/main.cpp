@@ -342,7 +342,8 @@ void handleRunCommand(const std::string command, bool & run,
 	      pos = getPosAfterDelimAfterCommand(command, command::runCmdUpper);
 	    }
 	  std::stringstream ssCommand {command.substr(pos)};
-	  getNumbersFromStrInHex(ssCommand, getNumbersFromStrInHexCallCount, runLen);
+	  getNumbersFromStrInHex(ssCommand, getNumbersFromStrInHexCallCount,
+				 runLen);
 	  
 	  if(runLen < runLenMin)
 	    {
