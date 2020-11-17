@@ -35,14 +35,14 @@ namespace architecturalState
   {
     struct
     {
-      isaReg C : 1;	// Carry	~===<( Lowest order byte  )>===~
+      isaReg C : 1;	// Carry	~===<( Lowest order bit  )>===~
       isaReg Z : 1;	// Zero
       isaReg I : 1;	// Interrupt Disable
       isaReg D : 1;	// Decimal
       isaReg s0 : 1;	// No CPU effect. (refere to the comment at the
       isaReg s1 : 1;	// top of the file.)
       isaReg V : 1;	// Overflow
-      isaReg N : 1;	// Negative	~===<( Highest order byte )>===~
+      isaReg N : 1;	// Negative	~===<( Highest order bit )>===~
     }u;
     isaReg flags;
   }Status;

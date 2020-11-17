@@ -561,6 +561,7 @@ bool dispatchInstruction()
       bne_d0();
       break;
     case 0xd1:			// CMP	(d),y
+      cmp_d1();
       break;
     case 0xd2:			// STP
       break;

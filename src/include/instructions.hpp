@@ -143,6 +143,7 @@ inline void dex_ca();
 inline void cpy_cc();
 inline void cmp_cd();
 inline void bne_d0();
+inline void cmp_d1();
 inline void cmp_d5();
 inline void cdl_d8();
 inline void cmp_d9();
@@ -255,6 +256,9 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
   const memory::address address {memory::address(baseAddress + index)};
   const memory::address pageNum {memory::address(baseAddress &
 						 memory::maskAddressHigh)};
+  
+  std::cout<<"baseAddress = "<<baseAddress<<", address = "<<address
+	   <<", (address) = "<<short(memory::mem[address])<<'\n';
   
   if(pageNum != (address & memory::maskAddressHigh))
     {
@@ -1104,8 +1108,6 @@ inline void sta_91()
     }
 
   storeRegAtAddress(address, architecturalState::A);
-  setZeroFlagOn(architecturalState::A);
-  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 5;
 }
@@ -1828,6 +1830,47 @@ inline void bne_d0()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-)			||
+  Addressing Mode:		(Indirect), Y	||
+  Assembly Language Form:	CMP (oper), Y	||
+  Opcode:			D1		||
+  Bytes:			2		||
+  Cycles:			5*		|| */
+inline void cmp_d1()
+{
+  // Get address pointed to by immediate.
+  const memory::address baseAddress
+    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
+		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
+		      << memory::minimumAddressableUnitSize))};
+  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
+  const memory::address address
+    {memory::address(baseAddress + architecturalState::Y)};
+  // Calculate page number.
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  
+  if(pageNum != (address & memory::maskAddressHigh))
+    {				// If page boundry was crossed.
+      architecturalState::cycles += 1;
+    }
+
+  const memory::minimumAddressableUnit compVal {getVarAtAddress(address)};
+
+  /* Note here that we negate the second argument so our addition is actually a
+     subtraction. */
+  setCarryFlagOnAdditionOn(architecturalState::A,
+			   - getVarAtIndexedZeroPage(architecturalState::X));
+  setZeroFlagOn(compVal);
+  setNegativeFlagOn(compVal); 
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
