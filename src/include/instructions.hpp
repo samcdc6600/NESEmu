@@ -1906,22 +1906,8 @@ inline void bne_d0()
   Cycles:			5*		|| */
 inline void cmp_d1()
 {
-  // Get address pointed to by immediate.
-  const memory::address baseAddress
-    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
-		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
-		      << memory::minimumAddressableUnitSize))};
-  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
   const memory::address address
-    {memory::address(baseAddress + architecturalState::Y)};
-  // Calculate page number.
-  const memory::address pageNum {memory::address(baseAddress &
-						 memory::maskAddressHigh)};
-  
-  if(pageNum != (address & memory::maskAddressHigh))
-    {				// If page boundry was crossed.
-      architecturalState::cycles += 1;
-    }
+    {getPostIndexedIndirectImmediateAddress(architecturalState::Y)};
 
   const memory::minimumAddressableUnit compVal {memory::minimumAddressableUnit
     (architecturalState::A - getVarAtAddress(address))};
