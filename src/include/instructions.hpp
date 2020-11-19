@@ -297,12 +297,9 @@ inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
      or unsigned), then it is promoted to (signed) int if int can hold all
      values of the source type; otherwise it is promoted to unsigned int; the
      promotion is designed to be lossless. Examples: */
-  const int potentialAddress {index + get8BitImmediate()};
-  // If potentialAddress is larger then pageSize wrape around.
-  memory::minimumAddressableUnit address {};
-  address = zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
-					      (potentialAddress - pageSize) :
-					      potentialAddress));
+  const memory::address address
+    {memory::address(memory::minimumAddressableUnit(index +
+						    get8BitImmediate()))};
   mem[address] = reg;
 }
 
