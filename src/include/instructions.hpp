@@ -1294,17 +1294,21 @@ inline void ldy_a0()
   Cycles:			6		||
   https://sites.google.com/site/6502asembly/6502-instruction-set/lda/the-addressing-mode-summary-of-lda:
   Load Accumulator from address obtained from the address calculated from "$20
-  adding content of Index Register X" */
+  adding content of Index Register X" Address must wrap around! */
 inline void lda_a1()
-{  	// Get address pointed to by immediate + X.
+{	// Get address pointed to by immediate + X.
+  // Cast to memory::minimumAddressableUnit to wrap address around.
   const memory::address addressOfAddress
-    {memory::address((memory::zeroPageBase | get8BitImmediate()) +
-		     architecturalState::X)};
+    {memory::address(memory::minimumAddressableUnit(get8BitImmediate() +
+						    architecturalState::X))};
+  std::cout<<"addressOfAddress = "<<addressOfAddress<<'\n';
   // Get address that address (addressOfAddress) points to
   const memory::address address
     {memory::address(memory::mem[addressOfAddress] |
 		     ((memory::mem[addressOfAddress +1])
 		      << memory::minimumAddressableUnitSize))};
+
+    std::cout<<"address = "<<address<<'\n';
 
   architecturalState::A = getVarAtAddress(address);
   setZeroFlagOn(architecturalState::A);
@@ -1570,7 +1574,7 @@ inline void ldy_b4()
   Cycles:			4		|| */
 inline void lda_b5()
 {
-    architecturalState::A =
+  architecturalState::A =
     getVarAtIndexedZeroPage(architecturalState::X);
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
