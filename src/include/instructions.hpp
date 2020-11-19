@@ -946,8 +946,8 @@ inline void sei_78()
 inline void sta_81()
 {  	// Get address pointed to by immediate + X.
   const memory::address addressOfAddress
-    {memory::address((memory::zeroPageBase | get8BitImmediate()) +
-		     architecturalState::X)};
+    {memory::address(memory::minimumAddressableUnit(get8BitImmediate() +
+					    architecturalState::X))};
   // Get address that address (addressOfAddress) points to
   const memory::address address
     {memory::address(memory::mem[addressOfAddress] |
