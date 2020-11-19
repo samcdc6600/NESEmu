@@ -96,6 +96,7 @@ inline void adc_69();
 inline void jmp_6c();
 inline void bvs_70();
 inline void sei_78();
+inline void sta_81();
 inline void sty_84();
 inline void sta_85();
 inline void stx_86();
@@ -258,9 +259,6 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
   const memory::address address {memory::address(baseAddress + index)};
   const memory::address pageNum {memory::address(baseAddress &
 						 memory::maskAddressHigh)};
-  
-  std::cout<<"baseAddress = "<<baseAddress<<", address = "<<address
-	   <<", (address) = "<<short(memory::mem[address])<<'\n';
   
   if(pageNum != (address & memory::maskAddressHigh))
     {
@@ -936,6 +934,32 @@ inline void sei_78()
 }
 
 
+/*! \brief Store Accumulator in Memory
+
+  A -> M      					||
+  (N-, Z-, C-, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect, X)  	||
+  Assembly Language Form:	STA (oper, X)  	||
+  Opcode:			81		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void sta_81()
+{  	// Get address pointed to by immediate + X.
+  const memory::address addressOfAddress
+    {memory::address((memory::zeroPageBase | get8BitImmediate()) +
+		     architecturalState::X)};
+  // Get address that address (addressOfAddress) points to
+  const memory::address address
+    {memory::address(memory::mem[addressOfAddress] |
+		     ((memory::mem[addressOfAddress +1])
+		      << memory::minimumAddressableUnitSize))};
+
+  memory::mem[address] = architecturalState::A;
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
+}
+
+
 /*! \brief Store Index Y in Memory
 
   Y -> M      					||
@@ -1278,11 +1302,9 @@ inline void lda_a1()
 		     architecturalState::X)};
   // Get address that address (addressOfAddress) points to
   const memory::address address
-    {memory::address((memory::zeroPageBase | memory::mem[addressOfAddress]) |
-		     ((memory::zeroPageBase | memory::mem[addressOfAddress +1])
+    {memory::address(memory::mem[addressOfAddress] |
+		     ((memory::mem[addressOfAddress +1])
 		      << memory::minimumAddressableUnitSize))};
-  
-  const memory::minimumAddressableUnit var = memory::mem[address];
 
   architecturalState::A = getVarAtAddress(address);
   setZeroFlagOn(architecturalState::A);

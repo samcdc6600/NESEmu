@@ -353,6 +353,7 @@ bool dispatchInstruction()
     case 0x80:			// NOP	#i
       break;
     case 0x81:			// STA	(d,x)
+      sta_81();
       break;
     case 0x82:			// NOP	#i
       break;
