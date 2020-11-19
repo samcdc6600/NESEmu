@@ -35,7 +35,11 @@ inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
 inline memory::address
+// Used for things analgous to "LDA oper,Y."
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
+// Used for things analgous to "LDA (oper),Y."
+inline memory::address
+getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // ~~~~~~~~~~~~~~~~~<{ Functions for Storing Values in Memory }>~~~~~~~~~~~~~~~~
@@ -251,7 +255,7 @@ inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a)
 
 /*! \brief Used to get an address that is the combination of an index register
   (index) and the current 16-bit operand. Note that this function will
-  incremente the PC if a page boundry is crossed! */
+  increment cycles if a page boundry is crossed! */
 inline memory::address
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 {
@@ -264,6 +268,33 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
     {
       architecturalState::cycles += 1;
     }
+  return address;
+}
+
+
+/*! \brief Used to get an address that is located at:
+  ((immediate) + ((immediate +1) << 8)) + index,
+  where immediate is an 8-bit immidate and index is an index register. Note
+  thst this function will increment cycles if a page boundry is crossed!  */
+inline memory::address
+getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index)
+{
+  // Get address pointed to by immediate.
+  const memory::address baseAddress
+    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
+		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
+		      << memory::minimumAddressableUnitSize))};
+  // Calculate address (baseAddress (address pointed to by immediate) + index.)
+  const memory::address address
+    {memory::address(baseAddress + index)};
+  // Calculate page number.
+  const memory::address pageNum {memory::address(baseAddress &
+						 memory::maskAddressHigh)};
+  if(pageNum != (address & memory::maskAddressHigh))
+    {				// If page boundry was crossed.
+      architecturalState::cycles += 1;
+    }
+
   return address;
 }
 
@@ -1094,7 +1125,7 @@ inline void stx_8e()
   Cycles:			2**		||
   Branches are dependant on the status of the flag bits when the op code is
   encountered. A branch not taken requires two machine cycles. Add one if the
-  branch is taken and add one more if the branch crosses a page boundary. From:
+anch is taken and add one more if the branch crosses a page boundary. From:
   http://6502.org/tutorials/6502opcodes.html#BCC */
 inline void bcc_90()
 {
@@ -1115,28 +1146,9 @@ inline void bcc_90()
   Bytes:			2		||
   Cycles:			6		|| */
 inline void sta_91()
-{	// Get address pointed to by immediate.
-  const memory::address baseAddress
-    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
-		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
-		      << memory::minimumAddressableUnitSize))};
-  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
-  const memory::address address
-    {memory::address(baseAddress + architecturalState::Y)};
-  // Calculate page number.
-  const memory::address pageNum {memory::address(baseAddress &
-						 memory::maskAddressHigh)};
-  /* Note here that 6 is specified for the cycles at:
-     https://www.masswerk.at/6502/6502_instruction_set.html#STA
-     however 5* is specified at:
-     http://www.thealmightyguru.com/Games/Hacking/Wiki/index.php?title=STA
-     We use the latter as it is more specific, hence the following test. */
-  if(pageNum != (address & memory::maskAddressHigh))
-    {				// If page boundry was crossed.
-      architecturalState::cycles += 1;
-    }
-
-  storeRegAtAddress(address, architecturalState::A);
+{
+  storeRegAtAddress(getPostIndexedIndirectImmediateAddress(architecturalState::Y),
+		    architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 5;
 }
@@ -1516,23 +1528,9 @@ inline void bcs_b0()
   Load Accumulator from address obtained from the address calculated from "the
   value stored in the address $20" adding content of Index Register Y */
 inline void lda_b1()
-{	// Get address pointed to by immediate.
-  const memory::address baseAddress
-    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
-		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
-		      << memory::minimumAddressableUnitSize))};
-  // Calculate address (baseAddress (address pointed to by immediate) + Y reg.)
-  const memory::address address
-    {memory::address(baseAddress + architecturalState::Y)};
-  // Calculate page number.
-  const memory::address pageNum {memory::address(baseAddress &
-						 memory::maskAddressHigh)};
-  if(pageNum != (address & memory::maskAddressHigh))
-    {				// If page boundry was crossed.
-      architecturalState::cycles += 1;
-    }
-
-  architecturalState::A = getVarAtAddress(address);
+{
+  architecturalState::A =
+    getVarAtAddress(getPostIndexedIndirectImmediateAddress(architecturalState::Y));
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
@@ -1724,12 +1722,12 @@ inline void ldx_be()
   Y - M						||
   (N+, Z+, C+, I-, D-, V-) 			||
   Addressing Mode:		Immediate	||
-  Assembly Language Form:	CPY #oper	||
+Assembly Language Form:	CPY #oper	||
   Opcode:			C0		||
   Bytes:			2		||
   Cycles:			2		|| */
 inline void cpy_c0()
-{
+{  
   architecturalState::status.u.C = ((architecturalState::Y == get8BitImmediate())
 				    || (architecturalState::Y >
 					get8BitImmediate())) ? 1 : 0;
@@ -1769,12 +1767,12 @@ inline void cpy_c4()
   (N+, Z+, C+, I-, D-, V-) 			||
   Addressing Mode:		Zeropage	||
   Assembly Language Form:	CMP oper	||
-  Opcode:			C5		||
+ Opcode:			C5		||
   Bytes:			2		||
   Cycles:			3		|| */
 inline void cmp_c5()
 {
-  const memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+  memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
 							 get8BitImmediate()]};
   architecturalState::status.u.C = ((architecturalState::A == oper)
 				    || (architecturalState::A >
