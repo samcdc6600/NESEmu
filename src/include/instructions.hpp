@@ -88,7 +88,7 @@ inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
 inline void brk_00();
 inline void php_08();
 inline void ora_09();
-inline void als_0a();
+inline void asl_0a();
 inline void bpl_10();
 inline void clc_18();
 inline void jsr_20();
@@ -100,6 +100,7 @@ inline void sec_38();
 inline void rti_40();
 inline void pha_48();
 inline void eor_49();
+inline void lsr_4a();
 inline void jmp_4c();
 inline void bvc_50();
 inline void cli_58();
@@ -659,7 +660,7 @@ inline void ora_09()
   Opcode:			0A		||
   Bytes:			1		||
   Cycles:			2		|| */
-inline void als_0a()
+inline void asl_0a()
 {
   architecturalState::status.u.C =
     ((architecturalState::A & masks::bit7) ? 1 : 0);
@@ -827,7 +828,7 @@ inline void bmi_30()
 
   1 -> C			       		||
   (N-, Z-, C = 1, I-, D-, V-) 			||
-  Addressing Mode:		Implied		||
+  Addressing Mode1:		Implied		||
   Assembly Language Form:	SEC		||
   Opcode:			38		||
   Bytes:			1		||
@@ -891,6 +892,32 @@ inline void eor_49()
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Shift One Bit Right (Memory or Accumulator)
+
+  0 -> [76543210] -> C	       			||
+  (N = 0, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Accumulator	||
+  Assembly Language Form:	LSR A   	||
+  Opcode:			4A		||
+  Bytes:			1		||
+  Cycles:			2		||
+  LSR shifts all bits right one position. 0 is shifted into bit 7 and the
+  original bit 0 is shifted into the Carry:
+  http://6502.org/tutorials/6502opcodes.html#LSR */
+inline void lsr_4a()
+{
+  architecturalState::status.u.C =
+    ((architecturalState::A & masks::bit0) ? 1 : 0);
+  
+  architecturalState::A >>= 1;
+  setZeroFlagOn(architecturalState::A);
+  architecturalState::status.u.N = 0;
+  
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 
