@@ -88,6 +88,7 @@ inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
 inline void brk_00();
 inline void php_08();
 inline void ora_09();
+inline void als_0a();
 inline void bpl_10();
 inline void clc_18();
 inline void jsr_20();
@@ -645,6 +646,27 @@ inline void ora_09()
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Shift Left One Bit (Memory or Accumulator)
+
+  C <- [76543210] <- 0	       	       		||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Accumulator	||
+  Assembly Language Form:	ALS A		||
+  Opcode:			0A		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void als_0a()
+{
+  architecturalState::status.u.C =
+    ((architecturalState::A & masks::bit7) ? 1 : 0);
+  architecturalState::A <<= 1;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A); 
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 

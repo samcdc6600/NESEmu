@@ -97,6 +97,7 @@ bool dispatchInstruction()
       ora_09();
       break;
     case 0x0a:			// ASL
+      als_0a();
       break;
     case 0x0b:			// ANC	#i
       break;
