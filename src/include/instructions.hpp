@@ -22,9 +22,12 @@
 // ~~~~~~~~~~~~~~~~~~~~~~<{ Functions for Setting Flags }>~~~~~~~~~~~~~~~~~~~~~~
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 				     const architecturalState::isaReg b);
-inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
+inline void setOverflowOnAdditionOn(const architecturalState::isaReg a,
 				    const architecturalState::isaReg b,
 				    const architecturalState::isaReg c);
+/* For use with functions that set the overflow flag directly (that is without
+   addition) such as bit_24(). */
+inline void setOverflowOnVar(const memory::minimumAddressableUnit var);
 inline void setZeroFlagOn(const architecturalState::isaReg reg);
 inline void setDecimalFlagOn(const bool d);
 inline void setNegativeFlagOn(const architecturalState::isaReg reg);
@@ -85,6 +88,7 @@ inline void ora_09();
 inline void bpl_10();
 inline void clc_18();
 inline void jsr_20();
+inline void bit_24();
 inline void plp_28();
 inline void bmi_30();
 inline void sec_38();
@@ -177,13 +181,19 @@ inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 }
 
 
-inline void setOverFlowOnAdditionOn(const architecturalState::isaReg a,
+inline void setOverflowOnAdditionOn(const architecturalState::isaReg a,
 				    const architecturalState::isaReg b,
 				    const architecturalState::isaReg c)
 {
   /* An explination of the following:
      https://stackoverflow.com/questions/16845912/determining-carry-and-overflow-flag-in-6502-emulation-in-java  */
   architecturalState::status.u.V = (~(a ^ b)) & (a ^ c) & masks::bit7;
+}
+
+
+inline void setOverflowOnVar(const memory::minimumAddressableUnit var)
+{
+  architecturalState::status.u.V = var ? 1 : 0;
 }
 
 
@@ -684,6 +694,29 @@ inline void jsr_20()
 }
 
 
+/*! \brief BIT Test Bits in Memory with Accumulator
+
+  A AND M, M7 -> N, M6 -> V    	       		||
+  (M7 -> N, Z+, C-, I-, D-, M6 -> V)		||
+  Addressing Mode:		Zeropage       	||
+  Assembly Language Form:	BIT oper       	||
+  Opcode:			24		||
+  Bytes:			2		||
+  Cycles:			3		||
+  bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
+  the zeroflag is set to the result of operand AND accumulator. */
+inline void bit_24()
+{
+  const memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
+							 get8BitImmediate()]};
+  setNegativeFlagOn(masks::bit7 & var);
+  setOverflowOnVar(masks::bit6 & var);
+  setZeroFlagOn(architecturalState::A & var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
+}
+
+
 /*! \brief Pull Processor Status from Stack
 
   Pull SR			       		||
@@ -885,7 +918,7 @@ inline void adc_69()
   architecturalState::isaReg aR {architecturalState::isaReg(architecturalState::A
 							    + get8BitImmediate())};
   setCarryFlagOnAdditionOn(architecturalState::A, get8BitImmediate());
-  setOverFlowOnAdditionOn(architecturalState::A, get8BitImmediate(), aR);
+  setOverflowOnAdditionOn(architecturalState::A, get8BitImmediate(), aR);
   architecturalState::A = aR;
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
@@ -1749,13 +1782,13 @@ inline void cpy_c0()
   Cycles:			3		|| */
 inline void cpy_c4()
 {
-  const memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+  const memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
 							 get8BitImmediate()]};
-  architecturalState::status.u.C = ((architecturalState::Y == oper)
+  architecturalState::status.u.C = ((architecturalState::Y == var)
 				    || (architecturalState::Y >
-					oper)) ? 1 : 0;
-  setZeroFlagOn(architecturalState::Y - oper);
-  setNegativeFlagOn(architecturalState::Y - oper);
+					var)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::Y - var);
+  setNegativeFlagOn(architecturalState::Y - var);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -1772,13 +1805,13 @@ inline void cpy_c4()
   Cycles:			3		|| */
 inline void cmp_c5()
 {
-  memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+  memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
 							 get8BitImmediate()]};
-  architecturalState::status.u.C = ((architecturalState::A == oper)
+  architecturalState::status.u.C = ((architecturalState::A == var)
 				    || (architecturalState::A >
-					oper)) ? 1 : 0;
-  setZeroFlagOn(architecturalState::A - oper);
-  setNegativeFlagOn(architecturalState::A - oper);
+					var)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::A - var);
+  setNegativeFlagOn(architecturalState::A - var);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -1850,13 +1883,13 @@ inline void dex_ca()
   Cycles:			4		|| */
 inline void cpy_cc()
 {
-  const memory::minimumAddressableUnit oper
+  const memory::minimumAddressableUnit var
     {getVarAtAddress(get16BitImmediate())};
-  architecturalState::status.u.C = ((architecturalState::Y == oper)
+  architecturalState::status.u.C = ((architecturalState::Y == var)
 				    || (architecturalState::Y >
-					oper)) ? 1 : 0;
-  setZeroFlagOn(architecturalState::Y - oper);
-  setNegativeFlagOn(architecturalState::Y - oper);
+					var)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::Y - var);
+  setNegativeFlagOn(architecturalState::Y - var);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -2026,13 +2059,13 @@ inline void cpx_e0()
   Cycles:			3		|| */
 inline void cpx_e4()
 {
-  const memory::minimumAddressableUnit oper {memory::mem[memory::zeroPageBase |
+  const memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
 							 get8BitImmediate()]};
-    architecturalState::status.u.C = ((architecturalState::X == oper)
+    architecturalState::status.u.C = ((architecturalState::X == var)
 				    || (architecturalState::X >
-					oper)) ? 1 : 0;
-  setZeroFlagOn(architecturalState::X - oper);
-  setNegativeFlagOn(architecturalState::X - oper);
+					var)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::X - var);
+  setNegativeFlagOn(architecturalState::X - var);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -2075,13 +2108,13 @@ inline void nop_ea()
   Cycles:			4		|| */
 inline void cpx_ec()
 {
-  const memory::minimumAddressableUnit oper
+  const memory::minimumAddressableUnit var
     {getVarAtAddress(get16BitImmediate())};
-  architecturalState::status.u.C = ((architecturalState::X == oper)
+  architecturalState::status.u.C = ((architecturalState::X == var)
 				    || (architecturalState::X >
-					oper)) ? 1 : 0;
-  setZeroFlagOn(architecturalState::X - oper);
-  setNegativeFlagOn(architecturalState::X - oper);
+					var)) ? 1 : 0;
+  setZeroFlagOn(architecturalState::X - var);
+  setNegativeFlagOn(architecturalState::X - var);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }

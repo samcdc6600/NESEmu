@@ -152,6 +152,7 @@ bool dispatchInstruction()
     case 0x23:			// RLA	(d,x)
       break;
     case 0x24:			// BIT	d
+      bit_24();
       break;
     case 0x25:			// AND	d
       break;
