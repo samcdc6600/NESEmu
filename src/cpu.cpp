@@ -170,6 +170,7 @@ bool dispatchInstruction()
     case 0x2b:			// ANC	#i
       break;
     case 0x2c:			// BIT	a
+      bit_2c();
       break;
     case 0x2d:			// AND	a
       break;

@@ -90,6 +90,7 @@ inline void clc_18();
 inline void jsr_20();
 inline void bit_24();
 inline void plp_28();
+inline void bit_2c();
 inline void bmi_30();
 inline void sec_38();
 inline void rti_40();
@@ -694,7 +695,7 @@ inline void jsr_20()
 }
 
 
-/*! \brief BIT Test Bits in Memory with Accumulator
+/*! \brief Test Bits in Memory with Accumulator
 
   A AND M, M7 -> N, M6 -> V    	       		||
   (M7 -> N, Z+, C-, I-, D-, M6 -> V)		||
@@ -732,6 +733,28 @@ inline void plp_28()
   architecturalState::status.flags = pullStatusFlagsFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Test Bits in Memory with Accumulator
+
+  A AND M, M7 -> N, M6 -> V    	       		||
+  (M7 -> N, Z+, C-, I-, D-, M6 -> V)		||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	BIT oper       	||
+  Opcode:			2C		||
+  Bytes:			3		||
+  Cycles:			4		||
+  bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
+  the zeroflag is set to the result of operand AND accumulator. */
+inline void bit_2c()
+{
+  const memory::minimumAddressableUnit var {memory::mem[get16BitImmediate()]};
+  setNegativeFlagOn(masks::bit7 & var);
+  setOverflowOnVar(masks::bit6 & var);
+  setZeroFlagOn(architecturalState::A & var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
