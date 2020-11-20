@@ -38,11 +38,14 @@ inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
 inline memory::address
-// Used for things analgous to "LDA oper,Y."
+// Used for things including and analogous to "LDA oper,Y."
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
-// Used for things analgous to "LDA (oper),Y."
+// Used for things including and analogous to "LDA (oper),Y."
 inline memory::address
 getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
+// Used for things including and analogous to "CMP (oper, X)."
+inline memory::address
+getPreIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // ~~~~~~~~~~~~~~~~~<{ Functions for Storing Values in Memory }>~~~~~~~~~~~~~~~~
@@ -147,6 +150,7 @@ inline void ldy_bc();
 inline void lda_bd();
 inline void ldx_be();
 inline void cpy_c0();
+inline void cmp_c1();
 inline void cpy_c4();
 inline void cmp_c5();
 inline void iny_c8();
@@ -307,6 +311,23 @@ getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index)
     }
 
   return address;
+}
+
+
+/* All 8 instructions that this function should be applicable to acording to:
+   https://www.masswerk.at/6502/6502_instruction_set.html
+   take 6 cycles. Therfore there should be no need to check for the crossing of
+   any page boundrys. */
+inline memory::address
+getPreIndexedIndirectImmediateAddress(const architecturalState::isaReg index)
+{	// Get address pointed to by immediate + X.
+  const memory::address addressOfAddress
+    {memory::address(memory::minimumAddressableUnit(get8BitImmediate() +
+						    index))};
+  // Return address that addressOfAddress points to
+  return (memory::address(memory::mem[addressOfAddress] |
+			  ((memory::mem[addressOfAddress +1])
+			   << memory::minimumAddressableUnitSize)));
 }
 
 
@@ -1028,17 +1049,9 @@ inline void sei_78()
   Bytes:			2		||
   Cycles:			6		|| */
 inline void sta_81()
-{  	// Get address pointed to by immediate + X.
-  const memory::address addressOfAddress
-    {memory::address(memory::minimumAddressableUnit(get8BitImmediate() +
-					    architecturalState::X))};
-  // Get address that address (addressOfAddress) points to
-  const memory::address address
-    {memory::address(memory::mem[addressOfAddress] |
-		     ((memory::mem[addressOfAddress +1])
-		      << memory::minimumAddressableUnitSize))};
-
-  memory::mem[address] = architecturalState::A;
+{
+  memory::mem[getPreIndexedIndirectImmediateAddress(architecturalState::X)] =
+    architecturalState::A;
   architecturalState::PC += 2;
   architecturalState::cycles += 6;
 }
@@ -1361,21 +1374,9 @@ inline void ldy_a0()
   Load Accumulator from address obtained from the address calculated from "$20
   adding content of Index Register X" Address must wrap around! */
 inline void lda_a1()
-{	// Get address pointed to by immediate + X.
-  // Cast to memory::minimumAddressableUnit to wrap address around.
-  const memory::address addressOfAddress
-    {memory::address(memory::minimumAddressableUnit(get8BitImmediate() +
-						    architecturalState::X))};
-  std::cout<<"addressOfAddress = "<<addressOfAddress<<'\n';
-  // Get address that address (addressOfAddress) points to
-  const memory::address address
-    {memory::address(memory::mem[addressOfAddress] |
-		     ((memory::mem[addressOfAddress +1])
-		      << memory::minimumAddressableUnitSize))};
-
-    std::cout<<"address = "<<address<<'\n';
-
-  architecturalState::A = getVarAtAddress(address);
+{
+  architecturalState::A =
+    getVarAtAddress(getPreIndexedIndirectImmediateAddress(architecturalState::X));
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
@@ -1791,6 +1792,32 @@ inline void cpy_c0()
   setNegativeFlagOn(architecturalState::Y - get8BitImmediate());
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Compare Memory with Accumulator
+
+  A - M						||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect, X)	||
+  Assembly Language Form:	CMP (oper, X)	||
+  Opcode:			C1		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void cmp_c1()
+{
+  const memory::address address
+    {getPreIndexedIndirectImmediateAddress(architecturalState::X)};
+  const memory::minimumAddressableUnit compVal {memory::minimumAddressableUnit
+    (architecturalState::A - getVarAtAddress(address))};
+
+  /* Note here that we negate the second argument so our addition is actually a
+     subtraction. */
+  setCarryFlagOnAdditionOn(architecturalState::A, - getVarAtAddress(address));
+  setZeroFlagOn(compVal);
+  setNegativeFlagOn(compVal); 
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 

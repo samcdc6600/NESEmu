@@ -525,6 +525,7 @@ bool dispatchInstruction()
       cpy_c0();
       break;
     case 0xc1:			// CMP	(d,x)
+      cmp_c1();
       break;
     case 0xc2:			// NOP	#i
       break;
