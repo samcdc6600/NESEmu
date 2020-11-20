@@ -753,8 +753,8 @@ inline void bit_2c()
   setNegativeFlagOn(masks::bit7 & var);
   setOverflowOnVar(masks::bit6 & var);
   setZeroFlagOn(architecturalState::A & var);
-  architecturalState::PC += 2;
-  architecturalState::cycles += 3;
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
