@@ -108,6 +108,7 @@ inline void cli_58();
 inline void rts_60();
 inline void pla_68();
 inline void adc_69();
+inline void ror_6a();
 inline void jmp_6c();
 inline void bvs_70();
 inline void sei_78();
@@ -789,22 +790,18 @@ inline void plp_28()
   Assembly Language Form:	ROL A		||
   Opcode:			2A		||
   Bytes:			1		||
-  Cycles:			2		|| */
+  Cycles:			2		||
+  http://www.6502.org/tutorials/6502opcodes.html#ROL:
+  ROL shifts all bits left one position. The Carry is shifted into bit 0 and the
+  original bit 7 is shifted into the Carry. */
 inline void rol_2a()
-{	// Why doesn't C just have rotate operations builtin?
+{
   const architecturalState::isaReg RMB	// Right most bit.
     {architecturalState::isaReg((architecturalState::A & masks::bit7) ? 1 : 0)};
-
-  std::cout<<"RMB = "<<(unsigned short)(RMB);
   architecturalState::A <<= 1;		// Do shift.
-
-  std::cout<<", A shifted = "<<(unsigned short)(architecturalState::A);
-  architecturalState::A = RMB ?
+  architecturalState::A = architecturalState::status.u.C ? // Set bit0 to carry.
     architecturalState::A | masks::bit0 : architecturalState::A;
-
-  std::cout<<", A rotated = "<<(unsigned short)(architecturalState::A)<<'\n';
-
-  architecturalState::status.u.C = RMB;
+  architecturalState::status.u.C = RMB;	// Set carry to RMB before shift.
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);  
   architecturalState::PC += 1;
@@ -1048,6 +1045,33 @@ inline void adc_69()
   setZeroFlagOn(architecturalState::A);
   setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Rotate One Bit Right (Memory or Accumulator)
+
+  C -> [76543210] -> C		       		||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Accumulator    	||
+  Assembly Language Form:	ROR A		||
+  Opcode:			6A		||
+  Bytes:			1		||
+  Cycles:			2		||
+  http://www.6502.org/tutorials/6502opcodes.html#ROL:
+  ROR shifts all bits right one position. The Carry is shifted into bit 7 and
+  the original bit 0 is shifted into the Carry. */
+inline void ror_6a()
+{
+    const architecturalState::isaReg LMB	// Right most bit.
+    {architecturalState::isaReg((architecturalState::A & masks::bit0) ? 1 : 0)};
+    architecturalState::A >>= 1;		// Do shift.
+  architecturalState::A = architecturalState::status.u.C ? // Set bit7 to carry.
+    architecturalState::A | masks::bit7 : architecturalState::A;
+  architecturalState::status.u.C = LMB;	// Set carry to LMB before shift.
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);  
+  architecturalState::PC += 1;
   architecturalState::cycles += 2;
 }
 

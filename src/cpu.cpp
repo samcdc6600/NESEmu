@@ -309,6 +309,7 @@ bool dispatchInstruction()
       adc_69();
       break;
     case 0x6a:			// ROR
+      ror_6a();
       break;
     case 0x6b:			// ARR	#i
       break;
