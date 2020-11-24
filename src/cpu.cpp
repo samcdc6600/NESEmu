@@ -167,6 +167,7 @@ bool dispatchInstruction()
     case 0x29:			// AND	#i
       break;
     case 0x2a:			// ROL
+      rol_2a();
       break;
     case 0x2b:			// ANC	#i
       break;

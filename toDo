@@ -3,6 +3,8 @@
 * GENERAL ======================================================================
 	- Make  modifyHTMLDocsToCollapseCode pass shellcheck.
 	- Fix problems when compiling with g++!
+	- Alter code for setting breakpoints so that you can set a brakpoint for
+	  the line you are on.
 	- Improve error messages for debug commands.
 	- Improve code for "handlePrintHelp()"
 	- Make variables for parts of duplicated debug commands exception out

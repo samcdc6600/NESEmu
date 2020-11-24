@@ -94,6 +94,7 @@ inline void clc_18();
 inline void jsr_20();
 inline void bit_24();
 inline void plp_28();
+inline void rol_2a();
 inline void bit_2c();
 inline void bmi_30();
 inline void sec_38();
@@ -777,6 +778,37 @@ inline void plp_28()
   architecturalState::status.flags = pullStatusFlagsFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Rotate One Bit Left (Memory or Accumulator)
+
+  C <- [76543210] <- C	       	       		||
+  (N+, Z+, C+, I, D, V)				||
+  Addressing Mode:		Accumulator    	||
+  Assembly Language Form:	ROL A		||
+  Opcode:			2A		||
+  Bytes:			1		||
+  Cycles:			2		|| */
+inline void rol_2a()
+{	// Why doesn't C just have rotate operations builtin?
+  const architecturalState::isaReg RMB	// Right most bit.
+    {architecturalState::isaReg((architecturalState::A & masks::bit7) ? 1 : 0)};
+
+  std::cout<<"RMB = "<<(unsigned short)(RMB);
+  architecturalState::A <<= 1;		// Do shift.
+
+  std::cout<<", A shifted = "<<(unsigned short)(architecturalState::A);
+  architecturalState::A = RMB ?
+    architecturalState::A | masks::bit0 : architecturalState::A;
+
+  std::cout<<", A rotated = "<<(unsigned short)(architecturalState::A)<<'\n';
+
+  architecturalState::status.u.C = RMB;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);  
+  architecturalState::PC += 1;
+  architecturalState::cycles += 2;
 }
 
 
