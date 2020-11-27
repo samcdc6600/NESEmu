@@ -180,6 +180,7 @@ bool dispatchInstruction()
     case 0x2d:			// AND	a
       break;
     case 0x2e:			// ROL	a
+      rol_2e();
       break;
     case 0x2f:			// RLA	a
       break;
