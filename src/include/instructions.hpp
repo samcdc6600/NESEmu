@@ -192,6 +192,7 @@ inline void cmp_d9();
 inline void cmp_dd();
 inline void cpx_e0();
 inline void cpx_e4();
+inline void inc_e6();
 inline void inx_e8();
 inline void nop_ea();
 inline void cpx_ec();
@@ -2721,6 +2722,28 @@ inline void cpx_e4()
   setNegativeFlagOn(architecturalState::X - var);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
+}
+
+
+/*! \brief Increment Memory by One
+
+  M + 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	INC oper	||
+  Opcode:			E6		||
+  Bytes:			2		||
+  Cycles:			5		|| */
+inline void inc_e6()
+{
+  memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
+							get8BitImmediate()]};
+  ++var;
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] = var;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
