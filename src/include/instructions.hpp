@@ -465,7 +465,7 @@ inline void
 storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
 					  const architecturalState::isaReg reg)
 {
-  StoreVarAtIndexedAbsoluteImmediateAddress(reg, index);
+  StoreVarAtIndexedAbsoluteImmediateAddress(index, reg);
 }
 
 
@@ -1874,8 +1874,8 @@ because we may crosses a page boundry. Or maybe this is specific to the
 Ricoh. */
 inline void sta_99()
 {
-  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::A,
-					    architecturalState::Y);
+  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::Y,
+					    architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -1916,8 +1916,8 @@ because we may crosses a page boundry. Or maybe this is specific to the
 Ricoh. */
 inline void sta_9d()
 {
-  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::A,
-					    architecturalState::X);
+  storeRegAtIndexedAbsoluteImmediateAddress(architecturalState::X,
+					    architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
