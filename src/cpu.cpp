@@ -558,6 +558,7 @@ bool dispatchInstruction()
       cmp_c5();
       break;
     case 0xc6:			// DEC	d
+      dec_c6();
       break;
     case 0xc7:			// DCP	d
       break;

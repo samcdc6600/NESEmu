@@ -179,6 +179,7 @@ inline void cpy_c0();
 inline void cmp_c1();
 inline void cpy_c4();
 inline void cmp_c5();
+inline void dec_c6();
 inline void iny_c8();
 inline void cmp_c9();
 inline void dex_ca();
@@ -2468,6 +2469,28 @@ inline void cmp_c5()
   setNegativeFlagOn(architecturalState::A - var);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
+}
+
+
+/*! \brief Decrement Memory by One
+
+  M - 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	DEC oper	||
+  Opcode:			C6		||
+  Bytes:			2		||
+  Cycles:			5		|| */
+inline void dec_c6()
+{
+  memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
+						  get8BitImmediate()]};
+  --var;
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] = var;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
