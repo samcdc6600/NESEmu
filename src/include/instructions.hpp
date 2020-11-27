@@ -200,6 +200,7 @@ inline void nop_ea();
 inline void cpx_ec();
 inline void inc_ee();
 inline void beq_f0();
+inline void inc_f6();
 inline void sed_f8();
 
 
@@ -2869,6 +2870,28 @@ inline void beq_f0()
     branchTaken();
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Increment Memory by One
+
+  M + 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Zeropage, X	||
+  Assembly Language Form:	INC oper, X	||
+  Opcode:			F6		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void inc_f6()
+{
+  memory::minimumAddressableUnit var
+    {getVarAtIndexedZeroPage(architecturalState::X)};
+  ++var;
+  storeVarAtIndexedZeroPage(architecturalState::X, var);
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 
