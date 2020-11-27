@@ -218,6 +218,7 @@ bool dispatchInstruction()
     case 0x3d:			// AND	a,x
       break;
     case 0x3e:			// ROL	a,x
+      rol_3e();
       break;
     case 0x3f:			// RLA	a,x
       break;

@@ -111,6 +111,7 @@ inline void rol_2e();
 inline void bmi_30();
 inline void rol_36();
 inline void sec_38();
+inline void rol_3e();
 inline void rti_40();
 inline void lsr_46();
 inline void pha_48();
@@ -1099,6 +1100,36 @@ inline void sec_38()
   architecturalState::status.u.C = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Rotate One Bit Left (Memory or Accumulator)
+
+  C <- [76543210] <- C	       	       		||
+  (N+, Z+, C+, I, D, V)				||
+  Addressing Mode:		Absolute, X    	||
+  Assembly Language Form:	ROL oper, X    	||
+  Opcode:			3E		||
+  Bytes:			3		||
+  Cycles:			7		||
+  http://www.6502.org/tutorials/6502opcodes.html#ROL:
+  ROL shifts all bits left one position. The Carry is shifted into bit 0 and the
+  original bit 7 is shifted into the Carry. */
+inline void rol_3e()
+{
+  memory::minimumAddressableUnit var
+    {memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]};
+  const architecturalState::isaReg RMB	// Right most bit.
+    {architecturalState::isaReg((var & masks::bit7) ? 1 : 0)};
+  var <<= 1;	// Do shift.
+  // Set bit0 to carry.
+  var = architecturalState::status.u.C ? var | masks::bit0 : var;
+  architecturalState::status.u.C = RMB;	// Set carry to RMB before shift.
+  StoreVarAtIndexedAbsoluteImmediateAddress(architecturalState::X, var);
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);  
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
