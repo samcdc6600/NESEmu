@@ -125,6 +125,7 @@ bool dispatchInstruction()
     case 0x15:			// ORA	d,x
       break;
     case 0x16:			// ASL	d,x
+      asl_16();
       break;
     case 0x17:			// SLO	d,x
       break;

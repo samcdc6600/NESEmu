@@ -37,18 +37,21 @@ inline memory::address get16BitImmediate();
 inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
-// Used for things including and analogous to "LDA oper,Y."
+// Used for things including and similar to "LDA oper,Y."
 inline memory::address
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
-// Used for things including and analogous to "LDA (oper),Y."
+// Used for things including and similar to "LDA (oper),Y."
 inline memory::address
 getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
-// Used for things including and analogous to "CMP (oper, X)."
+// Used for things including and similar to "CMP (oper, X)."
 inline memory::address
 getPreIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // ~~~~~~~~~~~~~~~~~<{ Functions for Storing Values in Memory }>~~~~~~~~~~~~~~~~
+// Used for things including and similar "ASL oper, X."
+inline void storeVarAtIndexedZeroPage(const architecturalState::isaReg index,
+				      memory::minimumAddressableUnit var);
 inline void storeRegAtIndexedZeroPage(const architecturalState::isaReg index,
 				      const architecturalState::isaReg reg);
 inline void storeRegAtAddress(const memory::address a,
@@ -92,6 +95,7 @@ inline void ora_09();
 inline void asl_0a();
 inline void asl_0e();
 inline void bpl_10();
+inline void asl_16();
 inline void clc_18();
 inline void jsr_20();
 inline void bit_24();
@@ -351,6 +355,26 @@ inline memory::minimumAddressableUnit
 getVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index)
 {
   return memory::mem[getIndexedAbsoluteImmediateAddress(index)];
+}
+
+
+/*! \brief Stores an 8 bit value in the zero page at address composed of (8 bit
+  immediate + index register)
+
+  : http://www.emulator101.com/6502-addressing-modes.html
+  This works just like absolute indexed, but the target address is limited to
+  the first 0xFF bytes. The target address will wrap around and will always be
+  in the zero page. */
+inline void storeVarAtIndexedZeroPage(const architecturalState::isaReg index,
+				      memory::minimumAddressableUnit var)
+{
+  using namespace memory;
+
+  const int potentialAddress {index + get8BitImmediate()};
+  // If potentialAddress is larger then pageSize wrape around.
+  mem[zeroPageBase + (maskAddressLow & (potentialAddress > (pageSize -1) ?
+					(potentialAddress - pageSize) :
+					potentialAddress))] = var;
 }
 
 
@@ -748,6 +772,30 @@ inline void bpl_10()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Shift Left One Bit (Memory or Accumulator)
+
+  C <- [76543210] <- 0		       		|| 
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	ASL oper, X    	||
+  Opcode:			16		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void asl_16()
+{
+  memory::minimumAddressableUnit var
+    {getVarAtIndexedZeroPage(architecturalState::X)};
+  architecturalState::status.u.C =
+    ((var & masks::bit7) ? 1 : 0);
+  var <<= 1;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  storeVarAtIndexedZeroPage(architecturalState::X, var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 
