@@ -87,6 +87,7 @@ bool dispatchInstruction()
     case 0x05:			// ORA	d
       break;
     case 0x06:			// ASL	d
+      asl_06();
       break;
     case 0x07:			// SLO	d
       break;
