@@ -252,6 +252,7 @@ bool dispatchInstruction()
     case 0x4d:			// EOR	a
       break;
     case 0x4e:			// LSR	a
+      lsr_4e();
       break;
     case 0x4f:			// SRE	a
       break;

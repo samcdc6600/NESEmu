@@ -107,6 +107,7 @@ inline void pha_48();
 inline void eor_49();
 inline void lsr_4a();
 inline void jmp_4c();
+inline void lsr_4e();
 inline void bvc_50();
 inline void cli_58();
 inline void rts_60();
@@ -1066,6 +1067,34 @@ inline void jmp_4c()
 {
   loadPCFrom16BitImmediate();
   architecturalState::cycles += 3;
+}
+
+
+/*! \brief Shift One Bit Right (Memory or Accumulator)
+
+  0 -> [76543210] -> C		       		||
+  (N = 0, Z+, C+, I-, D-, V-) 	       		||
+  Addressing Mode:		Absolute       	||
+  Assembly Language Form:	LSR oper       	||
+  Opcode:			4E		||
+  Bytes:			3		||
+  Cycles:			6		||
+  LSR shifts all bits right one position. 0 is shifted into bit 7 and the
+  original bit 0 is shifted into the Carry:
+  http://6502.org/tutorials/6502opcodes.html#LSR */
+inline void lsr_4e()
+{
+  memory::minimumAddressableUnit var {memory::mem[get16BitImmediate()]};
+  architecturalState::status.u.C =
+    ((var & masks::bit0) ? 1 : 0);
+  
+  var >>= 1;
+  memory::mem[get16BitImmediate()] = var;
+  setZeroFlagOn(var);
+  architecturalState::status.u.N = 0;
+  
+  architecturalState::PC += 3;
+  architecturalState::cycles += 6;
 }
 
 
