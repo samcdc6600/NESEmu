@@ -1128,8 +1128,8 @@ inline void rol_3e()
   StoreVarAtIndexedAbsoluteImmediateAddress(architecturalState::X, var);
   setZeroFlagOn(var);
   setNegativeFlagOn(var);  
-  architecturalState::PC += 2;
-  architecturalState::cycles += 5;
+  architecturalState::PC += 3;
+  architecturalState::cycles += 7;
 }
 
 
