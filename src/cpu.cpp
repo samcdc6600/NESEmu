@@ -143,6 +143,7 @@ bool dispatchInstruction()
     case 0x1d:			// ORA	a,x
       break;
     case 0x1e:			// ASL	a,x
+      asl_1e();
       break;
     case 0x1f:			// SLO	a,x
       break;

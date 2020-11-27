@@ -59,6 +59,9 @@ inline void storeRegAtAddress(const memory::address a,
 inline void
 storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg);
 inline void
+StoreVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+				      memory::minimumAddressableUnit var);
+inline void
 storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
 					  const architecturalState::isaReg reg);
 // ~~~~~~~~<{ Functions for Loading Registers With Values From Memory }>~~~~~~~~
@@ -97,6 +100,7 @@ inline void asl_0e();
 inline void bpl_10();
 inline void asl_16();
 inline void clc_18();
+inline void asl_1e();
 inline void jsr_20();
 inline void bit_24();
 inline void rol_26();
@@ -422,6 +426,14 @@ storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg)
 }
 
 
+inline void
+StoreVarAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+				      memory::minimumAddressableUnit var)
+{
+    memory::mem[getIndexedAbsoluteImmediateAddress(index)] = var;
+}
+
+
 /* \brief For use with instructions that store a registers value (reg) at an
    absolute address indexed by one of the index registers (index) and where the
    absolute address is specified by that instructions 16 bit operand. Note that
@@ -448,10 +460,10 @@ storeRegAtAbsoluteImmediateAddress(const architecturalState::isaReg reg)
    on Nes Hacker for this instruction says the following:
    "...Add one cycle if indexing across page boundary"  */
 inline void
-storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg reg,
-					  const architecturalState::isaReg index)
+storeRegAtIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index,
+					  const architecturalState::isaReg reg)
 {
-  memory::mem[getIndexedAbsoluteImmediateAddress(index)] = reg;
+  StoreVarAtIndexedAbsoluteImmediateAddress(reg, index);
 }
 
 
@@ -816,6 +828,30 @@ inline void clc_18()
   architecturalState::status.u.C = 0;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Shift Left One Bit (Memory or Accumulator)
+
+  C <- [76543210] <- 0		       		|| 
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, X    	||
+  Assembly Language Form:	ASL oper, X    	||
+  Opcode:			1E		||
+  Bytes:			3		||
+  Cycles:			7		|| */
+inline void asl_1e()
+{
+  memory::minimumAddressableUnit var
+    {memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]};
+  architecturalState::status.u.C =
+    ((var & masks::bit7) ? 1 : 0);
+  var <<= 1;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  StoreVarAtIndexedAbsoluteImmediateAddress(architecturalState::X, var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 7;
 }
 
 
