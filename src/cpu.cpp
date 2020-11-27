@@ -656,6 +656,7 @@ bool dispatchInstruction()
     case 0xed:			// SBC	a
       break;
     case 0xee:			// INC	a
+      inc_ee();
       break;
     case 0xef:			// ISC	a
       break;

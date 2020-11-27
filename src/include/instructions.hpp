@@ -197,6 +197,7 @@ inline void inc_e6();
 inline void inx_e8();
 inline void nop_ea();
 inline void cpx_ec();
+inline void inc_ee();
 inline void beq_f0();
 inline void sed_f8();
 
@@ -2816,6 +2817,27 @@ inline void cpx_ec()
   setNegativeFlagOn(architecturalState::X - var);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Increment Memory by One
+
+  M + 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	INC oper	||
+  Opcode:			EE		||
+  Bytes:			3		||
+  Cycles:			6		|| */
+inline void inc_ee()
+{
+  memory::minimumAddressableUnit var {memory::mem[get16BitImmediate()]};
+  ++var;
+  memory::mem[get16BitImmediate()] = var;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 6;
 }
 
 
