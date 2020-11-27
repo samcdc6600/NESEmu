@@ -125,6 +125,7 @@ inline void ror_6a();
 inline void jmp_6c();
 inline void ror_6e();
 inline void bvs_70();
+inline void ror_76();
 inline void sei_78();
 inline void sta_81();
 inline void sty_84();
@@ -1462,6 +1463,36 @@ inline void bvs_70()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Rotate One Bit Right (Memory or Accumulator)
+
+  C -> [76543210] -> C		       		||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	ROR oper, X    	||
+  Opcode:			76		||
+  Bytes:			2		||
+  Cycles:			6		||
+  http://www.6502.org/tutorials/6502opcodes.html#ROL:
+  ROR shifts all bits right one position. The Carry is shifted into bit 7 and
+  the original bit 0 is shifted into the Carry. */
+inline void ror_76()
+{
+  memory::minimumAddressableUnit var
+    {getVarAtIndexedZeroPage(architecturalState::X)};
+  const architecturalState::isaReg LMB	// Right most bit.
+    {architecturalState::isaReg((var & masks::bit0) ? 1 : 0)};
+  var >>= 1;		// Do shift.
+  // Set bit7 to carry.
+  var = architecturalState::status.u.C ? var | masks::bit7 : var;
+  storeVarAtIndexedZeroPage(architecturalState::X, var);
+  architecturalState::status.u.C = LMB;	// Set carry to LMB before shift.
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);  
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

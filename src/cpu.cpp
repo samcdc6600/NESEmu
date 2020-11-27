@@ -347,6 +347,7 @@ bool dispatchInstruction()
     case 0x75:			// ADC	d,x
       break;
     case 0x76:			// ROR	d,x
+      ror_76();
       break;
     case 0x77:			// RRA	d,x
       break;
