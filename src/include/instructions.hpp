@@ -193,6 +193,7 @@ inline void dec_d6();
 inline void cdl_d8();
 inline void cmp_d9();
 inline void cmp_dd();
+inline void dec_de();
 inline void cpx_e0();
 inline void cpx_e4();
 inline void inc_e6();
@@ -2749,6 +2750,28 @@ inline void cmp_dd()
   cmpAgainsIndexedAbsoluteImmediate(architecturalState::X);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Decrement Memory by One
+
+  M - 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Absolute, X	||
+  Assembly Language Form:	DEC oper, X	||
+  Opcode:			DE		||
+  Bytes:			3		||
+  Cycles:			7		|| */
+inline void dec_de()
+{
+  memory::minimumAddressableUnit var
+    {memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]};
+  --var;
+  StoreVarAtIndexedAbsoluteImmediateAddress(architecturalState::X, var);
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 7;
 }
 
 
