@@ -185,6 +185,7 @@ inline void cmp_c9();
 inline void dex_ca();
 inline void cpy_cc();
 inline void cmp_cd();
+inline void dec_ce();
 inline void bne_d0();
 inline void cmp_d1();
 inline void cmp_d5();
@@ -2591,6 +2592,27 @@ inline void cmp_cd()
   setNegativeFlagOn(architecturalState::A - getVarAtAddress(get16BitImmediate()));
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief Decrement Memory by One
+
+  M - 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	DEC oper	||
+  Opcode:			CE		||
+  Bytes:			3		||
+  Cycles:			6		|| */
+inline void dec_ce()
+{
+  memory::minimumAddressableUnit var {memory::mem[get16BitImmediate()]};
+  --var;
+  memory::mem[get16BitImmediate()] = var;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 6;
 }
 
 

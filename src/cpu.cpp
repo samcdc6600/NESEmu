@@ -580,6 +580,7 @@ bool dispatchInstruction()
       cmp_cd();
       break;
     case 0xce:			// DEC	a
+      dec_ce();
       break;
     case 0xcf:			// DCP	a
       break;
