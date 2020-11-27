@@ -326,6 +326,7 @@ bool dispatchInstruction()
     case 0x6d:			// ADC	a
       break;
     case 0x6e:			// ROR	a
+      ror_6e();
       break;
     case 0x6f:			// RRA	a
       break;
