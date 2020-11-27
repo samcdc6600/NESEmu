@@ -105,6 +105,7 @@ inline void rol_2a();
 inline void bit_2c();
 inline void rol_2e();
 inline void bmi_30();
+inline void rol_36();
 inline void sec_38();
 inline void rti_40();
 inline void lsr_46();
@@ -1013,6 +1014,36 @@ inline void bmi_30()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Rotate One Bit Left (Memory or Accumulator)
+
+  C <- [76543210] <- C	       	       		||
+  (N+, Z+, C+, I, D, V)				||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	ROL oper, X    	||
+  Opcode:			36		||
+  Bytes:			2		||
+  Cycles:			6		||
+  http://www.6502.org/tutorials/6502opcodes.html#ROL:
+  ROL shifts all bits left one position. The Carry is shifted into bit 0 and the
+  original bit 7 is shifted into the Carry. */
+inline void rol_36()
+{
+  memory::minimumAddressableUnit var
+    {getVarAtIndexedZeroPage(architecturalState::X)};
+  const architecturalState::isaReg RMB	// Right most bit.
+    {architecturalState::isaReg((var & masks::bit7) ? 1 : 0)};
+  var <<= 1;	// Do shift.
+  // Set bit0 to carry.
+  var = architecturalState::status.u.C ? var | masks::bit0 : var;
+  architecturalState::status.u.C = RMB;	// Set carry to RMB before shift.
+  storeVarAtIndexedZeroPage(architecturalState::X, var);
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);  
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

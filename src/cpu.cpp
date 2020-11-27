@@ -199,6 +199,7 @@ bool dispatchInstruction()
     case 0x35:			// AND	d,x
       break;
     case 0x36:			// ROL	d,x
+      rol_36();
       break;
     case 0x37:			// RLA	d,x
       break;
