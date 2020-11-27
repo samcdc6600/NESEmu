@@ -37,8 +37,8 @@ inline memory::address get16BitImmediate();
 inline memory::minimumAddressableUnit
 getVarAtIndexedZeroPage(const architecturalState::isaReg index);
 inline memory::minimumAddressableUnit getVarAtAddress(const memory::address a);
-inline memory::address
 // Used for things including and analogous to "LDA oper,Y."
+inline memory::address
 getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // Used for things including and analogous to "LDA (oper),Y."
 inline memory::address
@@ -606,8 +606,8 @@ inline void asl_06()
   setZeroFlagOn(var);
   setNegativeFlagOn(var);
   memory::mem[memory::zeroPageBase | get8BitImmediate()] = var;
-  architecturalState::PC += 1;
-  architecturalState::cycles += 2;
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
