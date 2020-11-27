@@ -90,6 +90,7 @@ inline void asl_06();
 inline void php_08();
 inline void ora_09();
 inline void asl_0a();
+inline void asl_0e();
 inline void bpl_10();
 inline void clc_18();
 inline void jsr_20();
@@ -699,6 +700,29 @@ inline void asl_0a()
   setNegativeFlagOn(architecturalState::A); 
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Shift Left One Bit (Memory or Accumulator)
+
+  C <- [76543210] <- 0	       	       		||
+  (N+, Z+, C+, I-, D-, V-) 			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	ASL oper       	||
+  Opcode:			0E		||
+  Bytes:			3		||
+  Cycles:			6		|| */
+inline void asl_0e()
+{
+  memory::minimumAddressableUnit var {memory::mem[get16BitImmediate()]};
+  architecturalState::status.u.C =
+    ((var & masks::bit7) ? 1 : 0);
+  var <<= 1;
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  memory::mem[get16BitImmediate()] = var;
+  architecturalState::PC += 3;
+  architecturalState::cycles += 6;
 }
 
 

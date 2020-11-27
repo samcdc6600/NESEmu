@@ -107,6 +107,7 @@ bool dispatchInstruction()
     case 0x0d:			// ORA	a
       break;
     case 0x0e:			// ASL	a
+      asl_0e();
       break;
     case 0x0f:			// SLO	a
       break;
