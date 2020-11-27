@@ -203,6 +203,7 @@ inline void inc_ee();
 inline void beq_f0();
 inline void inc_f6();
 inline void sed_f8();
+inline void inc_fe();
 
 
 // =================== SUB INSTRUCTION GRANULARITY OPERATIONS ==================
@@ -2934,6 +2935,28 @@ inline void sed_f8()
   architecturalState::status.u.D = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Increment Memory by One
+
+  M + 1 -> M			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Absolute, X	||
+  Assembly Language Form:	INC oper, X	||
+  Opcode:			FE		||
+  Bytes:			3		||
+  Cycles:			7		|| */
+inline void inc_fe()
+{
+  memory::minimumAddressableUnit var
+    {memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]};
+  ++var;
+  StoreVarAtIndexedAbsoluteImmediateAddress(architecturalState::X, var);
+  setZeroFlagOn(var);
+  setNegativeFlagOn(var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 7;
 }
 
 

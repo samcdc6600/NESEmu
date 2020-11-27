@@ -694,6 +694,7 @@ bool dispatchInstruction()
     case 0xfd:			// SBC	a,x
       break;
     case 0xfe:			// INC	a,x
+      inc_fe();
       break;
     case 0xff:			// ISC	a,x
       break;
