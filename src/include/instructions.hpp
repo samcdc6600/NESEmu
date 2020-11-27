@@ -100,6 +100,7 @@ inline void bit_2c();
 inline void bmi_30();
 inline void sec_38();
 inline void rti_40();
+inline void lsr_46();
 inline void pha_48();
 inline void eor_49();
 inline void lsr_4a();
@@ -911,6 +912,35 @@ inline void rti_40()
   architecturalState::status.flags = pullStatusFlagsFromStack();
   loadPCFromStack();
   architecturalState::cycles += 6;
+}
+
+
+/*! \brief Shift One Bit Right (Memory or Accumulator)
+
+  0 -> [76543210] -> C		       		||
+  (N = 0, Z+, C+, I-, D-, V-) 	       		||
+  Addressing Mode:		Zeropage       	||
+  Assembly Language Form:	LSR oper       	||
+  Opcode:			46		||
+  Bytes:			2		||
+  Cycles:			5		||
+  LSR shifts all bits right one position. 0 is shifted into bit 7 and the
+  original bit 0 is shifted into the Carry:
+  http://6502.org/tutorials/6502opcodes.html#LSR */
+inline void lsr_46()
+{
+  memory::minimumAddressableUnit var {memory::mem[memory::zeroPageBase |
+						  get8BitImmediate()]};
+  architecturalState::status.u.C =
+    ((var & masks::bit0) ? 1 : 0);
+  
+  var >>= 1;
+  memory::mem[memory::zeroPageBase | get8BitImmediate()] = var;
+  setZeroFlagOn(var);
+  architecturalState::status.u.N = 0;
+  
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

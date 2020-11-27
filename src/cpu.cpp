@@ -229,6 +229,7 @@ bool dispatchInstruction()
     case 0x45:			// EOR	d
       break;
     case 0x46:			// LSR	d
+      lsr_46();
       break;
     case 0x47:			// SRE	d
       break;
