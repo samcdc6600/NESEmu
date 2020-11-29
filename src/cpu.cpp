@@ -201,6 +201,7 @@ bool dispatchInstruction()
     case 0x34:			// NOP	d,x
       break;
     case 0x35:			// AND	d,x
+      and_35();
       break;
     case 0x36:			// ROL	d,x
       rol_36();

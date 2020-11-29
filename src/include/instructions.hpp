@@ -112,6 +112,7 @@ inline void bit_2c();
 inline void and_2d();
 inline void rol_2e();
 inline void bmi_30();
+inline void and_35();
 inline void rol_36();
 inline void sec_38();
 inline void rol_3e();
@@ -1123,6 +1124,25 @@ inline void bmi_30()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	AND oper, X    	||
+  Opcode:			35		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void and_35()
+{
+  architecturalState::A &= getVarAtIndexedZeroPage(architecturalState::X);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
