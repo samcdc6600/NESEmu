@@ -115,6 +115,7 @@ inline void bmi_30();
 inline void and_35();
 inline void rol_36();
 inline void sec_38();
+inline void and_39();
 inline void and_3d();
 inline void rol_3e();
 inline void rti_40();
@@ -1191,6 +1192,26 @@ inline void sec_38()
   architecturalState::status.u.C = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		Absolute, Y    	||
+  Assembly Language Form:	AND oper, Y    	||
+  Opcode:			39		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void and_39()
+{
+  architecturalState::A &=
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 

@@ -212,6 +212,7 @@ bool dispatchInstruction()
       sec_38();
       break;
     case 0x39:			// AND	a,y
+      and_39();
       break;
     case 0x3a:			// NOP
       break;
