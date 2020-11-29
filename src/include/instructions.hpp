@@ -102,6 +102,7 @@ inline void asl_16();
 inline void clc_18();
 inline void asl_1e();
 inline void jsr_20();
+inline void and_21();
 inline void bit_24();
 inline void and_25();
 inline void rol_26();
@@ -897,6 +898,26 @@ inline void jsr_20()
   pushPCPlusTwoToStack();
   loadPCFrom16BitImmediate();
   architecturalState::cycles += 4;
+}
+
+
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		(Indirect, X)  	||
+  Assembly Language Form:	AND (oper, X)  	||
+  Opcode:			21		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void and_21()
+{
+  architecturalState::A &=
+    memory::mem[getPreIndexedIndirectImmediateAddress(architecturalState::X)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 

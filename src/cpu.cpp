@@ -151,6 +151,7 @@ bool dispatchInstruction()
       jsr_20();
       break;
     case 0x21:			// AND	(d,x)
+      and_21();
       break;
     case 0x22:			// STP
       break;
