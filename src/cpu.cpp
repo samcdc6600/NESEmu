@@ -220,6 +220,7 @@ bool dispatchInstruction()
     case 0x3c:			// NOP	a,x
       break;
     case 0x3d:			// AND	a,x
+      and_3d();
       break;
     case 0x3e:			// ROL	a,x
       rol_3e();
