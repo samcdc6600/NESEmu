@@ -109,6 +109,7 @@ inline void plp_28();
 inline void and_29();
 inline void rol_2a();
 inline void bit_2c();
+inline void and_2d();
 inline void rol_2e();
 inline void bmi_30();
 inline void rol_36();
@@ -1050,6 +1051,25 @@ inline void bit_2c()
   setNegativeFlagOn(masks::bit7 & var);
   setOverflowOnVar(masks::bit6 & var);
   setZeroFlagOn(architecturalState::A & var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		Absolute      	||
+  Assembly Language Form:	AND oper      	||
+  Opcode:			2D		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void and_2d()
+{
+  architecturalState::A &= memory::mem[get16BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }

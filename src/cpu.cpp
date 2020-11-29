@@ -182,6 +182,7 @@ bool dispatchInstruction()
       bit_2c();
       break;
     case 0x2d:			// AND	a
+      and_2d();
       break;
     case 0x2e:			// ROL	a
       rol_2e();
