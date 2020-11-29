@@ -160,6 +160,7 @@ bool dispatchInstruction()
       bit_24();
       break;
     case 0x25:			// AND	d
+      and_25();
       break;
     case 0x26:			// ROL	d
       rol_26();

@@ -103,6 +103,7 @@ inline void clc_18();
 inline void asl_1e();
 inline void jsr_20();
 inline void bit_24();
+inline void and_25();
 inline void rol_26();
 inline void plp_28();
 inline void and_29();
@@ -913,6 +914,26 @@ inline void bit_24()
   setNegativeFlagOn(masks::bit7 & var);
   setOverflowOnVar(masks::bit6 & var);
   setZeroFlagOn(architecturalState::A & var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
+}
+
+
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		Zeropage      	||
+  Assembly Language Form:	AND oper      	||
+  Opcode:			25		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void and_25()
+{
+  architecturalState::A &= memory::mem[memory::zeroPageBase |
+				       get8BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
