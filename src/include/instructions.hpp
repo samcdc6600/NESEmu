@@ -105,6 +105,7 @@ inline void jsr_20();
 inline void bit_24();
 inline void rol_26();
 inline void plp_28();
+inline void and_29();
 inline void rol_2a();
 inline void bit_2c();
 inline void rol_2e();
@@ -920,7 +921,7 @@ inline void bit_24()
 /*! \brief Rotate One Bit Left (Memory or Accumulator)
 
   C <- [76543210] <- C	       	       		||
-  (N+, Z+, C+, I, D, V)				||
+  (N+, Z+, C+, I-, D-, V-)				||
   Addressing Mode:		Zeropage    	||
   Assembly Language Form:	ROL oper       	||
   Opcode:			26		||
@@ -965,10 +966,29 @@ inline void plp_28()
 }
 
 
+/*! \brief AND Memory with Accumulator
+
+  A AND M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)	       		||
+  Addressing Mode:		Immidiate      	||
+  Assembly Language Form:	AND #oper      	||
+  Opcode:			29		||
+  Bytes:			2		||
+  Cycles:			2		|| */
+inline void and_29()
+{
+  architecturalState::A &= get8BitImmediate();
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 2;
+}
+
+
 /*! \brief Rotate One Bit Left (Memory or Accumulator)
 
   C <- [76543210] <- C	       	       		||
-  (N+, Z+, C+, I, D, V)				||
+  (N+, Z+, C+, I-, D-, V-)		       	||
   Addressing Mode:		Accumulator    	||
   Assembly Language Form:	ROL A		||
   Opcode:			2A		||
@@ -1017,7 +1037,7 @@ inline void bit_2c()
 /*! \brief Rotate One Bit Left (Memory or Accumulator)
 
   C <- [76543210] <- C	       	       		||
-  (N+, Z+, C+, I, D, V)				||
+  (N+, Z+, C+, I-, D-, V-)	       		||
   Addressing Mode:		Absolute    	||
   Assembly Language Form:	ROL oper       	||
   Opcode:			2E		||
@@ -1068,7 +1088,7 @@ inline void bmi_30()
 /*! \brief Rotate One Bit Left (Memory or Accumulator)
 
   C <- [76543210] <- C	       	       		||
-  (N+, Z+, C+, I, D, V)				||
+  (N+, Z+, C+, I-, D-, V-)     			||
   Addressing Mode:		Zeropage, X    	||
   Assembly Language Form:	ROL oper, X    	||
   Opcode:			36		||
@@ -1115,7 +1135,7 @@ inline void sec_38()
 /*! \brief Rotate One Bit Left (Memory or Accumulator)
 
   C <- [76543210] <- C	       	       		||
-  (N+, Z+, C+, I, D, V)				||
+  (N+, Z+, C+, I-, D-, V-)	       		||
   Addressing Mode:		Absolute, X    	||
   Assembly Language Form:	ROL oper, X    	||
   Opcode:			3E		||

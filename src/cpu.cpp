@@ -170,6 +170,7 @@ bool dispatchInstruction()
       plp_28();
       break;
     case 0x29:			// AND	#i
+      and_29();
       break;
     case 0x2a:			// ROL
       rol_2a();
