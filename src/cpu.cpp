@@ -194,6 +194,7 @@ bool dispatchInstruction()
       bmi_30();
       break;
     case 0x31:			// AND	(d),y
+      and_31();
       break;
     case 0x32:			// STP
       break;
