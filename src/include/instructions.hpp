@@ -103,6 +103,7 @@ inline void bpl_10();
 inline void ora_15();
 inline void asl_16();
 inline void clc_18();
+inline void ora_1d();
 inline void asl_1e();
 inline void jsr_20();
 inline void and_21();
@@ -915,6 +916,26 @@ inline void clc_18()
   architecturalState::status.u.C = 0;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		Absolute, X    	||
+  Assembly Language Form:	ORA oper, X    	||
+  Opcode:			1D		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void ora_1d()
+{
+  architecturalState::A |=
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 

@@ -144,6 +144,7 @@ bool dispatchInstruction()
     case 0x1c:			// NOP	a,x
       break;
     case 0x1d:			// ORA	a,x
+      ora_1d();
       break;
     case 0x1e:			// ASL	a,x
       asl_1e();
