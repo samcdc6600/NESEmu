@@ -97,8 +97,10 @@ inline void asl_06();
 inline void php_08();
 inline void ora_09();
 inline void asl_0a();
+inline void ora_0d();
 inline void asl_0e();
 inline void bpl_10();
+inline void ora_15();
 inline void asl_16();
 inline void clc_18();
 inline void asl_1e();
@@ -792,6 +794,25 @@ inline void asl_0a()
 }
 
 
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Absolute  	||
+  Assembly Language Form:	ORA oper  	||
+  Opcode:			0D		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void ora_0d()
+{
+  architecturalState::A |= memory::mem[get16BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
 /*! \brief Shift Left One Bit (Memory or Accumulator)
 
   C <- [76543210] <- 0	       	       		||
@@ -834,6 +855,25 @@ inline void bpl_10()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Zeropage, X  	||
+  Assembly Language Form:	ORA oper, X  	||
+  Opcode:			15		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void ora_15()
+{
+  architecturalState::A |= getVarAtIndexedZeroPage(architecturalState::X);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 

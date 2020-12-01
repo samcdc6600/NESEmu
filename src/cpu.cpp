@@ -106,6 +106,7 @@ bool dispatchInstruction()
     case 0x0c:			// NOP	a
       break;
     case 0x0d:			// ORA	a
+      ora_0d();
       break;
     case 0x0e:			// ASL	a
       asl_0e();
@@ -124,6 +125,7 @@ bool dispatchInstruction()
     case 0x14:			// NOP	d,x
       break;
     case 0x15:			// ORA	d,x
+      ora_15();
       break;
     case 0x16:			// ASL	d,x
       asl_16();
