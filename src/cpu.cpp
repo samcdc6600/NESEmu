@@ -136,6 +136,7 @@ bool dispatchInstruction()
       clc_18();
       break;
     case 0x19:			// ORA	a,y
+      ora_19();
       break;
     case 0x1a:			// NOP
       break;
