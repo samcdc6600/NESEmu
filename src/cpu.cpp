@@ -85,6 +85,7 @@ bool dispatchInstruction()
     case 0x04:			// NOP	d
       break;
     case 0x05:			// ORA	d
+      ora_05();
       break;
     case 0x06:			// ASL	d
       asl_06();

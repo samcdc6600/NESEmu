@@ -92,6 +92,7 @@ inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
    OPERATIONS" (see above for SUB INSTRUCTION GRANULARITY OPERATIONS function
    headers), as these functions assume it has not been altered yet! */
 inline void brk_00();
+inline void ora_05();
 inline void asl_06();
 inline void php_08();
 inline void ora_09();
@@ -656,6 +657,26 @@ inline void brk_00()
 			    << memory::minimumAddressableUnitSize) |
     memory::mem[memory::brkPCLoadVector];
   architecturalState::cycles += 7;
+}
+
+
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Zeropage  	||
+  Assembly Language Form:	ORA oper  	||
+  Opcode:			05		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void ora_05()
+{
+  architecturalState::A |= memory::mem[memory::zeroPageBase |
+				       get8BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
