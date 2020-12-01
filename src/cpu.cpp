@@ -118,6 +118,7 @@ bool dispatchInstruction()
       bpl_10();
       break;
     case 0x11:			// ORA	(d),y
+      ora_11();
       break;
     case 0x12:			// STP
       break;

@@ -43,6 +43,12 @@ getIndexedAbsoluteImmediateAddress(const architecturalState::isaReg index);
 // Used for things including and similar to "LDA (oper),Y."
 inline memory::address
 getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
+/* This function is only for use with the sta_91() instruction specialization
+   as it requires getPostIndexedIndirectImmediateAddress with the exception that
+   it should not increment the PC if a page boundry is crossed. */
+inline memory::address
+getPostIndexedIndirectImmediateAddressNoPCInc
+(const architecturalState::isaReg index);
 // Used for things including and similar to "CMP (oper, X)."
 inline memory::address
 getPreIndexedIndirectImmediateAddress(const architecturalState::isaReg index);
@@ -101,6 +107,7 @@ inline void asl_0a();
 inline void ora_0d();
 inline void asl_0e();
 inline void bpl_10();
+inline void ora_11();
 inline void ora_15();
 inline void asl_16();
 inline void clc_18();
@@ -364,6 +371,23 @@ getPostIndexedIndirectImmediateAddress(const architecturalState::isaReg index)
     {				// If page boundry was crossed.
       architecturalState::cycles += 1;
     }
+
+  return address;
+}
+
+
+inline memory::address
+getPostIndexedIndirectImmediateAddressNoPCInc
+(const architecturalState::isaReg index)
+{
+  // Get address pointed to by immediate.
+  const memory::address baseAddress
+    {memory::address(memory::mem[memory::zeroPageBase | get8BitImmediate()] |
+		     (memory::mem[memory::zeroPageBase | get8BitImmediate() +1]
+		      << memory::minimumAddressableUnitSize))};
+  // Calculate address (baseAddress (address pointed to by immediate) + index.)
+  const memory::address address
+    {memory::address(baseAddress + index)};
 
   return address;
 }
@@ -878,6 +902,26 @@ inline void bpl_10()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief OR Memory with Accumulator
+
+  A OR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 			||
+  Addressing Mode:		(Indirect), Y  	||
+  Assembly Language Form:	ORA (oper), Y   ||
+  Opcode:			11		||
+  Bytes:			2		||
+  Cycles:			5*		|| */
+inline void ora_11()
+{
+  architecturalState::A |=
+    memory::mem[getPostIndexedIndirectImmediateAddress(architecturalState::Y)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 
@@ -2261,10 +2305,11 @@ inline void bcc_90()
   Cycles:			6		|| */
 inline void sta_91()
 {
-  storeRegAtAddress(getPostIndexedIndirectImmediateAddress(architecturalState::Y),
-		    architecturalState::A);
+  storeRegAtAddress(getPostIndexedIndirectImmediateAddressNoPCInc
+		    (architecturalState::Y), architecturalState::A);
+
   architecturalState::PC += 2;
-  architecturalState::cycles += 5;
+  architecturalState::cycles += 6;
 }
 
 
