@@ -127,6 +127,7 @@ inline void pha_48();
 inline void eor_49();
 inline void lsr_4a();
 inline void jmp_4c();
+inline void eor_4d();
 inline void lsr_4e();
 inline void bvc_50();
 inline void lsr_56();
@@ -1442,6 +1443,25 @@ inline void jmp_4c()
 {
   loadPCFrom16BitImmediate();
   architecturalState::cycles += 3;
+}
+
+
+/*! \brief Exclusive-OR Memory with Accumulator
+
+  A EOR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Absolute    	||
+  Assembly Language Form:	EOR oper    	||
+  Opcode:			4D		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void eor_4d()
+{
+  architecturalState::A ^= memory::mem[get16BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 

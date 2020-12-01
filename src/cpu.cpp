@@ -264,6 +264,7 @@ bool dispatchInstruction()
       jmp_4c();
       break;
     case 0x4d:			// EOR	a
+      eor_4d();
       break;
     case 0x4e:			// LSR	a
       lsr_4e();
