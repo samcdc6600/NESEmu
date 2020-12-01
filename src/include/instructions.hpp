@@ -130,6 +130,7 @@ inline void jmp_4c();
 inline void eor_4d();
 inline void lsr_4e();
 inline void bvc_50();
+inline void eor_55();
 inline void lsr_56();
 inline void cli_58();
 inline void lsr_5e();
@@ -1512,6 +1513,25 @@ inline void bvc_50()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Exclusive-OR Memory with Accumulator
+
+  A EOR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Zeropage, X    	||
+  Assembly Language Form:	EOR oper, X    	||
+  Opcode:			55		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void eor_55()
+{
+  architecturalState::A ^= getVarAtIndexedZeroPage(architecturalState::X);
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
