@@ -121,6 +121,7 @@ inline void and_39();
 inline void and_3d();
 inline void rol_3e();
 inline void rti_40();
+inline void eor_45();
 inline void lsr_46();
 inline void pha_48();
 inline void eor_49();
@@ -1323,6 +1324,26 @@ inline void rti_40()
   architecturalState::status.flags = pullStatusFlagsFromStack();
   loadPCFromStack();
   architecturalState::cycles += 6;
+}
+
+
+/*! \brief Exclusive-OR Memory with Accumulator
+
+  A EOR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-)			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	EOR oper	||
+  Opcode:			45		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void eor_45()
+{
+  architecturalState::A ^= memory::mem[memory::zeroPageBase |
+				       get8BitImmediate()];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
