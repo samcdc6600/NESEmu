@@ -294,6 +294,7 @@ bool dispatchInstruction()
       cli_58();
       break;
     case 0x59:			// EOR	a,y
+      eor_59();
       break;
     case 0x5a:			// NOP
       break;

@@ -133,6 +133,7 @@ inline void bvc_50();
 inline void eor_55();
 inline void lsr_56();
 inline void cli_58();
+inline void eor_59();
 inline void eor_5d();
 inline void lsr_5e();
 inline void rts_60();
@@ -1579,6 +1580,26 @@ inline void cli_58()
   architecturalState::status.u.I = 0;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Exclusive-OR Memory with Accumulator
+
+  A EOR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		Absolute, Y    	||
+  Assembly Language Form:	EOR oper, Y    	||
+  Opcode:			59		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void eor_59()
+{
+  architecturalState::A ^=
+    memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
