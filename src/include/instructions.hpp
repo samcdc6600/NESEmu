@@ -121,6 +121,7 @@ inline void and_39();
 inline void and_3d();
 inline void rol_3e();
 inline void rti_40();
+inline void eor_41();
 inline void eor_45();
 inline void lsr_46();
 inline void pha_48();
@@ -1327,6 +1328,26 @@ inline void rti_40()
      rather than the address-1. */
   architecturalState::status.flags = pullStatusFlagsFromStack();
   loadPCFromStack();
+  architecturalState::cycles += 6;
+}
+
+
+/*! \brief Exclusive-OR Memory with Accumulator
+
+  A EOR M -> A			       		||
+  (N+, Z+, C-, I-, D-, V-) 	       		||
+  Addressing Mode:		(Indirect, X)  	||
+  Assembly Language Form:	EOR (oper, X)  	||
+  Opcode:			41		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void eor_41()
+{
+  architecturalState::A ^=
+    memory::mem[getPreIndexedIndirectImmediateAddress(architecturalState::X)];
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
   architecturalState::cycles += 6;
 }
 

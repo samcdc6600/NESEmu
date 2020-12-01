@@ -234,6 +234,7 @@ bool dispatchInstruction()
       rti_40();
       break;
     case 0x41:			// EOR	(d,x)
+      eor_41();
       break;
     case 0x42:			// STP
       break;
