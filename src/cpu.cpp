@@ -77,6 +77,7 @@ bool dispatchInstruction()
       brk_00();
       break;
     case 0x01:			// ORA	(d,x)
+      ora_01();
       break;
     case 0x02:			// STP
       break;
