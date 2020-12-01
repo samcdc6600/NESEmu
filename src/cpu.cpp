@@ -276,6 +276,7 @@ bool dispatchInstruction()
       bvc_50();
       break;
     case 0x51:			// EOR	(d),y
+      eor_51();
       break;
     case 0x52:			// STP
       break;
