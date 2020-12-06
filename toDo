@@ -12,6 +12,8 @@
 	- Fix error where non char type numbers read in with
 	  "getNumbersFromStrInHex()" that are less then 0 are read even if the
 	  type is not signed.
+	- Try to make instructions.hpp shorter as there is a lot code
+	  duplication in the implementation of the instruction specializations.
 	- (LOW PRIORITY) Convert debug consol output to use ncurse. This way we
 	  can take advantge of pretty colours to help distinguish things.
 	- (LOW PRIORITY) fix problem with modifyHTMLDocsToCollapseCode.sh that

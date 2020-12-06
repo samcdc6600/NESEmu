@@ -660,6 +660,7 @@ bool dispatchInstruction()
       cpx_e4();
       break;
     case 0xe5:			// SBC	d
+      sbc_e5();
       break;
     case 0xe6:			// INC	d
       inc_e6();

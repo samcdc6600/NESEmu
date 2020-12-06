@@ -225,6 +225,7 @@ inline void cmp_dd();
 inline void dec_de();
 inline void cpx_e0();
 inline void cpx_e4();
+inline void sbc_e5();
 inline void inc_e6();
 inline void inx_e8();
 inline void nop_ea();
@@ -3319,6 +3320,32 @@ inline void cpx_e4()
 					var)) ? 1 : 0;
   setZeroFlagOn(architecturalState::X - var);
   setNegativeFlagOn(architecturalState::X - var);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	SBC oper	||
+  Opcode:			E5		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void sbc_e5()
+{
+  memory::minimumAddressableUnit arg
+    {memory::minimumAddressableUnit(~memory::mem[memory::zeroPageBase |
+						 get8BitImmediate()])};
+  architecturalState::isaReg aR
+    {architecturalState::isaReg(architecturalState::A + arg)};
+  setCarryFlagOnAdditionOn(architecturalState::A, arg);
+  setOverflowOnAdditionOn(architecturalState::A, arg, aR);
+  architecturalState::A = aR;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
