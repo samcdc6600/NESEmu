@@ -152,6 +152,7 @@ inline void eor_59();
 inline void eor_5d();
 inline void lsr_5e();
 inline void rts_60();
+inline void adc_65();
 inline void ror_66();
 inline void pla_68();
 inline void adc_69();
@@ -1878,6 +1879,31 @@ inline void rts_60()
   loadPCFromStack();
   architecturalState::PC += 1;
   architecturalState::cycles += 6;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Zeropage	||
+  Assembly Language Form:	ADC oper	||
+  Opcode:			65		||
+  Bytes:			2		||
+  Cycles:			3		|| */
+inline void adc_65()
+{  
+  memory::minimumAddressableUnit arg {memory::mem[memory::zeroPageBase |
+						  get8BitImmediate()]};
+  architecturalState::isaReg aR
+    {architecturalState::isaReg(architecturalState::A + arg)};
+  setCarryFlagOnAdditionOn(architecturalState::A, arg);
+  setOverflowOnAdditionOn(architecturalState::A, arg, aR);
+  architecturalState::A = aR;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
+  architecturalState::PC += 2;
+  architecturalState::cycles += 3;
 }
 
 
