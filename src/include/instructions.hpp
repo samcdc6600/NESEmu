@@ -160,6 +160,7 @@ inline void pla_68();
 inline void adc_69();
 inline void ror_6a();
 inline void jmp_6c();
+inline void adc_6d();
 inline void ror_6e();
 inline void bvs_70();
 inline void ror_76();
@@ -2037,6 +2038,23 @@ inline void jmp_6c()
 {
   loadPCFrom16BitImmediateIndirect();
   architecturalState::cycles += 5;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	ADC oper	||
+  Opcode:			6D		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void adc_6d()
+{
+  adc(memory::mem[get16BitImmediate()]);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 

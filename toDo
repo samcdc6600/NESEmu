@@ -2,6 +2,9 @@
 
 * GENERAL ======================================================================
 	- Make  modifyHTMLDocsToCollapseCode pass shellcheck.
+	- Add instruction specialization descriptions to the top of instruction
+	  specialization functions in instructions.hpp that do not currently
+	  have them.
 	- Fix problems when compiling with g++!
 	- Alter code for setting breakpoints so that you can set a brakpoint for
 	  the line you are on.

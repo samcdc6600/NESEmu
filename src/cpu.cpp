@@ -353,6 +353,7 @@ bool dispatchInstruction()
       jmp_6c();
       break;
     case 0x6d:			// ADC	a
+      adc_6d();
       break;
     case 0x6e:			// ROR	a
       ror_6e();
