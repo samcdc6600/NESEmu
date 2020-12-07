@@ -86,8 +86,10 @@ inline void pushStatusFlagsToStackWithBSet();
 inline memory::minimumAddressableUnit pullFromStack();
 inline memory::minimumAddressableUnit pullStatusFlagsFromStack();
 // ~~~~~~~~~~~~~~~~~~~~~~~<{ Called to Compare Values }>~~~~~~~~~~~~~~~~~~~~~~~~
-inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
+inline void cmpAgainstIndexedAbsoluteImmediate(const architecturalState::isaReg
 					       index);
+// ~~~~~~~~~~~~~~~~~~~~~<{ Generic Instruction Functions }>~~~~~~~~~~~~~~~~~~~~~
+inline void adc(const memory::minimumAddressableUnit arg);
 
 
 // ======================== INSTRUCTION SPECIALIZATIONS  =======================
@@ -641,7 +643,7 @@ inline memory::minimumAddressableUnit pullStatusFlagsFromStack()
 }
 
 
-inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
+inline void cmpAgainstIndexedAbsoluteImmediate(const architecturalState::isaReg
 					       index)
 {
     const memory::minimumAddressableUnit compVal
@@ -654,6 +656,22 @@ inline void cmpAgainsIndexedAbsoluteImmediate(const architecturalState::isaReg
 			   - getVarAtIndexedAbsoluteImmediateAddress(index));
   setZeroFlagOn(compVal);
   setNegativeFlagOn(compVal);
+}
+
+
+/*! \brief To be used for all adc and sbc instruction specializations.
+
+  arg's bits should be negated with ~ when calling adc from sbc instruction
+  specialization functions. */
+inline void adc(const memory::minimumAddressableUnit arg)
+{
+  architecturalState::isaReg aR
+    {architecturalState::isaReg(architecturalState::A + arg)};
+  setCarryFlagOnAdditionOn(architecturalState::A, arg);
+  setOverflowOnAdditionOn(architecturalState::A, arg, aR);
+  architecturalState::A = aR;
+  setZeroFlagOn(architecturalState::A);
+  setNegativeFlagOn(architecturalState::A);
 }
 
 
@@ -1893,16 +1911,8 @@ inline void rts_60()
   Bytes:			2		||
   Cycles:			3		|| */
 inline void adc_65()
-{  
-  memory::minimumAddressableUnit arg {memory::mem[memory::zeroPageBase |
-						  get8BitImmediate()]};
-  architecturalState::isaReg aR
-    {architecturalState::isaReg(architecturalState::A + arg)};
-  setCarryFlagOnAdditionOn(architecturalState::A, arg);
-  setOverflowOnAdditionOn(architecturalState::A, arg, aR);
-  architecturalState::A = aR;
-  setZeroFlagOn(architecturalState::A);
-  setNegativeFlagOn(architecturalState::A);
+{
+  adc(memory::mem[memory::zeroPageBase | get8BitImmediate()]);
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
@@ -1957,15 +1967,18 @@ inline void pla_68()
 }
 
 
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Immidiate	||
+  Assembly Language Form:	ADC #oper	||
+  Opcode:			69		||
+  Bytes:			2		||
+  Cycles:			2		|| */
 inline void adc_69()
 {
-  architecturalState::isaReg aR {architecturalState::isaReg(architecturalState::A
-							    + get8BitImmediate())};
-  setCarryFlagOnAdditionOn(architecturalState::A, get8BitImmediate());
-  setOverflowOnAdditionOn(architecturalState::A, get8BitImmediate(), aR);
-  architecturalState::A = aR;
-  setZeroFlagOn(architecturalState::A);
-  setNegativeFlagOn(architecturalState::A);
+  adc(get8BitImmediate());
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
 }
@@ -3236,7 +3249,7 @@ inline void cdl_d8()
   Cycles:			4*		|| */
 inline void cmp_d9()
 {
-  cmpAgainsIndexedAbsoluteImmediate(architecturalState::Y);
+  cmpAgainstIndexedAbsoluteImmediate(architecturalState::Y);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -3253,7 +3266,7 @@ inline void cmp_d9()
   Cycles:			4*		|| */
 inline void cmp_dd()
 {
-  cmpAgainsIndexedAbsoluteImmediate(architecturalState::X);
+  cmpAgainstIndexedAbsoluteImmediate(architecturalState::X);
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
@@ -3336,16 +3349,8 @@ inline void cpx_e4()
   Cycles:			3		|| */
 inline void sbc_e5()
 {
-  memory::minimumAddressableUnit arg
-    {memory::minimumAddressableUnit(~memory::mem[memory::zeroPageBase |
-						 get8BitImmediate()])};
-  architecturalState::isaReg aR
-    {architecturalState::isaReg(architecturalState::A + arg)};
-  setCarryFlagOnAdditionOn(architecturalState::A, arg);
-  setOverflowOnAdditionOn(architecturalState::A, arg, aR);
-  architecturalState::A = aR;
-  setZeroFlagOn(architecturalState::A);
-  setNegativeFlagOn(architecturalState::A);
+  adc(memory::minimumAddressableUnit(~memory::mem[memory::zeroPageBase |
+						  get8BitImmediate()]));
   architecturalState::PC += 2;
   architecturalState::cycles += 3;
 }
