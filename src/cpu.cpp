@@ -703,6 +703,7 @@ bool dispatchInstruction()
     case 0xf4:			// NOP	d,x
       break;
     case 0xf5:			// SBC	d,x
+      sbc_f5();
       break;
     case 0xf6:			// INC	d,x
       inc_f6();

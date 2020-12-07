@@ -238,6 +238,7 @@ inline void cpx_ec();
 inline void sbc_ed();
 inline void inc_ee();
 inline void beq_f0();
+inline void sbc_f5();
 inline void inc_f6();
 inline void sed_f8();
 inline void inc_fe();
@@ -3526,6 +3527,23 @@ inline void beq_f0()
     branchTaken();
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Zeropage, X	||
+  Assembly Language Form:	SBC oper, X	||
+  Opcode:			F5		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void sbc_f5()
+{
+  adc(memory::minimumAddressableUnit(~getVarAtIndexedZeroPage(architecturalState::X)));
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
