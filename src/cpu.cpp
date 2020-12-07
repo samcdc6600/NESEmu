@@ -672,6 +672,7 @@ bool dispatchInstruction()
       inx_e8();
       break;
     case 0xe9:			// SBC	#i
+      sbc_e9();
       break;
     case 0xea:			// NOP
       nop_ea();
