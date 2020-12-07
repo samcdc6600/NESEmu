@@ -163,6 +163,7 @@ inline void jmp_6c();
 inline void adc_6d();
 inline void ror_6e();
 inline void bvs_70();
+inline void adc_75();
 inline void ror_76();
 inline void sei_78();
 inline void ror_7e();
@@ -2108,6 +2109,23 @@ inline void bvs_70()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Zeropage, X	||
+  Assembly Language Form:	ADC oper, X	||
+  Opcode:			75		||
+  Bytes:			2		||
+  Cycles:			4		|| */
+inline void adc_75()
+{
+  adc(getVarAtIndexedZeroPage(architecturalState::X));
+  architecturalState::PC += 2;
+  architecturalState::cycles += 4;
 }
 
 
