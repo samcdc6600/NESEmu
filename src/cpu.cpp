@@ -682,6 +682,7 @@ bool dispatchInstruction()
       cpx_ec();
       break;
     case 0xed:			// SBC	a
+      sbc_ed();
       break;
     case 0xee:			// INC	a
       inc_ee();

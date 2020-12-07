@@ -233,6 +233,7 @@ inline void inc_e6();
 inline void inx_e8();
 inline void nop_ea();
 inline void cpx_ec();
+inline void sbc_ed();
 inline void inc_ee();
 inline void beq_f0();
 inline void inc_f6();
@@ -3440,6 +3441,23 @@ inline void cpx_ec()
 					var)) ? 1 : 0;
   setZeroFlagOn(architecturalState::X - var);
   setNegativeFlagOn(architecturalState::X - var);
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Absolute	||
+  Assembly Language Form:	SBC oper	||
+  Opcode:			ED		||
+  Bytes:			3		||
+  Cycles:			4		|| */
+inline void sbc_ed()
+{
+  adc(memory::minimumAddressableUnit(~memory::mem[get16BitImmediate()]));
   architecturalState::PC += 3;
   architecturalState::cycles += 4;
 }
