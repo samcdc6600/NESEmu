@@ -723,6 +723,7 @@ bool dispatchInstruction()
     case 0xfc:			// NOP	a,x
       break;
     case 0xfd:			// SBC	a,x
+      sbc_fd();
       break;
     case 0xfe:			// INC	a,x
       inc_fe();

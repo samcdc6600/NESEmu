@@ -242,6 +242,7 @@ inline void beq_f0();
 inline void sbc_f5();
 inline void inc_f6();
 inline void sed_f8();
+inline void sbc_fd();
 inline void inc_fe();
 
 
@@ -2194,7 +2195,7 @@ inline void adc_7d()
 {
   adc(memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]);
   architecturalState::PC += 3;
-  architecturalState::cycles += 2;
+  architecturalState::cycles += 4;
 }
 
 
@@ -3606,6 +3607,24 @@ inline void sed_f8()
   architecturalState::status.u.D = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Absolute, X	||
+  Assembly Language Form:	SBC oper, X	||
+  Opcode:			FD		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void sbc_fd()
+{
+  adc(memory::minimumAddressableUnit
+      (~memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]));
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
