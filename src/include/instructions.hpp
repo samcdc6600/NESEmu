@@ -164,6 +164,7 @@ inline void jmp_6c();
 inline void adc_6d();
 inline void ror_6e();
 inline void bvs_70();
+inline void adc_71();
 inline void adc_75();
 inline void ror_76();
 inline void sei_78();
@@ -2136,6 +2137,24 @@ inline void bvs_70()
     branchTaken();
   architecturalState::PC += 2;	// This is done even if branch is taken.
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		(Indirect), Y	||
+  Assembly Language Form:	ADC (oper), Y	||
+  Opcode:			71		||
+  Bytes:			2		||
+  Cycles:			5*		|| */
+inline void adc_71()
+{
+  adc(getVarAtAddress
+      (getPostIndexedIndirectImmediateAddress(architecturalState::Y)));
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

@@ -365,6 +365,7 @@ bool dispatchInstruction()
       bvs_70();
       break;
     case 0x71:			// ADC	(d),y
+      adc_71();
       break;
     case 0x72:			// STP
       break;
