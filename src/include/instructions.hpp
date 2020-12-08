@@ -231,6 +231,7 @@ inline void cmp_d9();
 inline void cmp_dd();
 inline void dec_de();
 inline void cpx_e0();
+inline void sbc_e1();
 inline void cpx_e4();
 inline void sbc_e5();
 inline void inc_e6();
@@ -3410,6 +3411,24 @@ inline void cpx_e0()
   setNegativeFlagOn(architecturalState::X - get8BitImmediate());
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		(Indirect, X)	||
+  Assembly Language Form:	SBC (oper, X)	||
+  Opcode:			E1		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void sbc_e1()
+{
+  adc(memory::minimumAddressableUnit
+      (~memory::mem[getPreIndexedIndirectImmediateAddress(architecturalState::X)]));
+  architecturalState::PC += 2;
+  architecturalState::cycles += 6;
 }
 
 

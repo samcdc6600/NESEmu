@@ -656,6 +656,7 @@ bool dispatchInstruction()
       cpx_e0();
       break;
     case 0xe1:			// SBC	(d,x)
+      sbc_e1();
       break;
     case 0xe2:			// NOP	#i
       break;
