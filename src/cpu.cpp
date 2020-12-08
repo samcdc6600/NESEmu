@@ -383,6 +383,7 @@ bool dispatchInstruction()
       sei_78();
       break;
     case 0x79:			// ADC	a,y
+      adc_79();
       break;
     case 0x7a:			// NOP
       break;
