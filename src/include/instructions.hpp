@@ -166,6 +166,7 @@ inline void bvs_70();
 inline void adc_75();
 inline void ror_76();
 inline void sei_78();
+inline void adc_7d();
 inline void ror_7e();
 inline void sta_81();
 inline void sty_84();
@@ -670,8 +671,11 @@ inline void cmpAgainstIndexedAbsoluteImmediate(const architecturalState::isaReg
   specialization functions. */
 inline void adc(const memory::minimumAddressableUnit arg)
 {
+  /* architecturalState::isaReg aR
+     {architecturalState::isaReg(architecturalState::A + arg)}; */
   architecturalState::isaReg aR
-    {architecturalState::isaReg(architecturalState::A + arg)};
+    {architecturalState::isaReg(architecturalState::A + arg +
+    (architecturalState::status.u.C == 1 ? 1: 0))};
   setCarryFlagOnAdditionOn(architecturalState::A, arg);
   setOverflowOnAdditionOn(architecturalState::A, arg, aR);
   architecturalState::A = aR;
@@ -2173,6 +2177,23 @@ inline void sei_78()
 {
   architecturalState::status.u.I = 1;
   architecturalState::PC += 1;
+  architecturalState::cycles += 2;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Absolute, X	||
+  Assembly Language Form:	ADC oper, X	||
+  Opcode:			7D		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void adc_7d()
+{
+  adc(memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::X)]);
+  architecturalState::PC += 3;
   architecturalState::cycles += 2;
 }
 
