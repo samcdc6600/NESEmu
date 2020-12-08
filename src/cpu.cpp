@@ -716,6 +716,7 @@ bool dispatchInstruction()
       sed_f8();
       break;
     case 0xf9:			// SBC	a,y
+      sbc_f9();
       break;
     case 0xfa:			// NOP
       break;

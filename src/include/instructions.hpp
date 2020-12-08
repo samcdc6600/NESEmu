@@ -243,6 +243,7 @@ inline void beq_f0();
 inline void sbc_f5();
 inline void inc_f6();
 inline void sed_f8();
+inline void sbc_f9();
 inline void sbc_fd();
 inline void inc_fe();
 
@@ -3625,6 +3626,24 @@ inline void sed_f8()
   architecturalState::status.u.D = 1;
   architecturalState::PC += 1;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		Absolute, Y	||
+  Assembly Language Form:	SBC oper, Y	||
+  Opcode:			F9		||
+  Bytes:			3		||
+  Cycles:			4*		|| */
+inline void sbc_f9()
+{
+  adc(memory::minimumAddressableUnit
+      (~memory::mem[getIndexedAbsoluteImmediateAddress(architecturalState::Y)]));
+  architecturalState::PC += 3;
+  architecturalState::cycles += 4;
 }
 
 
