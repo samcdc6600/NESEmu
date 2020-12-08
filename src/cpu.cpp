@@ -323,6 +323,7 @@ bool dispatchInstruction()
       rts_60();
       break;
     case 0x61:			// ADC	(d,x)
+      adc_61();
       break;
     case 0x62:			// STP
       break;

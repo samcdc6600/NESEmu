@@ -154,6 +154,7 @@ inline void eor_59();
 inline void eor_5d();
 inline void lsr_5e();
 inline void rts_60();
+inline void adc_61();
 inline void adc_65();
 inline void ror_66();
 inline void pla_68();
@@ -1909,6 +1910,23 @@ inline void rts_60()
 
   loadPCFromStack();
   architecturalState::PC += 1;
+  architecturalState::cycles += 6;
+}
+
+
+/*! \brief Add Memory to Accumulator with Carry
+
+  A + M + C -> A, C		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		(Indirect, X)	||
+  Assembly Language Form:	ADC (oper, X)	||
+  Opcode:			61		||
+  Bytes:			2		||
+  Cycles:			6		|| */
+inline void adc_61()
+{
+  adc(memory::mem[getPreIndexedIndirectImmediateAddress(architecturalState::X)]);
+  architecturalState::PC += 2;
   architecturalState::cycles += 6;
 }
 
