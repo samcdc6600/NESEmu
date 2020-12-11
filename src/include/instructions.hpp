@@ -243,6 +243,7 @@ inline void cpx_ec();
 inline void sbc_ed();
 inline void inc_ee();
 inline void beq_f0();
+inline void sbc_f1();
 inline void sbc_f5();
 inline void inc_f6();
 inline void sed_f8();
@@ -259,8 +260,8 @@ inline void inc_fe();
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 				     const architecturalState::isaReg b)
 {
-  architecturalState::status.u.C =
-    (masks::bit8 & (architecturalState::largerThenAXY(a) + b)) ? 1 : 0;
+  architecturalState::status.u.C = (a + b) > memory::maskAddressLow;
+    //    (masks::bit8 & (architecturalState::largerThenAXY(a) + b)) ? 1 : 0;
 }
 
 
@@ -677,11 +678,11 @@ inline void cmpAgainstIndexedAbsoluteImmediate(const architecturalState::isaReg
   specialization functions. */
 inline void adc(const memory::minimumAddressableUnit arg)
 {
-  /* const architecturalState::isaReg aR
-     {architecturalState::isaReg(architecturalState::A + arg)}; */
+  /*const architecturalState::isaReg aR
+     {architecturalState::isaReg(architecturalState::A + arg)};*/
   const architecturalState::isaReg aR
     {architecturalState::isaReg(architecturalState::A + arg +
-    (architecturalState::status.u.C == 1 ? 1: 0))};
+				(architecturalState::status.u.C == 1 ? 1: 0))};
   setCarryFlagOnAdditionOn(architecturalState::A, arg);
   setOverflowOnAdditionOn(architecturalState::A, arg, aR);
   architecturalState::A = aR;
@@ -3624,6 +3625,24 @@ inline void beq_f0()
     branchTaken();
   architecturalState::PC += 2;
   architecturalState::cycles += 2;
+}
+
+
+/*! \brief Subtract Memory from Accumulator with Borrow
+
+  A - M - C(hat) -> A		       	        ||
+  (N+, Z+, C+, I-, D-, V+) 			||
+  Addressing Mode:		(Indirect), Y	||
+  Assembly Language Form:	SBC (oper), Y	||
+  Opcode:			F1		||
+  Bytes:			2		||
+  Cycles:			5*		|| */
+inline void sbc_f1()
+{  
+  adc(memory::minimumAddressableUnit
+      (~memory::mem[getPostIndexedIndirectImmediateAddress(architecturalState::Y)]));
+  architecturalState::PC += 2;
+  architecturalState::cycles += 5;
 }
 
 

@@ -55,6 +55,19 @@ void cpu()
 	   <<architecturalState::PC<<") is invalid!\n";
 	  throw std::invalid_argument(e.str());
 	}
+
+      
+
+      if(architecturalState::PC == 0x35c9)
+	{
+	  static int i {};
+	  i++;
+	  std::cout<<i<<'\n';
+	  char c {};
+	  std::cin>>c;
+	}
+
+	
     }
   catch(const std::exception & e)
     {
@@ -700,6 +713,7 @@ bool dispatchInstruction()
       beq_f0();
       break;
     case 0xf1:			// SBC	(d),y
+      sbc_f1();
       break;
     case 0xf2:			// STP
       break;

@@ -1,0 +1,247 @@
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (333b),
+	S = (ff),	flags = (11000000),	cycles = (287200)
+        ------------------------------------------------------------------------
+	in cycle (461e0), read opcode (85) with mnemonic (STA), at PC 333b
+: p 11
+0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (333d),
+	S = (ff),	flags = (11000000),	cycles = (287203)
+        ------------------------------------------------------------------------
+	in cycle (461e3), read opcode (38) with mnemonic (SEC), at PC 333d
+: p 11
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (333e),
+	S = (ff),	flags = (11000001),	cycles = (287205)
+        ------------------------------------------------------------------------
+	in cycle (461e5), read opcode (20) with mnemonic (JSR), at PC 333e
+: p 3340
+35
+: p 333f
+a2
+: p 35a2
+a5
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35a2),
+	S = (fd),	flags = (11000001),	cycles = (287209)
+        ------------------------------------------------------------------------
+	in cycle (461e9), read opcode (a5) with mnemonic (LDA), at PC 35a2
+: p 11
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35a4),
+	S = (fd),	flags = (11000001),	cycles = (287212)
+        ------------------------------------------------------------------------
+	in cycle (461ec), read opcode (29) with mnemonic (AND), at PC 35a4
+: p 35a5
+83
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35a6),
+	S = (fd),	flags = (11000001),	cycles = (287214)
+        ------------------------------------------------------------------------
+	in cycle (461ee), read opcode (48) with mnemonic (PHA), at PC 35a6
+: p 1fd
+72
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35a7),
+	S = (fc),	flags = (11000001),	cycles = (287217)
+        ------------------------------------------------------------------------
+	in cycle (461f1), read opcode (a5) with mnemonic (LDA), at PC 35a7
+: p 1fd
+80
+: p d
+7f
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (7f),	X     = (e),	Y      = (ff),	PC = (35a9),
+	S = (fc),	flags = (01000001),	cycles = (287220)
+        ------------------------------------------------------------------------
+	in cycle (461f4), read opcode (45) with mnemonic (EOR), at PC 35a9
+: p e
+0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (7f),	X     = (e),	Y      = (ff),	PC = (35ab),
+	S = (fc),	flags = (01000001),	cycles = (287223)
+        ------------------------------------------------------------------------
+	in cycle (461f7), read opcode (30) with mnemonic (BMI), at PC 35ab
+:     
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (7f),	X     = (e),	Y      = (ff),	PC = (35ad),
+	S = (fc),	flags = (01000001),	cycles = (287225)
+        ------------------------------------------------------------------------
+	in cycle (461f9), read opcode (a5) with mnemonic (LDA), at PC 35ad
+: p d
+7f
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (7f),	X     = (e),	Y      = (ff),	PC = (35af),
+	S = (fc),	flags = (01000001),	cycles = (287228)
+        ------------------------------------------------------------------------
+	in cycle (461fc), read opcode (45) with mnemonic (EOR), at PC 35af
+: p f
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (ff),	X     = (e),	Y      = (ff),	PC = (35b1),
+	S = (fc),	flags = (11000001),	cycles = (287231)
+        ------------------------------------------------------------------------
+	in cycle (461ff), read opcode (10) with mnemonic (BPL), at PC 35b1
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (ff),	X     = (e),	Y      = (ff),	PC = (35b3),
+	S = (fc),	flags = (11000001),	cycles = (287233)
+        ------------------------------------------------------------------------
+	in cycle (46201), read opcode (68) with mnemonic (PLA), at PC 35b3
+: p 1fd
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35b4),
+	S = (fd),	flags = (11000001),	cycles = (287237)
+        ------------------------------------------------------------------------
+	in cycle (46205), read opcode (9) with mnemonic (ORA), at PC 35b4
+: p 35b5
+40
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (c0),	X     = (e),	Y      = (ff),	PC = (35b6),
+	S = (fd),	flags = (11000001),	cycles = (287239)
+        ------------------------------------------------------------------------
+	in cycle (46207), read opcode (48) with mnemonic (PHA), at PC 35b6
+: p 1fd
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (c0),	X     = (e),	Y      = (ff),	PC = (35b7),
+	S = (fc),	flags = (11000001),	cycles = (287242)
+        ------------------------------------------------------------------------
+	in cycle (4620a), read opcode (68) with mnemonic (PLA), at PC 35b7
+: p 1fd
+c0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (c0),	X     = (e),	Y      = (ff),	PC = (35b8),
+	S = (fd),	flags = (11000001),	cycles = (287246)
+        ------------------------------------------------------------------------
+	in cycle (4620e), read opcode (85) with mnemonic (STA), at PC 35b8
+: p 11
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (c0),	X     = (e),	Y      = (ff),	PC = (35ba),
+	S = (fd),	flags = (11000001),	cycles = (287249)
+        ------------------------------------------------------------------------
+	in cycle (46211), read opcode (8) with mnemonic (PHP), at PC 35ba
+: p 11
+c0
+: p 1fd
+c0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (c0),	X     = (e),	Y      = (ff),	PC = (35bb),
+	S = (fc),	flags = (11000001),	cycles = (287252)
+        ------------------------------------------------------------------------
+	in cycle (46214), read opcode (a5) with mnemonic (LDA), at PC 35bb
+: p 1fd
+f1
+: p d
+7f
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (7f),	X     = (e),	Y      = (ff),	PC = (35bd),
+	S = (fc),	flags = (01000001),	cycles = (287255)
+        ------------------------------------------------------------------------
+	in cycle (46217), read opcode (65) with mnemonic (ADC), at PC 35bd
+: p 0e
+0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35bf),
+	S = (fc),	flags = (10000000),	cycles = (287258)
+        ------------------------------------------------------------------------
+	in cycle (4621a), read opcode (8) with mnemonic (PHP), at PC 35bf
+: p 1fc
+30
+:    
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35c0),
+	S = (fb),	flags = (10000000),	cycles = (287261)
+        ------------------------------------------------------------------------
+	in cycle (4621d), read opcode (c5) with mnemonic (CMP), at PC 35c0
+: p 1fc
+b0
+: p 0f
+80
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35c2),
+	S = (fb),	flags = (00000011),	cycles = (287264)
+        ------------------------------------------------------------------------
+	in cycle (46220), read opcode (d0) with mnemonic (BNE), at PC 35c2
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35c4),
+	S = (fb),	flags = (00000011),	cycles = (287266)
+        ------------------------------------------------------------------------
+	in cycle (46222), read opcode (68) with mnemonic (PLA), at PC 35c4
+: p 1fc
+b0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (b0),	X     = (e),	Y      = (ff),	PC = (35c5),
+	S = (fc),	flags = (10000001),	cycles = (287270)
+        ------------------------------------------------------------------------
+	in cycle (46226), read opcode (29) with mnemonic (AND), at PC 35c5
+: p 35c6
+c3
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35c7),
+	S = (fc),	flags = (10000001),	cycles = (287272)
+        ------------------------------------------------------------------------
+	in cycle (46228), read opcode (c5) with mnemonic (CMP), at PC 35c7
+: p 11
+c0
+: 
+Exiting dispatchInstruction() with state:
+        ----------------------------- A  S -------------------------------------
+	A = (80),	X     = (e),	Y      = (ff),	PC = (35c9),
+	S = (fc),	flags = (10000000),	cycles = (287275)
+        ------------------------------------------------------------------------
+	in cycle (4622b), read opcode (d0) with mnemonic (BNE), at PC 35c9
+100
+k 
