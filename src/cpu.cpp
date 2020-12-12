@@ -58,14 +58,14 @@ void cpu()
 
       
 
-      if(architecturalState::PC == 0x35c9)
+      /*      if(architecturalState::PC == 0x35c9)
 	{
 	  static int i {};
 	  i++;
 	  std::cout<<i<<'\n';
 	  char c {};
 	  std::cin>>c;
-	}
+	}*/
 
 	
     }

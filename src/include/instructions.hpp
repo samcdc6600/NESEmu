@@ -22,9 +22,12 @@
 // ~~~~~~~~~~~~~~~~~~~~~~<{ Functions for Setting Flags }>~~~~~~~~~~~~~~~~~~~~~~
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
 				     const architecturalState::isaReg b);
+inline void setCarryFlagOnAdditionWithCarryFlagAnd
+(const architecturalState::isaReg a, const architecturalState::isaReg arg);
+// We use largerThenAXY here because sum may be larger then isaReg.
 inline void setOverflowOnAdditionOn(const architecturalState::isaReg a,
-				    const architecturalState::isaReg b,
-				    const architecturalState::isaReg c);
+				    const architecturalState::isaReg arg,
+				    const architecturalState::largerThenAXY sum);
 /* For use with functions that set the overflow flag directly (that is without
    addition) such as bit_24(). */
 inline void setOverflowOnVar(const memory::minimumAddressableUnit var);
@@ -258,20 +261,38 @@ inline void inc_fe();
 
 
 inline void setCarryFlagOnAdditionOn(const architecturalState::isaReg a,
-				     const architecturalState::isaReg b)
+				     const architecturalState::isaReg arg)
 {
-  architecturalState::status.u.C = (a + b) > memory::maskAddressLow;
-    //    (masks::bit8 & (architecturalState::largerThenAXY(a) + b)) ? 1 : 0;
+  architecturalState::status.u.C = (a + arg) > memory::maskAddressLow;
+}
+
+
+inline void setCarryFlagOnAdditionWithCarryFlagAnd
+(const architecturalState::isaReg a, const architecturalState::isaReg arg)
+{
+  architecturalState::status.u.C = (a + arg + architecturalState::status.u.C) >
+    memory::maskAddressLow;
 }
 
 
 inline void setOverflowOnAdditionOn(const architecturalState::isaReg a,
-				    const architecturalState::isaReg b,
-				    const architecturalState::isaReg c)
+				    const architecturalState::isaReg arg,
+				    const architecturalState::largerThenAXY sum)
+				    //const architecturalState::isaReg sum)
 {
   /* An explination of the following:
      https://stackoverflow.com/questions/16845912/determining-carry-and-overflow-flag-in-6502-emulation-in-java  */
-  architecturalState::status.u.V = (~(a ^ b)) & (a ^ c) & masks::bit7;
+  /*  std::cout<<"a = "<<int(a)<<'\n'<<", arg = "<<int(arg)<<'\n'<<", sum = "
+	   <<sum<<'\n'<<", (a ^ arg) = "<<(a ^ arg)<<'\n'<<", ~(a ^ arg) = "
+	   <<~(a ^ arg)<<'\n'<<", (a ^ sum) = "<<(a ^ sum)<<'\n'
+	   <<", ~(a ^ arg)) & (a ^ sum) = "<<(~(a ^ arg) & (a ^ sum))<<'\n'
+	   <<", ~(a ^ arg)) & (a ^ sum) & 0x80 = "<<(~(a ^ arg) & (a ^ sum) & 0x80)
+	   <<"\n\n";*/
+  architecturalState::status.u.V = ((~(a ^ arg)) & (a ^ sum) & 0x80) ? 1 : 0;
+  /*  std::cout<<"architecturalState::status.u.V = "<<int(architecturalState::status.u.V)
+      <<"(architecturalState::status.u.V == 1 ? 1: 0) = "<<int(architecturalState::status.u.V == 1 ? 1: 0)<<"\n\n";*/
+  //  ~(a ^ arg) & (a ^ sum) & 0x80;
+
 }
 
 
@@ -680,10 +701,13 @@ inline void adc(const memory::minimumAddressableUnit arg)
 {
   /*const architecturalState::isaReg aR
      {architecturalState::isaReg(architecturalState::A + arg)};*/
-  const architecturalState::isaReg aR
+  //  const architecturalState::isaReg aR
+  const int aR
     {architecturalState::isaReg(architecturalState::A + arg +
 				(architecturalState::status.u.C == 1 ? 1: 0))};
-  setCarryFlagOnAdditionOn(architecturalState::A, arg);
+  //  setCarryFlagOnAdditionOn(architecturalState::A, arg);
+  setCarryFlagOnAdditionWithCarryFlagAnd(architecturalState::A, arg);
+    
   setOverflowOnAdditionOn(architecturalState::A, arg, aR);
   architecturalState::A = aR;
   setZeroFlagOn(architecturalState::A);
